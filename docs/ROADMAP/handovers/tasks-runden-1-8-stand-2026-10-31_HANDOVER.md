@@ -1,0 +1,1 @@
+E:/repos/tasks-vault/ALL/handovers/tasks-runden-1-8-stand-2026-10-31_HANDOVER.md
