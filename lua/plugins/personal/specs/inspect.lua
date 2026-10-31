@@ -1477,7 +1477,15 @@ return {
       -- whose `.testing.lua` has a `ci` section ("$VAR" is expanded by testing.nvim); `include` /
       -- `exclude` narrow them by directory name.
       -- Default: { roots = {}, include = {}, exclude = {} }.
-      ci = { repos = { roots = { "$REPOS_DIR" } } },
+      ci = {
+        repos = { roots = { "$REPOS_DIR" } },
+        -- Whether `:Testing ci repos --export=<dir>` also asks the CI adapter (GitHub) and writes
+        -- `ci_remote` into the export: "always" (default; only released repositories, a GitHub
+        -- failure is a note, never an exit code), "never" (ci_remote stays null) or "ask" (a
+        -- question before each run). A `testing ci` from a terminal does not read this: there
+        -- `--export-remote=always|never|ask` decides (default always). See testing.nvim docs/CI.md.
+        -- export_remote = "always",
+      },
     },
   },
 }
