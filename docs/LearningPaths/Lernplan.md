@@ -22,7 +22,9 @@ Annahme: 8–10 Stunden pro Woche neben dem Job. Zwei Spuren laufen parallel: di
 
 Detailseiten mit Kapitel- und Seitenlinks, Kontrollfragen und Aufgaben je Phase: [Phase 0](Phasen/Phase-0-Betriebssysteme.md),
 [Phase 1](Phasen/Phase-1-Systeme-und-C.md), [Phase 2](Phasen/Phase-2-Compiler-und-Interpreter.md),
-[Phase 3](Phasen/Phase-3-Algorithmen.md), [Phase 4](Phasen/Phase-4-Architektur-und-Testen.md) (weitere folgen).
+[Phase 3](Phasen/Phase-3-Algorithmen.md), [Phase 4](Phasen/Phase-4-Architektur-und-Testen.md),
+[Phase 5](Phasen/Phase-5-Datenbanken.md), [Phase 6](Phasen/Phase-6-Netze-und-verteilte-Systeme.md),
+[Phase 7](Phasen/Phase-7-Programmiersprachen-Theorie.md).
 
 | Phase | Monate | Lesen | Selbst bauen (Nachweis) | Hebt in der Matrix |
 |---|---|---|---|---|

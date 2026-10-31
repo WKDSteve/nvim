@@ -12,8 +12,8 @@ Links mit `#page=N` zeigen auf die PDF-Seite, nicht auf die gedruckte Seitenzahl
 ## Quellen
 
 Die im [Lernplan](../Lernplan.md) genannten Bücher Ousterhout (*A Philosophy of Software Design*), Fowler
-(*Refactoring*), Khorikov (*Unit Testing*) und Starke (*Effektive Softwarearchitekturen*) stehen in der
-[Beschaffungsliste]($REPOS_DIR/Literatur/Beschaffungsliste.md) und fehlen im Bestand. Bis sie da sind, trägt diese
+(*Refactoring*), Khorikov (*Unit Testing*) und Starke (*Effektive Softwarearchitekturen*) fehlen im Bestand; sie
+stehen jetzt in der [Beschaffungsliste]($REPOS_DIR/Literatur/Beschaffungsliste.md), Abschnitt 7. Bis sie da sind, trägt diese
 Seite die Phase mit folgenden Büchern aus dem Bestand; jede Woche nennt, welches Beschaffungsbuch sie später
 ergänzt.
 
@@ -183,7 +183,7 @@ den Rhythmus von Test, Code, Commit.
 - [ ] Mindestens drei ADRs, C4-Diagramme
 - [ ] Alle Fragen beantwortet
 - [ ] Matrix aktualisiert: Architektur, Testing 3→4
-- [ ] Beschaffungsliste: Ousterhout, Fowler, Khorikov, Starke besorgt und die Wochen 9–10 und 13 mit ihnen ergänzt
+- [ ] Ousterhout, Fowler, Khorikov, Starke besorgt (Beschaffungsliste) und die Wochen 9–10 und 13 mit ihnen ergänzt
 
 ## Fortschritt
 
