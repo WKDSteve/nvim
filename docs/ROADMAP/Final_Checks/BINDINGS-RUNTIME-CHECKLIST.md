@@ -656,7 +656,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Cdx
 
-- [ ] `:Cdx open prompt` -- Open a prompt template (any .md of PROMPT/) as a scratch buffer instead of copying it; SHAs replace {SHA} like in :Cdx prompt
+- [ ] `:Cdx open prompt` -- Open the file of a prompt template (any .md of PROMPT/) in the current window to edit it
 - [ ] `:Cdx prompt` -- Copy a prompt template (any .md of PROMPT/) to the clipboard; SHAs (space- or comma-separated) replace {SHA}, none keeps it
 
 ### :ChecklistsFileGrep

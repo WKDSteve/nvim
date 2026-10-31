@@ -112,49 +112,49 @@ return function(H)
   vim.cmd("Cdx prompt review")
   eq(copied, "review prompt", "the old short name still works")
 
-  -- :Cdx open prompt: the text becomes a buffer and the clipboard stays untouched
-  local function opened()
-    local buf = vim.api.nvim_get_current_buf()
-    return table.concat(vim.api.nvim_buf_get_lines(buf, 0, -1, false), "\n"), buf
-  end
+  -- :Cdx open prompt: the template FILE is opened for editing, the clipboard stays untouched
   eq(
     vim.fn.getcompletion("Cdx open prompt ul", "cmdline"),
     { "ultra_sha" },
     "open prompt completes the names too"
   )
+  local function current_path()
+    return vim.fs.normalize(vim.api.nvim_buf_get_name(0))
+  end
+  local function in_prompt_dir(file)
+    return vim.fs.normalize(prompt .. "/" .. file)
+  end
   copied = nil
   vim.cmd("Cdx open prompt full")
-  local text1, buf1 = opened()
-  eq(text1, "full prompt", "open prompt shows the text in the current window")
+  eq(current_path(), in_prompt_dir("full.md"), "open prompt opens the template file itself")
+  local buf1 = vim.api.nvim_get_current_buf()
+  eq(table.concat(vim.api.nvim_buf_get_lines(buf1, 0, -1, false), "\n"), "full prompt")
+  eq(vim.bo[buf1].buftype, "", "a normal file buffer: it can be edited and written")
   eq(copied, nil, "open prompt leaves the clipboard alone")
-  eq(vim.bo[buf1].filetype, "markdown")
-  eq(vim.api.nvim_buf_get_name(buf1), "", "no name: explorers would take it for a path")
-  eq(vim.b[buf1].cdx_prompt, "full.md")
+  vim.cmd("Cdx open prompt REVIEW")
+  eq(current_path(), in_prompt_dir("review_w_ultracode.md"), "names resolve like for :Cdx prompt")
   vim.cmd("Cdx open prompt full")
-  local text2, buf2 = opened()
-  ok(buf2 ~= buf1, "a second open is a buffer of its own")
-  eq(text2, "full prompt")
-  vim.cmd("Cdx open prompt ultra_sha abc1234 def5678")
-  eq((opened()), "check abc1234, def5678 please", "open prompt also takes the SHAs")
-  eq(vim.b.cdx_prompt, "ultra_sha.md", "b:cdx_prompt is the file name, also with SHAs")
-  eq(copied, nil, "still no clipboard")
+  eq(vim.api.nvim_get_current_buf(), buf1, "the same file is the same buffer")
   vim.cmd("Cdx prompt full")
   eq(copied, "full prompt", "without open it copies again")
 
-  -- a window that refuses the buffer: an error message, no orphan buffer, no throw
+  -- an unknown name and a window that refuses the buffer: an error message, no throw
   local keep = vim.api.nvim_get_current_buf()
-  local count = #vim.api.nvim_list_bufs()
-  vim.wo.winfixbuf = true
   notes = {}
-  local thrown = pcall(vim.cmd, "Cdx open prompt full")
+  vim.cmd("silent! Cdx open prompt nope")
+  eq(vim.api.nvim_get_current_buf(), keep, "an unknown name opens nothing")
+  vim.wo.winfixbuf = true
+  local thrown = pcall(vim.cmd, "Cdx open prompt review")
   vim.wo.winfixbuf = false
   ok(thrown, "a refused buffer does not throw")
   eq(vim.api.nvim_get_current_buf(), keep, "the window keeps its buffer")
-  eq(#vim.api.nvim_list_bufs(), count, "and no orphan buffer is left")
   has(notes[#notes].msg, "Could not open")
 
-  for _, b in ipairs({ buf1, buf2, keep }) do
-    pcall(vim.api.nvim_buf_delete, b, { force = true })
+  vim.cmd("enew")
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if vim.api.nvim_buf_get_name(b):find(prompt, 1, true) then
+      pcall(vim.api.nvim_buf_delete, b, { force = true })
+    end
   end
 
   vim.notify = notify_was

@@ -1,15 +1,16 @@
 ---@module 'bindings.usrcmds.cdx'
----@brief `:Cdx prompt <name>` / `:Cdx open prompt <name>` -- copy a CDX prompt template to the clipboard or open it as a scratch buffer.
+---@brief `:Cdx prompt <name>` / `:Cdx open prompt <name>` -- copy a CDX prompt template to the clipboard or open its file for editing.
 ---@description
 --- The templates live in `docs/NOTES/CDX/templates/PROMPT/` of this config and
 --- are pasted into Claude Code by hand all day, so this saves the detour
 --- through a file manager:
 ---
 ---   :Cdx prompt <name> [sha ...]
----   :Cdx open prompt <name> [sha ...]
+---   :Cdx open prompt <name>
 ---
---- `:Cdx open prompt` does not copy the text but shows it in a new, unnamed
---- scratch buffer (`b:cdx_prompt` holds the template); `:Cdx open` is the
+--- `:Cdx open prompt <name>` does not copy anything but opens the template
+--- file itself in the current window (`:edit`), to change it; the name is
+--- resolved like for `:Cdx prompt`, SHAs do not apply. `:Cdx open` is the
 --- place for further things to open.
 ---
 --- `<name>` is every `*.md` file of that folder, without the extension
@@ -165,39 +166,10 @@ function M.parse_shas(tokens)
   return shas, nil
 end
 
----Show the text in a new scratch buffer in the current window. The buffer stays without a name:
----file explorers (neo-tree) take a buffer name for a path and try to `:tcd` into it; the label is
----in `b:cdx_prompt` instead.
 ---@param text string
 ---@param label string  shown in the confirmation
----@param file string  template file name, kept in `b:cdx_prompt`
 ---@return boolean
-local function open_buffer(text, label, file)
-  local buf = vim.api.nvim_create_buf(true, true)
-  vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n", { plain = true }))
-  vim.bo[buf].filetype = "markdown"
-  vim.bo[buf].bufhidden = "hide"
-  vim.b[buf].cdx_prompt = file
-  -- Fails in a 'winfixbuf' window (E1513) or with 'nohidden' over a modified buffer (E37): no orphan buffer then.
-  local shown, serr = pcall(vim.api.nvim_win_set_buf, 0, buf)
-  if not shown then
-    pcall(vim.api.nvim_buf_delete, buf, { force = true })
-    notify.error(("Could not open %s: %s"):format(label, tostring(serr)))
-    return false
-  end
-  notify.info(("Opened %s (%d chars)"):format(label, vim.fn.strchars(text)))
-  return true
-end
-
----@param text string
----@param label string  shown in the confirmation
----@param open? boolean  open as a buffer instead of copying to the clipboard
----@param file string  template file name
----@return boolean
-local function copy(text, label, open, file)
-  if open then
-    return open_buffer(text, label, file)
-  end
+local function copy(text, label)
   if not copy_to_clipboard(text) then
     notify.error("Could not write to the clipboard")
     return false
@@ -209,9 +181,8 @@ end
 ---Copy a template; `tokens` (SHAs) replace `{SHA}` when it has the placeholder and there are any.
 ---@param typed string  the name as typed
 ---@param tokens string[]
----@param open? boolean  open the text as a buffer instead of copying it
 ---@return boolean
-function M.copy_prompt(typed, tokens, open)
+function M.copy_prompt(typed, tokens)
   local file, rerr = M.resolve(typed)
   if not file then
     notify.error(rerr or "unknown prompt template")
@@ -224,13 +195,13 @@ function M.copy_prompt(typed, tokens, open)
   end
   local has_placeholder = text:find(SHA_PLACEHOLDER, 1, true) ~= nil
   if #tokens == 0 then
-    return copy(text, file, open, file)
+    return copy(text, file)
   end
   if not has_placeholder then
     notify.warn(
       ("%s has no %s placeholder; the arguments are ignored"):format(file, SHA_PLACEHOLDER)
     )
-    return copy(text, file, open, file)
+    return copy(text, file)
   end
   local shas, perr = M.parse_shas(tokens)
   if not shas then
@@ -242,7 +213,26 @@ function M.copy_prompt(typed, tokens, open)
   local filled = text:gsub(vim.pesc(SHA_PLACEHOLDER), function()
     return table.concat(shas, SHA_JOIN)
   end)
-  return copy(filled, ("%s (%d SHA)"):format(file, #shas), open, file)
+  return copy(filled, ("%s (%d SHA)"):format(file, #shas))
+end
+
+---Open the template file itself in the current window, to edit it.
+---@param typed string  the name as typed
+---@return boolean
+function M.open_prompt(typed)
+  local file, rerr = M.resolve(typed)
+  if not file then
+    notify.error(rerr or "unknown prompt template")
+    return false
+  end
+  local path = vim.fs.joinpath(prompt_dir(), file)
+  -- Fails in a 'winfixbuf' window (E1513) or with 'nohidden' over a modified buffer (E37).
+  local opened, oerr = pcall(vim.cmd.edit, vim.fn.fnameescape(path))
+  if not opened then
+    notify.error(("Could not open %s: %s"):format(path, tostring(oerr)))
+    return false
+  end
+  return true
 end
 
 ---@return nil
@@ -267,51 +257,43 @@ function M.enable()
     end,
   })
 
-  ---The positional arguments `:Cdx prompt` and `:Cdx open prompt` share.
-  ---@return table[]
-  local function prompt_args()
-    return {
-      {
-        name = "name",
-        type = "CDX_PROMPT",
-        desc = "Template of the PROMPT folder, without .md (base and review are short names)",
-      },
-      {
-        name = "sha",
-        type = "STRING",
-        optional = true,
-        desc = "Commit SHA of 4 to 64 hex digits for {SHA}; more may follow",
-      },
-    }
-  end
-
-  ---@param open boolean
-  ---@return fun(ctx: table)
-  local function prompt_runner(open)
-    return function(ctx)
-      local tokens = {}
-      if ctx.args.sha then
-        tokens[#tokens + 1] = ctx.args.sha
-      end
-      vim.list_extend(tokens, ctx.rest)
-      M.copy_prompt(ctx.args.name, tokens, open)
-    end
-  end
+  local name_arg = {
+    name = "name",
+    type = "CDX_PROMPT",
+    desc = "Template of the PROMPT folder, without .md (base and review are short names)",
+  }
 
   composer.verb("Cdx", {
-    desc = "Claude Code helpers: copy CDX prompt templates to the clipboard or open them as a buffer",
+    desc = "Claude Code helpers: copy CDX prompt templates to the clipboard or open their files",
     routes = {
       {
         path = { "prompt" },
-        args = prompt_args(),
+        args = {
+          name_arg,
+          {
+            name = "sha",
+            type = "STRING",
+            optional = true,
+            desc = "Commit SHA of 4 to 64 hex digits for {SHA}; more may follow",
+          },
+        },
         desc = "Copy a prompt template (any .md of PROMPT/) to the clipboard; SHAs (space- or comma-separated) replace {SHA}, none keeps it",
-        run = prompt_runner(false),
+        run = function(ctx)
+          local tokens = {}
+          if ctx.args.sha then
+            tokens[#tokens + 1] = ctx.args.sha
+          end
+          vim.list_extend(tokens, ctx.rest)
+          M.copy_prompt(ctx.args.name, tokens)
+        end,
       },
       {
         path = { "open", "prompt" },
-        args = prompt_args(),
-        desc = "Open a prompt template (any .md of PROMPT/) as a scratch buffer instead of copying it; SHAs replace {SHA} like in :Cdx prompt",
-        run = prompt_runner(true),
+        args = { name_arg },
+        desc = "Open the file of a prompt template (any .md of PROMPT/) in the current window to edit it",
+        run = function(ctx)
+          M.open_prompt(ctx.args.name)
+        end,
       },
     },
   })
