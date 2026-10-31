@@ -42,8 +42,7 @@ Lesen: [3.1 Prozess]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/W_St
 
 **Aufgabe (C):** `fork`-Experimente. Programm, das 3 Kinder erzeugt, jedes mit `getpid()`/`getppid()` ausgibt und
 vom Elternprozess mit `waitpid` eingesammelt wird. Dann einen Zombie absichtlich erzeugen und in `ps` sichtbar
-machen; eine Waise erzeugen und beobachten, wer sie adoptiert. Vertiefung: [K] Kap. 24–26 (Prozesse erzeugen,
-beenden, überwachen).
+machen; eine Waise erzeugen und beobachten, wer sie adoptiert. Vertiefung: [K 24: Prozess erzeugen]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=557), [K 25: beenden]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=575), [K 26: Kindprozesse überwachen]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=585).
 
 ### Woche 2: Nebenläufigkeit (Kap. 5)
 
@@ -64,7 +63,7 @@ Lesen: [5.1 Software-Ansätze]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Sy
 
 **Aufgabe (C):** Producer/Consumer mit POSIX-Threads (`pthread_mutex_t`, `pthread_cond_t`), Ringpuffer fester
 Größe. Test: 4 Producer, 4 Consumer, 10⁶ Elemente, Summe vergleichen; mit ThreadSanitizer (`-fsanitize=thread`)
-bauen. Zweite Variante: Readers/Writers mit Schreiber-Vorrang. Vertiefung: [K] Kap. 29–30.
+bauen. Zweite Variante: Readers/Writers mit Schreiber-Vorrang. Vertiefung: [K 29: Threads]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=661), [K 30: Synchronisation]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=675).
 
 ### Woche 3: Deadlock (Kap. 6)
 
@@ -143,7 +142,7 @@ Inodes vergleicht. Kein Mounten nötig.
 
 ### Woche 7–8: Abschlussprojekt Shell (Nachweis)
 
-Spezifikation: [S, Programming Project One]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/W_Stallings_OS/Operating-Systems-Internals-and-Design-Principles_Stallings_2018_9ed.pdf#page=953) und [K] Kap. 24–28, 44 (Pipes), 20–22 (Signale).
+Spezifikation: [S, Programming Project One]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/W_Stallings_OS/Operating-Systems-Internals-and-Design-Principles_Stallings_2018_9ed.pdf#page=953) und [K] [Kap. 24–28]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=557) (Prozesse, `exec`), [Kap. 44]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=933) (Pipes), [Kap. 20–22]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=431) (Signale).
 Mindestumfang:
 
 - Prompt, Zeile lesen, in Wörter zerlegen (Anführungszeichen beachten)
@@ -162,7 +161,7 @@ Mindestumfang:
 3. Was unterscheidet `fork` von `vfork` und `posix_spawn`?
 4. Wie kommt der Exit-Status eines Kindes zur Shell (`wait`-Status-Makros)?
 
-Antworten dazu: [K] Kap. 24–28 und 44.
+Antworten dazu: [K 24–28]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=557) und [K 44]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/Linux/System_Programming/The-Linux-Programming-Interface_Kerrisk_2010.pdf#page=933).
 
 ## Fortschritt
 
