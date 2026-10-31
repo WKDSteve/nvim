@@ -107,3 +107,4 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 - Nach Abschluss einer Aufgabe sofort committen/pushen (und ggf. vorher
   pullen) im main branch, damit die Änderung sofort nutzbar ist.
 - Am Ende jeder Ausgabe gibst du eine laufende Liste aller Commits des Chats aus mit kurzer Beschreibung + welches Repository. Jedes bekomtm einen grünen Haken, wenn das Commit durch einen `ultracode`-Agenten reviewd wurden.
+- **Review nach Abschluss:** Sind die aktuellen Aufgaben abgeschlossen, reviewst du zu einem guten Zeitpunkt (nicht mitten in der Arbeit, sondern wenn der Stand stimmig ist) jedes Commit des Chats, das nicht reine Doku war, gleich selbst mit hohem Reasoning (`high` oder mehr), damit es einen grünen Haken bekommt. Gefundene Bugs, Security- und Performance-Probleme fixt du direkt (Fix-Commit, mit Test) und führst sie in der Commit-Liste mit; die Fix-Commits werden nicht nochmals reviewed. Nicht nachfragen, ob reviewed werden soll.
