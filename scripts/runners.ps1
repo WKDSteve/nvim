@@ -51,7 +51,7 @@ if (-not (Test-Path $Root)) {
   exit 2
 }
 
-$names = if ($Repo -contains 'all') { Get-ChildItem $Root -Directory | Select-Object -ExpandProperty Name } else { $Repo }
+$names = if ($Repo -contains 'all') { Get-ChildItem $Root -Directory | Where-Object { $_.Name -notmatch '^[_.]' } | Select-Object -ExpandProperty Name } else { $Repo }
 foreach ($n in $names) {
   if (-not (Test-Path (Join-Path $Root "$n\run.cmd"))) { Write-Output "unknown runner: $n (no $Root\$n\run.cmd)"; exit 2 }
 }
