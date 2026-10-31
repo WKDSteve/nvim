@@ -244,8 +244,8 @@ Get-ScheduledTaskInfo -TaskName 'GitHub Runners'
 ## 7. Verweis: Handarbeit nach dem Umzug
 
 Task: `ALL/handarbeit-nach-umzug-schritt-fuer-schritt` ist selbst schon die Schritt-für-Schritt-
-Liste (Abschnitte A bis E mit kopierbaren Befehlen; Spiegel:
-`$NVIM_CONFIG_DIR/docs/ROADMAP/HANDARBEIT-NACH-UMZUG.md`). Hier nicht dupliziert. Berührungspunkt
+Liste (Abschnitt A, Install-Probe auf der Workstation, ist hinfaellig; Abschnitte A bis E mit kopierbaren Befehlen; Spiegel:
+entfernt, Task erledigt am 2026-10-31). Hier nicht dupliziert. Berührungspunkt
 mit diesen Checks: Abschnitt A (Install-Probe der Apps mit Token auf der Workstation, darunter
 `tasks-desktop`: `tasks-hub open`; bekannt: `tasks-hub start` endet dort evtl. still mit
 `0xE0000027`, dann `tasks-hub serve` im Vordergrund probieren).
