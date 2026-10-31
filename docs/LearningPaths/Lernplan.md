@@ -20,8 +20,8 @@ Annahme: 8–10 Stunden pro Woche neben dem Job. Zwei Spuren laufen parallel: di
 
 ## Hauptspur
 
-Detailseiten mit Kapitel- und Seitenlinks, Kontrollfragen und Aufgaben je Phase: [Phase 0](Phasen/Phase-0-Betriebssysteme.md)
-(weitere folgen).
+Detailseiten mit Kapitel- und Seitenlinks, Kontrollfragen und Aufgaben je Phase: [Phase 0](Phasen/Phase-0-Betriebssysteme.md),
+[Phase 1](Phasen/Phase-1-Systeme-und-C.md), [Phase 2](Phasen/Phase-2-Compiler-und-Interpreter.md) (weitere folgen).
 
 | Phase | Monate | Lesen | Selbst bauen (Nachweis) | Hebt in der Matrix |
 |---|---|---|---|---|
