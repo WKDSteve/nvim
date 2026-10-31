@@ -129,14 +129,17 @@ switch ($Action) {
     # requests, foreign actors and unreviewed commits of public repositories. It lives in each runner's .env, which
     # the runner reads at its start, so this is the moment to (re)write it. Idempotent; -NoGuard leaves it out
     # (`testing ci runner-guard remove` takes it away again).
-    if ($toStart.Count -gt 0 -and -not $NoGuard) {
-      $testingLua = Join-Path $env:REPOS_DIR 'testing.nvim\scripts\testing.lua'
-      if ($env:REPOS_DIR -and (Test-Path $testingLua)) {
+    if (-not $NoGuard) {
+      $testingLua = if ($env:REPOS_DIR) { Join-Path $env:REPOS_DIR 'testing.nvim\scripts\testing.lua' } else { '' }
+      if ($testingLua -and (Test-Path $testingLua)) {
         $guardOut = @(& nvim --headless -u NONE -l $testingLua ci runner-guard install "--runners=$Root" 2>&1 | ForEach-Object { "$_" })
         if ($LASTEXITCODE -ne 0) { Write-Output "warning: runner-guard install exited $LASTEXITCODE; the runners may be unguarded"; $guardOut | ForEach-Object { Write-Output "  $_" } }
       } else {
-        Write-Output "warning: $testingLua not found: the runners start WITHOUT the guard against foreign code"
+        Write-Output "warning: the testing.nvim checkout was not found (REPOS_DIR): the runners start WITHOUT the guard against foreign code"
       }
+      # a runner reads .env only when it starts: those that run already are unguarded until stop and start
+      $running = @($names | Where-Object { $toStart -notcontains $_ })
+      if ($running.Count -gt 0) { Write-Output "note: running runners read the guard at their next start (runners.ps1 stop <repo>, then ensure): $($running -join ', ')" }
     }
     # The runner also inherits the user's dependency overrides (LIB_NVIM_DIR=<local checkout>), and scripts/test.sh
     # lets a set override win over .deps/, so CI would test the working tree instead of ci-verified. Take them out of
