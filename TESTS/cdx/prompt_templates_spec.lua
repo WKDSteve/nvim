@@ -1,4 +1,4 @@
--- TESTS/cdx/prompt_templates_spec.lua -- `:Cdx prompt <name>` takes every `*.md` of the PROMPT folder as its
+-- TESTS/cdx/prompt_templates_spec.lua -- `:Cdx prompt <name>` and `:Cdx open prompt <name>` take every `*.md` of the PROMPT folder as its
 -- parameter, completes the names, keeps the short names `base` / `review`, and fills `{SHA}` only where a
 -- template has it.
 
@@ -136,6 +136,7 @@ return function(H)
   eq(text2, "full prompt")
   vim.cmd("Cdx open prompt ultra_sha abc1234 def5678")
   eq((opened()), "check abc1234, def5678 please", "open prompt also takes the SHAs")
+  eq(vim.b.cdx_prompt, "ultra_sha.md", "b:cdx_prompt is the file name, also with SHAs")
   eq(copied, nil, "still no clipboard")
   vim.cmd("Cdx prompt full")
   eq(copied, "full prompt", "without open it copies again")

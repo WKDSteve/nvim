@@ -1,5 +1,5 @@
 ---@module 'bindings.usrcmds.cdx'
----@brief `:Cdx prompt <name>` -- copy one of the CDX prompt templates to the clipboard.
+---@brief `:Cdx prompt <name>` / `:Cdx open prompt <name>` -- copy a CDX prompt template to the clipboard or open it as a scratch buffer.
 ---@description
 --- The templates live in `docs/NOTES/CDX/templates/PROMPT/` of this config and
 --- are pasted into Claude Code by hand all day, so this saves the detour
@@ -170,13 +170,14 @@ end
 ---in `b:cdx_prompt` instead.
 ---@param text string
 ---@param label string  shown in the confirmation
+---@param file string  template file name, kept in `b:cdx_prompt`
 ---@return boolean
-local function open_buffer(text, label)
+local function open_buffer(text, label, file)
   local buf = vim.api.nvim_create_buf(true, true)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n", { plain = true }))
   vim.bo[buf].filetype = "markdown"
   vim.bo[buf].bufhidden = "hide"
-  vim.b[buf].cdx_prompt = label
+  vim.b[buf].cdx_prompt = file
   -- Fails in a 'winfixbuf' window (E1513) or with 'nohidden' over a modified buffer (E37): no orphan buffer then.
   local shown, serr = pcall(vim.api.nvim_win_set_buf, 0, buf)
   if not shown then
@@ -191,10 +192,11 @@ end
 ---@param text string
 ---@param label string  shown in the confirmation
 ---@param open? boolean  open as a buffer instead of copying to the clipboard
+---@param file string  template file name
 ---@return boolean
-local function copy(text, label, open)
+local function copy(text, label, open, file)
   if open then
-    return open_buffer(text, label)
+    return open_buffer(text, label, file)
   end
   if not copy_to_clipboard(text) then
     notify.error("Could not write to the clipboard")
@@ -222,13 +224,13 @@ function M.copy_prompt(typed, tokens, open)
   end
   local has_placeholder = text:find(SHA_PLACEHOLDER, 1, true) ~= nil
   if #tokens == 0 then
-    return copy(text, file, open)
+    return copy(text, file, open, file)
   end
   if not has_placeholder then
     notify.warn(
       ("%s has no %s placeholder; the arguments are ignored"):format(file, SHA_PLACEHOLDER)
     )
-    return copy(text, file, open)
+    return copy(text, file, open, file)
   end
   local shas, perr = M.parse_shas(tokens)
   if not shas then
@@ -240,7 +242,7 @@ function M.copy_prompt(typed, tokens, open)
   local filled = text:gsub(vim.pesc(SHA_PLACEHOLDER), function()
     return table.concat(shas, SHA_JOIN)
   end)
-  return copy(filled, ("%s (%d SHA)"):format(file, #shas), open)
+  return copy(filled, ("%s (%d SHA)"):format(file, #shas), open, file)
 end
 
 ---@return nil
