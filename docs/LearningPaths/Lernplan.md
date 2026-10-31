@@ -20,6 +20,9 @@ Annahme: 8–10 Stunden pro Woche neben dem Job. Zwei Spuren laufen parallel: di
 
 ## Hauptspur
 
+Detailseiten mit Kapitel- und Seitenlinks, Kontrollfragen und Aufgaben je Phase: [Phase 0](Phasen/Phase-0-Betriebssysteme.md)
+(weitere folgen).
+
 | Phase | Monate | Lesen | Selbst bauen (Nachweis) | Hebt in der Matrix |
 |---|---|---|---|---|
 | **0** | 0–2 | [Stallings OS (9th)]($REPOS_DIR/Literatur/01_Fundamentals/Operating_Systems/W_Stallings_OS/Operating-Systems-Internals-and-Design-Principles_Stallings_2018_9ed.pdf) abschließen: Kap. 9 (Uniprocessor-Scheduling), 11 (I/O), 12 (Dateisysteme) | Shell in C mit Pipes, `fork`/`exec`, Umleitungen | Betriebssysteme T 3→4 |
