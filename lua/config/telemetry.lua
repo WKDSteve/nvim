@@ -129,6 +129,28 @@ local function applies(spec, name, repo)
   return false
 end
 
+---One plugin's policy as `runtime-analysis.nvim` consumes it. Mirrors that
+---plugin's `RA.Telemetry.LazyPluginOpts`, spelled out here so this file type-checks
+---without runtime-analysis.nvim being in the LuaLS workspace library.
+---@class Config.Telemetry.PluginOpts
+---@field namespace string
+---@field deep? boolean
+---@field profile_args? boolean
+---@field timing? boolean
+
+---The non-plugin target for this config (mirrors `RA.Telemetry.ExtraTarget`).
+---@class Config.Telemetry.ExtraTarget
+---@field namespace string
+---@field mains string[]
+---@field profile_args? boolean
+---@field timing? boolean
+
+---The table `build()` returns (mirrors `RA.Telemetry.LazyOpts`).
+---@class Config.Telemetry.Built
+---@field plugins table<string, Config.Telemetry.PluginOpts>
+---@field lib_nvim table|false   # { profile_args?, timing? }, or false when lib.nvim is excluded
+---@field extra Config.Telemetry.ExtraTarget[]
+
 ---Build the `opts.telemetry` table for `runtime-analysis.nvim`'s own spec.
 ---
 ---Keyed by the FULL repo ("WKDSteve/dap.nvim"), not by a normalized name.
@@ -144,7 +166,7 @@ end
 ---personal spec; it also removes the need to special-case reposcope.nvim,
 ---whose spec sets `name = "reposcope"` -- `plugin[1]` is still the repo.
 ---@param opts? Config.Telemetry.Opts
----@return RA.Telemetry.LazyOpts
+---@return Config.Telemetry.Built
 function M.build(opts)
   opts = vim.tbl_extend("force", defaults, opts or {})
 
@@ -154,7 +176,7 @@ function M.build(opts)
     return require("plugins.personal.core.list").read()
   end)
 
-  ---@type table<string, RA.Telemetry.LazyPluginOpts>
+  ---@type table<string, Config.Telemetry.PluginOpts>
   local plugins = {}
   if ok_list and entries then
     for _, entry in ipairs(entries) do

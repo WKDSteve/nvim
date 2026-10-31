@@ -68,6 +68,7 @@ return function(H)
     local empty = C.parse_status("")
     eq(empty.changed, 0, "empty text")
     eq(C.parse_status(nil).ahead, 0, "nil text")
+    ---@diagnostic disable-next-line: param-type-mismatch -- deliberately not a string
     eq(C.parse_status(42).behind, 0, "a non-string")
   end
 
@@ -236,7 +237,7 @@ return function(H)
       dirty = false,
       changed = 0,
       skipped = false,
-    }, extra or {})
+    }, extra or {}) --[[@as MyPlugins.SyncRecord]]
   end
 
   local records = {

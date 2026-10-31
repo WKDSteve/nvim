@@ -18,8 +18,8 @@ local MODULE = "blink.cmp.sources.cmdline.utils"
 local MARK = "__path_guard_original"
 
 --- Wraps a `get_completions`-shaped function so a throw cannot leak a changed PATH.
----@param fn fun(...): any
----@return fun(...): any
+---@param fn fun(...): ...
+---@return fun(...): ...
 function M.wrap(fn)
   return function(...)
     local path = vim.env.PATH

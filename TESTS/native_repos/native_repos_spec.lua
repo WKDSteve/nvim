@@ -1,5 +1,8 @@
 -- TESTS/native_repos/native_repos_spec.lua -- :MyNative: the staleness rule and the registry.
 
+-- The spec stubs module functions (toolchain.ensure, dialog.yesno, machine.is) on purpose.
+---@diagnostic disable: duplicate-set-field
+
 ---@param H table
 local function spec(H)
   local eq, ok = H.eq, H.ok
@@ -34,7 +37,7 @@ local function spec(H)
   -- every desktop app: the same three scripts (ai-desktop's build-install.ps1 hands over to setup.ps1, which
   -- configures build/ itself; a bare `cmake --build build` failed on a checkout without it)
   for _, name in ipairs({ "tasks-desktop", "rules-desktop", "docmap-desktop", "ai-desktop" }) do
-    local entry = natives.get(name)
+    local entry = assert(natives.get(name))
     eq(
       vim.tbl_contains(entry.build, "scripts/build-install.ps1"),
       true,
@@ -45,10 +48,15 @@ local function spec(H)
     eq(vim.tbl_contains(entry.uninstall, "scripts/uninstall.ps1"), true, name .. " uninstalls")
     ok(entry.needs and #entry.needs > 0, name .. " names its tools")
   end
-  eq(natives.get("ai-desktop").needs, { "cmake", "mingw64" }, "ai-desktop builds with MSYS2")
+  eq(
+    assert(natives.get("ai-desktop")).needs,
+    { "cmake", "mingw64" },
+    "ai-desktop builds with MSYS2"
+  )
 
   -- the tools: once each, in the order of the list (rust before tauri-cli)
   eq(
+    ---@diagnostic disable-next-line: missing-fields -- only `needs` matters to the function under test
     toolchain.needed({ { needs = { "tauri-cli", "rust" } }, { needs = { "rust", "node" } } }),
     { "rust", "node", "tauri-cli" },
     "needed tools are unique and ordered"
@@ -74,6 +82,7 @@ local function spec(H)
   eq(install, { "a" }, "only a tool with a command is installed")
   eq(tool_hints, { "b: hb", "c: hc", "zz: unknown tool" }, "the others are named (no pacman: hint)")
   local ready, held = toolchain.split(
+    ---@diagnostic disable-next-line: missing-fields -- only `name` and `needs` matter here
     { { name = "p", needs = { "a" } }, { name = "q", needs = { "a", "b" } }, { name = "r" } },
     { b = true }
   )

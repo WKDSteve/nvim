@@ -2,6 +2,9 @@
 -- yes/no through `dialog.yesno` (the callback is the dialog's), a list through `dialog.choose` where a dismissal (0)
 -- is the harmless first answer.
 
+-- The spec replaces dialog.yesno / dialog.choose on purpose (restored at the end).
+---@diagnostic disable: duplicate-set-field
+
 return function(H)
   local eq = H.eq
   local dialog = require("lib.nvim.ui.dialog")

@@ -4,6 +4,8 @@
 -- the dry-run guard of the state file, the read-modify-write of the dashboard saves and the
 -- base dir restored by `sync issues`.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -17,6 +19,7 @@ return function(H)
     notes[#notes + 1] = { msg = msg, level = level or vim.log.levels.INFO }
   end
 
+  ---@return MyPlugins.SyncRecord
   local function rec(name, st, extra)
     return vim.tbl_extend("force", {
       name = name,
@@ -29,7 +32,7 @@ return function(H)
       dirty = false,
       changed = 0,
       skipped = false,
-    }, extra or {})
+    }, extra or {}) --[[@as MyPlugins.SyncRecord]]
   end
   local function by_name(records)
     local out = {}
@@ -70,6 +73,7 @@ return function(H)
     do
       local path = H.tmpdir() .. "/issues-state.json"
       assert(state.save("D:/some/base", { rec("x", "no_upstream") }, { path = path }))
+      ---@type MyPlugins.SyncSession|nil
       local opened = nil
       dash.open = function(session)
         opened = session
@@ -77,9 +81,9 @@ return function(H)
       end
       sync.issues({ state_path = path, quiet = true })
       dash.open = orig_open
-      ok(opened ~= nil, "the list opens")
-      eq(opened.dir, "D:/some/base", "session dir")
-      eq(opened.opts.dir, "D:/some/base", "a re-run uses the dir that made the list")
+      local session = assert(opened, "the list opens")
+      eq(session.dir, "D:/some/base", "session dir")
+      eq(session.opts.dir, "D:/some/base", "a re-run uses the dir that made the list")
     end
 
     -- ── a dry run never replaces a real saved result ─────────────────────

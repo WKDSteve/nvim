@@ -2,6 +2,8 @@
 -- `issues` sub-route. Driven through the real composer (the verb is registered here as
 -- :SyncT with the very routes `:MyPlugins` gets); the handlers are stubbed.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok = H.eq, H.ok
 
@@ -29,7 +31,9 @@ return function(H)
   composer.verb("SyncT", { routes = routes.routes() })
 
   local orig_run, orig_issues, orig_notify = sync.run, sync.issues, vim.notify
-  local ran, issued, errors = nil, 0, {}
+  ---@type MyPlugins.SyncOpts|nil
+  local ran = nil
+  local issued, errors = 0, {}
   sync.run = function(opts)
     ran = opts
   end
@@ -50,23 +54,24 @@ return function(H)
 
   local passed, err = pcall(function()
     vim.cmd("SyncT sync")
-    ok(ran ~= nil, "a bare `sync` runs")
-    eq(ran.dry_run, false, "no --dry-run by default")
-    eq(ran.no_fetch, false, "no --no-fetch by default")
-    eq(ran.only, nil, "no --only by default")
-    eq(ran.jobs, nil, "the job count is left to the module default")
+    local first = assert(ran, "a bare `sync` runs")
+    eq(first.dry_run, false, "no --dry-run by default")
+    eq(first.no_fetch, false, "no --no-fetch by default")
+    eq(first.only, nil, "no --only by default")
+    eq(first.jobs, nil, "the job count is left to the module default")
     eq(issued, 0, "issues is not triggered")
 
     reset()
     vim.cmd("SyncT sync --dry-run --no-fetch --jobs=4 --only=alpha")
-    eq(ran.dry_run, true, "--dry-run")
-    eq(ran.no_fetch, true, "--no-fetch")
-    eq(ran.jobs, 4, "--jobs=4 arrives as a number")
-    eq(ran.only, "alpha", "--only=alpha")
+    local flagged = assert(ran, "the flags run a sync")
+    eq(flagged.dry_run, true, "--dry-run")
+    eq(flagged.no_fetch, true, "--no-fetch")
+    eq(flagged.jobs, 4, "--jobs=4 arrives as a number")
+    eq(flagged.only, "alpha", "--only=alpha")
 
     reset()
     vim.cmd("SyncT sync D:/some/dir")
-    eq(ran.dir, "D:/some/dir", "an optional dir argument")
+    eq(assert(ran, "the dir argument runs a sync").dir, "D:/some/dir", "an optional dir argument")
 
     reset()
     vim.cmd("SyncT sync issues")

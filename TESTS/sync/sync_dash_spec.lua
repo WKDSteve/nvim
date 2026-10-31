@@ -5,6 +5,8 @@
 -- acceptance of the plan: solve a problem in the repo -> its row disappears without a restart;
 -- skip -> the closing line names it; restart + `sync issues` -> the list is back.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -51,6 +53,7 @@ return function(H)
   local current = nil
   local list_prompts = {}
   vim.ui.select = function(items, opts, on_choice)
+    ---@type table|nil
     local first = items[1]
     if first and first.name then -- the repo list
       list_prompts[#list_prompts + 1] = opts.prompt
@@ -284,12 +287,17 @@ return function(H)
     ---@param name string
     ---@return string text
     local function preview_of_blocked(name)
+      ---@type MyPlugins.SyncRecord
       local r = {
         name = name,
         path = base .. "/" .. name,
         state = "dirty_blocked",
         branch = "main",
         upstream = "origin/main",
+        ahead = 0, -- the counters are not read by the preview
+        behind = 0,
+        dirty = true,
+        changed = 0,
         skipped = false,
       }
       local done = false

@@ -10,6 +10,7 @@ return function(H)
   local saved_mod = package.loaded["bindings.usrcmds.clipboard"]
 
   local copied, accept = nil, true
+  ---@diagnostic disable-next-line: duplicate-set-field -- replaces the loaded module on purpose (restored below)
   package.loaded["lib.nvim.cross.copy_to_clipboard"] = function(text)
     copied = text
     return accept

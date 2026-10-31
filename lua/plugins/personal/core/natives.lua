@@ -30,7 +30,7 @@ end
 ---@field build? string[] argv of a build (no install), run in the repo folder
 ---@field install? string[] argv of a build plus install for the current user, run in the repo folder
 ---@field uninstall? string[] argv that removes the installation of the current user, run in the repo folder
----@field hint string What to run by hand (shown when there is no command)
+---@field hint? string What to run by hand (shown when there is no command; `desktop()` fills it in)
 
 ---A desktop app: every one has scripts/build-install.ps1 [-BuildOnly] and scripts/uninstall.ps1.
 ---@param entry Plugins.Personal.Native

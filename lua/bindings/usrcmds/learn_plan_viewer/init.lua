@@ -137,7 +137,8 @@ function M.enable()
   usercmd.create("LearnPlanViewer", function(args)
     local fargs = args.fargs
     if fargs[1] == "week" and fargs[2] then
-      open_week(tonumber(fargs[2]))
+      -- A non-numeric argument gives nil; open_week's valid_week() guard reports it.
+      open_week(tonumber(fargs[2]) --[[@as integer]])
       return
     end
     open_week(last_week())

@@ -36,6 +36,7 @@ return function(H)
         )
       end
     end
+    ---@diagnostic disable-next-line: undefined-field -- probes a field that must not exist
     eq(M._orig_open, nil, "the original is not exported as M._orig_open")
 
     eq(type(M._debug), "table", "the debug handle is a table")

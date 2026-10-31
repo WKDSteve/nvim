@@ -49,7 +49,9 @@ function M.refresh(path)
   local changed = n ~= count
   count = n
   if changed then
-    pcall(vim.cmd, "redrawstatus")
+    pcall(function()
+      vim.cmd("redrawstatus")
+    end)
   end
 end
 

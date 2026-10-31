@@ -8,6 +8,12 @@ return function(H)
   local eq, ok = H.eq, H.ok
   local jump = require("bindings.usrcmds.plugin_repos.jump")
 
+  -- vim.cmd is a callable table, which pcall's typing rejects; this wrapper is a plain function
+  ---@param command string
+  local function ex(command)
+    vim.cmd(command)
+  end
+
   local dir = H.tmpdir()
   H.write(
     dir .. "/a.lua",
@@ -61,7 +67,7 @@ return function(H)
   eq(at("commented.nvim"), nil, "a commented-out spec is not a head")
   eq(at("missing.nvim"), nil, "unknown plugin")
 
-  local hit = jump.find("braced.nvim", dir)
+  local hit = assert(jump.find("braced.nvim", dir))
   eq(hit.col, 5, "the column points at the opening quote")
 
   eq(jump.names(dir), {
@@ -79,6 +85,7 @@ return function(H)
   local real_readfile = vim.fn.readfile
   local done_cache, err_cache = pcall(function()
     local reads = 0
+    ---@diagnostic disable-next-line: duplicate-set-field -- deliberate stub, restored below
     vim.fn.readfile = function(...)
       reads = reads + 1
       return real_readfile(...)
@@ -91,6 +98,7 @@ return function(H)
     local flaky = H.tmpdir()
     H.write(flaky .. "/f.lua", '{ "Owner/flaky.nvim" }')
     local fail = true
+    ---@diagnostic disable-next-line: duplicate-set-field -- deliberate stub, restored below
     vim.fn.readfile = function(path, ...)
       if fail and path:find("f.lua", 1, true) then
         error("simulated sharing violation")
@@ -180,10 +188,10 @@ return function(H)
     )
   end)
   vim.bo.modified = false
-  pcall(vim.cmd, "tabclose!")
-  pcall(vim.cmd, "silent! %bwipeout!")
+  pcall(ex, "tabclose!")
+  pcall(ex, "silent! %bwipeout!")
   if vim.api.nvim_tabpage_is_valid(tab) then
-    pcall(vim.cmd, "tabonly!")
+    pcall(ex, "tabonly!")
   end
   if not done then
     error(err, 0)
@@ -208,8 +216,8 @@ return function(H)
         "literal path"
       )
     end)
-    pcall(vim.cmd, "tabclose!")
-    pcall(vim.cmd, "silent! %bwipeout!")
+    pcall(ex, "tabclose!")
+    pcall(ex, "silent! %bwipeout!")
     ok(ok_odd, "odd directory name")
   end
 

@@ -47,13 +47,11 @@ M.FROM_DESC = {
 ---@field lang string|nil    the info string of a fence ("bash", "lua", ...), lower-cased
 
 ---The Visual / range data the command hands over (`ctx.range` of the composer).
----@class Execute.Range
----@field range integer|nil   0 when the command had no range
----@field line1 integer|nil
----@field line2 integer|nil
----@field mode string|nil     "v", "V" or the block mode of the last Visual selection
----@field col1 integer|nil    byte column of '<
----@field col2 integer|nil    byte column of '>
+---An alias of a table shape, not a class: LuaLS only lets a class value flow into a class it
+---inherits from, so a class here would reject the composer's `Lib.UserCmd.Composer.RangeInfo`.
+---Fields: `range` is 0 when the command had no range; `mode` is "v", "V" or the block mode of the
+---last Visual selection; `col1`/`col2` are the byte columns of '< and '>.
+---@alias Execute.Range { range?: integer, line1?: integer, line2?: integer, mode?: string, col1?: integer, col2?: integer }
 
 ---@class Execute.GetOpts
 ---@field from? Execute.From        default "auto"
@@ -167,7 +165,9 @@ end
 ---@param range Execute.Range
 ---@return string[] lines
 local function selection_lines(bufnr, range)
-  local l1, l2 = range.line1, range.line2
+  -- has_range() (checked by every caller) guarantees both lines are set
+  local l1 = range.line1 --[[@as integer]]
+  local l2 = range.line2 --[[@as integer]]
   local m1, m2 = vim.fn.getpos("'<"), vim.fn.getpos("'>")
   local charwise = range.mode == "v" and m1[2] == l1 and m2[2] == l2
   if not charwise then

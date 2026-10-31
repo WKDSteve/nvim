@@ -90,11 +90,14 @@ function M.setup()
 
   local ok, err = pcall(function()
     local ok_lazy, lazy_config = pcall(require, "lazy.core.config")
+    -- `keymaps` is not a LazyPlugin field; it is the extra field this host puts on ui.nvim's spec
+    ---@type (LazyPlugin|{ keymaps?: boolean|table })|false|nil
     local spec = ok_lazy and lazy_config.plugins["ui.nvim"]
     -- Not `(spec and spec.keymaps ~= nil) and spec.keymaps or default`: that
     -- and/or idiom breaks the moment the spec's own value IS `false` (which
     -- means something here -- "off entirely") since `X and false or Y`
     -- always evaluates to `Y`, silently discarding the `false`.
+    ---@type boolean|table
     local keymaps_opts = true
     if spec and spec.keymaps ~= nil then
       keymaps_opts = spec.keymaps

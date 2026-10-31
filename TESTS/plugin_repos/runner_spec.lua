@@ -42,7 +42,7 @@ local function spec(H)
   eq(#runner.REPOS, 11, "eleven runners are registered")
 
   -- autostart: the schtasks calls (built, not run: running them would change the real scheduled tasks)
-  local on = runner.autostart_argv("on")
+  local on = assert(runner.autostart_argv("on"))
   ok(on ~= nil, "autostart on builds a call")
   eq(on[1], "schtasks", "autostart goes through schtasks")
   eq(on[2], "/Create", "on creates the task")
@@ -65,6 +65,7 @@ local function spec(H)
     { "schtasks", "/Query", "/TN", "GitHub Runners", "/FO", "LIST" },
     "status queries the task"
   )
+  ---@diagnostic disable-next-line: param-type-mismatch -- an invalid action is the case under test
   local argv, why = runner.autostart_argv("nonsense")
   eq(argv, nil, "an unknown action builds nothing")
   H.has(why, "unknown action", "and says why")
@@ -181,6 +182,7 @@ end
 return function(H)
   local role = require("machine")
   local saved_is = role.is
+  ---@diagnostic disable-next-line: duplicate-set-field -- deliberate stub, restored below
   role.is = function(r)
     return r == "default"
   end

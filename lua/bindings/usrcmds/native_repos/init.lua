@@ -280,7 +280,8 @@ local function run(kind, only)
   if kind == "build" then
     todo, hints = M.plan_build(candidates, states, only ~= nil)
   else
-    todo, hints = M.plan_install(candidates, states, only ~= nil, kind)
+    todo, hints =
+      M.plan_install(candidates, states, only ~= nil, kind --[[@as "install"|"uninstall"]])
   end
   if #todo == 0 then
     if #hints > 0 then

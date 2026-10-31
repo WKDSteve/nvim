@@ -184,6 +184,7 @@ return function(H)
     lacks(text, "still recording", "finished window is not marked as running")
 
     local running = vim.tbl_extend("force", done_state, { running = true })
+    ---@cast running Startup.Heartbeat.State
     has(joined(report.heartbeat_lines(s, running)), "(still recording)", "running window")
 
     local many = {}

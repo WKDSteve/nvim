@@ -103,6 +103,8 @@ if wanted.req then
     return err
   end
 
+  -- Replacing `require` is the whole point of this probe, so the redefinition is intended.
+  ---@diagnostic disable-next-line: duplicate-set-field
   _G.require = function(name)
     if package.loaded[name] ~= nil then
       return orig_require(name)
@@ -311,7 +313,7 @@ if wanted.stall then
     end
   end
 
-  local timer = uv.new_timer()
+  local timer = assert(uv.new_timer())
   timer:start(
     0,
     TICK,
@@ -569,7 +571,9 @@ if wanted.spawn then
   -- jobstart, termopen, system(), systemlist() and `:!` (C-level, they never
   -- touch the Lua binding, and Vimscript callers bypass the vim.fn wrappers).
   -- The spawn itself runs on the main thread, ~15 ms each on Windows.
-  local procs, procs_n, procs_ms = {}, 0, 0
+  ---@type table<string, { n: integer, ms: number, first: number }>
+  local procs = {}
+  local procs_n, procs_ms = 0, 0
   wrap(uv, "spawn", function(orig, path, opts, on_exit)
     local t0 = uv.hrtime()
     -- Three values: on failure uv.spawn answers `nil, message, name`.

@@ -4,6 +4,8 @@
 -- the table is produced by git itself (and the porcelain-v2 text the parser reads is the real
 -- one, not a hand-written one). Needs `git` on $PATH; runs on Windows (paths, git.exe).
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -86,7 +88,9 @@ return function(H)
   ---@return MyPlugins.SyncRecord[] records
   ---@return MyPlugins.SyncSummary summary
   local function run(opts)
-    local done, recs, sum = false, nil, nil
+    local done = false
+    ---@type MyPlugins.SyncRecord[]|nil, MyPlugins.SyncSummary|nil
+    local recs, sum = nil, nil
     sync.run(vim.tbl_extend("force", {
       dir = base,
       names = names,
@@ -103,7 +107,7 @@ return function(H)
       end, 20),
       "the sync finished"
     )
-    return recs, sum
+    return assert(recs), assert(sum)
   end
   ---@param recs MyPlugins.SyncRecord[]
   ---@return table<string, MyPlugins.SyncRecord>

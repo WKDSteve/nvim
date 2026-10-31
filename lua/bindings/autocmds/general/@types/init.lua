@@ -19,7 +19,7 @@
 -- (e.g. the last file buffer closes, or a tree plugin is the only window
 -- left with `close_if_last_window = false`).
 
----@class AutoCmds.General.MD.GotoFile.Cfg
+---@class AutoCmds.General.MD.GotoFile.Opts
 ---@field enable boolean                             -- Enable Markdown-aware "gf" override for links/URLs.
 ---@field debug? boolean                             -- Emit verbose debug via vim.notify while resolving links.
 ---@field pattern? string|string[]|nil               -- FileType pattern(s) to attach on; defaults to "markdown".

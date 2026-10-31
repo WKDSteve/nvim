@@ -6,6 +6,9 @@
 -- The workstation is simulated by replacing `require("machine").is`; the tool steps are probes that
 -- throw, the terminal and vim.system are fakes, so even a run that gets through starts no real program.
 
+-- The spec stubs module functions (toolchain.*, machine.is, dialog.yesno) on purpose.
+---@diagnostic disable: duplicate-set-field
+
 local spec_dir = vim.fs.dirname(debug.getinfo(1, "S").source:sub(2))
 local config_root = vim.fs.dirname(vim.fs.dirname(spec_dir))
 
@@ -125,6 +128,7 @@ return function(H)
       Hint = "",
       Command = "node scripts/build-go.mjs",
     }
+    ---@cast item MyPlugins.MachineItem -- only the fields the code under test reads are filled in
     eq(
       plugin_machine.build_in_terminal(item, { terminal = fake_terminal, shell = "pwsh" }),
       false,
@@ -156,6 +160,7 @@ return function(H)
     local system_calls = {}
     vim.system = function(argv)
       system_calls[#system_calls + 1] = argv[2]
+      ---@diagnostic disable-next-line: return-type-mismatch -- minimal fake of vim.SystemObj (only wait is used)
       return {
         wait = function()
           return { code = 0, stdout = "", stderr = "" }
@@ -178,11 +183,12 @@ return function(H)
     -- nil: lazy reads a nil `build` as "run the plugin's build.lua / build/init.lua if there is one"
     eq(guard.lazy_build("cmd"), false, "no replacement: no build at all, not even a build.lua")
     eq(guard.lazy_build("cmd", "safe"), "safe", "a replacement runs instead")
-    local fzf = lazy_spec("lua/plugins/telescope.lua", "nvim-telescope/telescope-fzf-native.nvim")
+    local fzf =
+      assert(lazy_spec("lua/plugins/telescope.lua", "nvim-telescope/telescope-fzf-native.nvim"))
     ok(fzf, "the fzf-native spec is found")
     eq(fzf.build, false, "fzf-native is not compiled on the workstation")
     eq(telescope_extensions(), {}, "...and telescope does not try to load it there")
-    local mdview = lazy_spec("lua/plugins/personal/specs/view.lua", "WKDSteve/mdview.nvim")
+    local mdview = assert(lazy_spec("lua/plugins/personal/specs/view.lua", "WKDSteve/mdview.nvim"))
     ok(mdview, "the mdview spec is found")
     -- not even `npm ci && npm run build`: that is wasm-pack, whose cargo compiles and runs build
     -- scripts and proc-macro DLLs, and which fetches and runs wasm-bindgen.exe and wasm-opt.exe
@@ -211,10 +217,10 @@ return function(H)
     eq(reached, { "ensure", "ensure", "check" }, "install, deps and build go on elsewhere")
     eq(blocked_message(":MyNative"), nil, "...without the block message")
 
-    fzf = lazy_spec("lua/plugins/telescope.lua", "nvim-telescope/telescope-fzf-native.nvim")
+    fzf = assert(lazy_spec("lua/plugins/telescope.lua", "nvim-telescope/telescope-fzf-native.nvim"))
     ok(type(fzf.build) == "string" and fzf.build ~= "", "fzf-native is compiled elsewhere")
     eq(telescope_extensions(), { "fzf" }, "...and loaded")
-    mdview = lazy_spec("lua/plugins/personal/specs/view.lua", "WKDSteve/mdview.nvim")
+    mdview = assert(lazy_spec("lua/plugins/personal/specs/view.lua", "WKDSteve/mdview.nvim"))
     eq(
       mdview.build,
       "npm ci && npm run build:go && npm run build",

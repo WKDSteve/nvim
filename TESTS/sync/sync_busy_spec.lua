@@ -2,6 +2,8 @@
 -- `:MyPlugins sync` are serialized per repo (REAL git). Two concurrent `git merge --ff-only`
 -- on one repo collide on index.lock, and whichever chain ends last overwrites the record.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 

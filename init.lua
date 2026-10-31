@@ -196,21 +196,23 @@ vim.env.LUA_LS_PROFILE = "normal" -- "minimal"|"normal"|"full"
 ---
 --- Three things about the form, each of which the option needs:
 ---
---- * **`---@type` on the variable, naming lsp.nvim's own alias.** A function
----   written into the option table -- inline or by name -- is inferred as a
----   bare `function`, which satisfies no declared `fun(): T`. Naming the whole
----   function type is the same griff the plugin uses for its own
----   `label_source`, and the reason its `Reader` alias exists at all.
+--- * **`---@type` on the variable, spelling out the reader's function type.** A
+---   function written into the option table -- inline or by name -- is inferred
+---   as a bare `function`, which satisfies no declared `fun(): T`. Naming the
+---   whole function type is the same griff the plugin uses for its own
+---   `label_source`, and the reason its `Reader` alias exists at all. The type
+---   is written structurally (it is lsp.nvim's `LspNvim.PersonalNames.Reader`)
+---   so this file does not need lsp.nvim in the LuaLS library to type-check.
 --- * **A list is built rather than handed over.** `list.read()` answers
 ---   `entries, err` -- two values, and of a class (`Plugins.Personal.Entry`)
 ---   that the option does not name. Only `name` is ever read on the other
 ---   side, in `collect_labels`.
 --- * **`or {}`**, so a failed read is an empty completion source rather than
 ---   a nil the reader would have to guard.
----@type LspNvim.PersonalNames.Reader
+---@type fun(): { name: string }[]
 local personal_name_labels = function()
   local entries = require("plugins.personal.core.list").read() or {}
-  ---@type LspNvim.PersonalNames.Entry[]
+  ---@type { name: string }[]
   local out = {}
   for _, entry in ipairs(entries) do
     out[#out + 1] = { name = entry.name }

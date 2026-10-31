@@ -34,7 +34,7 @@ return function(H)
   -- Fake utils.job with the upstream shape: spawn, collect stdout, call on_exit, never close.
   local function fake_job(cmd, opts, on_exit)
     local out = {}
-    local stdout = uv.new_pipe(false)
+    local stdout = assert(uv.new_pipe(false))
     local exited, closed, code = false, false, nil
     local function finish()
       if exited and closed and on_exit then

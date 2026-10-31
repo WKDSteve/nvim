@@ -3,6 +3,8 @@
 -- repos as ONE partial `:MyPlugins sync` (so the saved result of the others is kept).
 -- Real Snacks picker, headless; `sync.run` is stubbed. Skipped when snacks.nvim is not installed.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -37,6 +39,7 @@ return function(H)
   vim.fn.mkdir(base .. "/" .. second, "p")
 
   local orig_run, orig_notify = sync.run, vim.notify
+  ---@type MyPlugins.SyncOpts|nil
   local ran = nil
   sync.run = function(opts)
     ran = opts
@@ -108,14 +111,15 @@ return function(H)
       end),
       "<CR> ran the batch and started a sync"
     )
-    eq(ran.partial, true, "as a partial run (the saved result of the other repos stays)")
-    eq(ran.names, { first, second }, "over exactly the repos marked [S], in list order")
+    local batch = assert(ran, "<CR> started a sync")
+    eq(batch.partial, true, "as a partial run (the saved result of the other repos stays)")
+    eq(batch.names, { first, second }, "over exactly the repos marked [S], in list order")
     eq(
-      vim.fs.normalize(ran.dir),
+      vim.fs.normalize(batch.dir),
       (vim.fs.normalize(base):gsub("/+$", "")),
       "in the picker's directory"
     )
-    ok(ran.only == nil, "not narrowed to one repo")
+    ok(batch.only == nil, "not narrowed to one repo")
   end)
 
   sync.run, vim.notify = orig_run, orig_notify

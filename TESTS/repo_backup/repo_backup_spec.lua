@@ -56,7 +56,8 @@ return function(H)
     local bundle = dest .. "/Local-Repo.bundle"
 
     -- the temp file is this process's own: two instances must not share one
-    local real_system, created_tmp = vim.system, nil
+    local real_system = assert(vim.system)
+    local created_tmp
     vim.system = function(cmd, ...)
       if cmd[4] == "bundle" and cmd[5] == "create" then
         created_tmp = cmd[6]

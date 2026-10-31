@@ -27,8 +27,8 @@ local function close(handle)
 end
 
 --- Wraps a `utils.job`-shaped function so the spawned process handle gets closed.
----@param fn fun(cmd: string[], opts: table?, on_exit: function?): table?, any
----@return fun(cmd: string[], opts: table?, on_exit: function?): table?, any
+---@param fn fun(cmd: string[], opts: table?, on_exit: function?): table?, any, ...
+---@return fun(cmd: string[], opts: table?, on_exit: function?): table?, any, ...
 function M.wrap(fn)
   return function(cmd, opts, on_exit)
     local job

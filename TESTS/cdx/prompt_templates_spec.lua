@@ -16,6 +16,7 @@ return function(H)
   vim.fn.mkdir(prompt .. "/sub.md", "p")
 
   local stdpath = vim.fn.stdpath
+  ---@diagnostic disable-next-line: duplicate-set-field -- the spec stubs stdpath on purpose (restored below)
   vim.fn.stdpath = function(what)
     if what == "config" then
       return config
@@ -26,6 +27,7 @@ return function(H)
   -- capture the clipboard and the messages; the module binds both at load, so load it again
   local copied
   local copy_was = package.loaded["lib.nvim.cross.copy_to_clipboard"]
+  ---@diagnostic disable-next-line: duplicate-set-field -- replaces the loaded module on purpose (restored below)
   package.loaded["lib.nvim.cross.copy_to_clipboard"] = function(text)
     copied = text
     return true
@@ -50,7 +52,7 @@ return function(H)
   eq(cdx.resolve("review"), "review_w_ultracode.md", "the other short name")
   eq(cdx.resolve("FULL"), "full.md", "any case")
   local none, err = cdx.resolve("nope")
-  ok(none == nil and err:find("have: ", 1, true), "an unknown name lists what there is")
+  ok(none == nil and (err or ""):find("have: ", 1, true), "an unknown name lists what there is")
 
   -- a file added later is there at once
   H.write(prompt .. "/brand_new.md", "new prompt\n")
@@ -144,7 +146,9 @@ return function(H)
   vim.cmd("silent! Cdx open prompt nope")
   eq(vim.api.nvim_get_current_buf(), keep, "an unknown name opens nothing")
   vim.wo.winfixbuf = true
-  local thrown = pcall(vim.cmd, "Cdx open prompt review")
+  local thrown = pcall(function()
+    vim.cmd("Cdx open prompt review")
+  end)
   vim.wo.winfixbuf = false
   ok(thrown, "a refused buffer does not throw")
   eq(vim.api.nvim_get_current_buf(), keep, "the window keeps its buffer")

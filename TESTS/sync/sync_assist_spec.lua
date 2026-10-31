@@ -3,6 +3,8 @@
 -- test: a failed action leaves the repo as it was (a conflicting rebase/merge is aborted, the
 -- stash is popped again), and nothing ever resets, cleans or forces.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -95,7 +97,9 @@ return function(H)
     "keeps-old-stash",
   }
 
-  local done, session = false, nil
+  local done = false
+  ---@type MyPlugins.SyncSession  -- assigned by `on_done`, which the wait below guarantees
+  local session
   sync.run({
     dir = base,
     names = names,
@@ -251,6 +255,7 @@ return function(H)
       end, 20),
       id .. " finished in " .. repo
     )
+    result = assert(result) -- set by the callback the wait above guarantees
     return result[1], result[2]
   end
   ---raw git that may fail (the fixture helper raises)
@@ -317,7 +322,12 @@ return function(H)
       if vim.tbl_contains(args, "--abort") then
         aborts = aborts + 1
         vim.schedule(function()
-          cb({ code = 1, stdout = "", stderr = "fatal: Unable to create index.lock\n" })
+          cb({
+            code = 1,
+            stdout = "",
+            stderr = "fatal: Unable to create index.lock\n",
+            timed_out = false,
+          })
         end)
         return { stop = function() end }
       end
@@ -406,6 +416,7 @@ return function(H)
 
   -- an unknown action is refused, not run
   local refused
+  ---@diagnostic disable-next-line: param-type-mismatch -- deliberately not a valid assist id
   ops.run_assist(keep.repo, "reset_hard", 1000, function(o, e)
     refused = { ok = o, err = e }
   end)

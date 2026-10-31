@@ -28,6 +28,7 @@ return function(H)
   ok(blink and type(blink.opts) == "function", "plugins.completion has a blink.cmp opts function")
 
   local opts = { keymap = { ["<C-k>"] = { "show_signature", "hide_signature", "fallback" } } }
+  ---@diagnostic disable-next-line: param-type-mismatch -- the opts function ignores its plugin argument
   blink.opts(nil, opts)
   eq(opts.keymap["<C-k>"], false, "<C-k> is removed from blink's keymap")
   for _, key in ipairs({ "<C-h>", "<C-j>", "<C-l>", "<C-H>", "<C-J>", "<C-K>", "<C-L>" }) do

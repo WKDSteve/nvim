@@ -3,6 +3,8 @@
 -- written by hand (no git is needed for the keys); the git-backed flow is in sync_dash_spec.lua.
 -- Skipped (reported, not failed) when snacks.nvim is not installed.
 
+---@diagnostic disable: duplicate-set-field -- the spec swaps module functions for stubs on purpose
+
 return function(H)
   local eq, ok, has = H.eq, H.ok, H.has
 
@@ -33,7 +35,8 @@ return function(H)
 
   ---@return MyPlugins.SyncRecord
   local function rec(name, state, extra)
-    return vim.tbl_extend("force", {
+    ---@type MyPlugins.SyncRecord
+    local record = vim.tbl_extend("force", {
       name = name,
       path = nowhere .. "/" .. name,
       state = state,
@@ -44,7 +47,8 @@ return function(H)
       dirty = false,
       changed = 0,
       skipped = false,
-    }, extra or {})
+    }, extra or {}) --[[@as MyPlugins.SyncRecord]]
+    return record
   end
   local session = {
     dir = nowhere,
@@ -79,7 +83,9 @@ return function(H)
   vim.notify = function(msg, level)
     notes[#notes + 1] = { msg = msg, level = level or vim.log.levels.INFO }
   end
-  local entered, rechecked, reran, rerun_opts, decline = {}, {}, 0, nil, false
+  local entered, rechecked, reran, decline = {}, {}, 0, false
+  ---@type MyPlugins.SyncOpts|nil
+  local rerun_opts
   -- `held`: the re-check does not end until the spec says so; `busy`: repo name -> reason
   local held, busy = nil, {}
   -- the `on_stopped` callbacks of held re-checks (what a cancel / a new run triggers)
@@ -160,9 +166,13 @@ return function(H)
     vim.notify, dash.go_into, sync.recheck, sync.run, sync.busy_reason =
       orig.notify, orig.go_into, orig.recheck, orig.run, orig.busy_reason
     for _, p in ipairs(Snacks.picker.get({ source = "myplugins_sync" })) do
-      pcall(p.close, p)
+      pcall(function()
+        p:close()
+      end)
     end
-    pcall(vim.cmd, "silent! %bwipeout!")
+    pcall(function()
+      vim.cmd("silent! %bwipeout!")
+    end)
   end
 
   local passed, err = pcall(function()
@@ -325,10 +335,11 @@ return function(H)
       "R started a full run"
     )
     ok(not said():find("unresolved", 1, true), "...without a closing line of its own")
-    eq(rerun_opts.names, nil, "R drops the picker's selection")
-    eq(rerun_opts.partial, nil, "R drops the partial flag")
-    eq(rerun_opts.only, nil, "R drops --only")
-    eq(rerun_opts.dir, nowhere, "R keeps the base dir")
+    local ropts = assert(rerun_opts)
+    eq(ropts.names, nil, "R drops the picker's selection")
+    eq(ropts.partial, nil, "R drops the partial flag")
+    eq(ropts.only, nil, "R drops --only")
+    eq(ropts.dir, nowhere, "R keeps the base dir")
 
     -- ── ...and declining the restart prompt must not lose the closing line ──
     dash.open(session)

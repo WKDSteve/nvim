@@ -390,7 +390,7 @@ local function apply_changes(current, session_records, changed)
       f = s
     elseif s and changed[f.name] == "skip" and classify.is_problem(f.state) then
       -- only the flag: the record itself may be newer than the session's copy
-      f = vim.tbl_extend("force", f, { skipped = s.skipped })
+      f = vim.tbl_extend("force", f, { skipped = s.skipped }) --[[@as MyPlugins.SyncRecord]]
     end
     out[#out + 1] = f
   end

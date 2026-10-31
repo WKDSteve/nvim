@@ -9,16 +9,16 @@ return function(H)
   package.loaded["plugins.personal.core.list"] = nil
   local list = require("plugins.personal.core.list")
 
-  local plain = list.read()
+  local plain = assert(list.read())
   eq(#plain, 1, "read() has the enabled plugin only")
   eq(plain[1].name, "a.nvim", "read() has no vault")
 
   local names = {}
-  for _, entry in ipairs(list.read_for_clone()) do
+  for _, entry in ipairs(assert(list.read_for_clone())) do
     names[#names + 1] = entry.name
   end
   eq(names, { "a.nvim", "rules-vault", "tasks-vault" }, "read_for_clone() adds the vaults")
-  eq(#list.read(), 1, "read_for_clone() does not leak into read()")
+  eq(#assert(list.read()), 1, "read_for_clone() does not leak into read()")
 
   package.loaded["plugins.personal"] = saved
   package.loaded["plugins.personal.core.list"] = nil
