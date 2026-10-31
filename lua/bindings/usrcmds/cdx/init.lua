@@ -5,9 +5,12 @@
 --- are pasted into Claude Code by hand all day, so this saves the detour
 --- through a file manager:
 ---
----   :Cdx prompt <name> [sha ...] [--open]
+---   :Cdx prompt <name> [sha ...]
+---   :Cdx open prompt <name> [sha ...]
 ---
---- With `--open` the text is not copied but shown in a new scratch buffer.
+--- `:Cdx open prompt` does not copy the text but shows it in a new, unnamed
+--- scratch buffer (`b:cdx_prompt` holds the template); `:Cdx open` is the
+--- place for further things to open.
 ---
 --- `<name>` is every `*.md` file of that folder, without the extension
 --- (`Base`, `full`, `review_w_ultracode`, `ultra_sha`, a new file the moment it
@@ -162,8 +165,9 @@ function M.parse_shas(tokens)
   return shas, nil
 end
 
----Show the text in a new scratch buffer in the current window. The buffer number is part of the
----name, so opening the same template twice never collides on the name.
+---Show the text in a new scratch buffer in the current window. The buffer stays without a name:
+---file explorers (neo-tree) take a buffer name for a path and try to `:tcd` into it; the label is
+---in `b:cdx_prompt` instead.
 ---@param text string
 ---@param label string  shown in the confirmation
 ---@return boolean
@@ -172,7 +176,7 @@ local function open_buffer(text, label)
   vim.api.nvim_buf_set_lines(buf, 0, -1, false, vim.split(text, "\n", { plain = true }))
   vim.bo[buf].filetype = "markdown"
   vim.bo[buf].bufhidden = "hide"
-  vim.api.nvim_buf_set_name(buf, ("cdx-prompt://%d/%s"):format(buf, label))
+  vim.b[buf].cdx_prompt = label
   -- Fails in a 'winfixbuf' window (E1513) or with 'nohidden' over a modified buffer (E37): no orphan buffer then.
   local shown, serr = pcall(vim.api.nvim_win_set_buf, 0, buf)
   if not shown then
@@ -261,40 +265,51 @@ function M.enable()
     end,
   })
 
+  ---The positional arguments `:Cdx prompt` and `:Cdx open prompt` share.
+  ---@return table[]
+  local function prompt_args()
+    return {
+      {
+        name = "name",
+        type = "CDX_PROMPT",
+        desc = "Template of the PROMPT folder, without .md (base and review are short names)",
+      },
+      {
+        name = "sha",
+        type = "STRING",
+        optional = true,
+        desc = "Commit SHA of 4 to 64 hex digits for {SHA}; more may follow",
+      },
+    }
+  end
+
+  ---@param open boolean
+  ---@return fun(ctx: table)
+  local function prompt_runner(open)
+    return function(ctx)
+      local tokens = {}
+      if ctx.args.sha then
+        tokens[#tokens + 1] = ctx.args.sha
+      end
+      vim.list_extend(tokens, ctx.rest)
+      M.copy_prompt(ctx.args.name, tokens, open)
+    end
+  end
+
   composer.verb("Cdx", {
-    desc = "Claude Code helpers: copy CDX prompt templates to the clipboard",
+    desc = "Claude Code helpers: copy CDX prompt templates to the clipboard or open them as a buffer",
     routes = {
       {
         path = { "prompt" },
-        args = {
-          {
-            name = "name",
-            type = "CDX_PROMPT",
-            desc = "Template of the PROMPT folder, without .md (base and review are short names)",
-          },
-          {
-            name = "sha",
-            type = "STRING",
-            optional = true,
-            desc = "Commit SHA of 4 to 64 hex digits for {SHA}; more may follow",
-          },
-        },
+        args = prompt_args(),
         desc = "Copy a prompt template (any .md of PROMPT/) to the clipboard; SHAs (space- or comma-separated) replace {SHA}, none keeps it",
-        flags = {
-          {
-            name = "open",
-            bool = true,
-            desc = "Open the text as a buffer instead of copying it to the clipboard",
-          },
-        },
-        run = function(ctx)
-          local tokens = {}
-          if ctx.args.sha then
-            tokens[#tokens + 1] = ctx.args.sha
-          end
-          vim.list_extend(tokens, ctx.rest)
-          M.copy_prompt(ctx.args.name, tokens, ctx.flags.open)
-        end,
+        run = prompt_runner(false),
+      },
+      {
+        path = { "open", "prompt" },
+        args = prompt_args(),
+        desc = "Open a prompt template (any .md of PROMPT/) as a scratch buffer instead of copying it; SHAs replace {SHA} like in :Cdx prompt",
+        run = prompt_runner(true),
       },
     },
   })
