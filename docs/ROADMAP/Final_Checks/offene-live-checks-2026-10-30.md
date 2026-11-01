@@ -23,7 +23,14 @@ Erzeugt am 2026-10-30. Hier stehen nur Prüfungen, die du selbst machen musst: e
 
 ## appkit
 
-- [ ] Hub-Start über wscript auf der Workstation (Falcon) (`appkit/start-ueber-wscript-von-edr-beendet`): siehe [nvim-config-live-checks-2026-10-29.md](nvim-config-live-checks-2026-10-29.md) (nur auf der Workstation)
+- [ ] Hub-Start ohne wscript, Handlauf auf dem privaten Rechner (`appkit/start-ueber-wscript-von-edr-beendet`): `start` meldet den Hub, Autostart nach Neuanmeldung, `--shortcut` und `uninstall`. Die Workstation entfällt (Entscheidung 2026-10-28); Hintergrund in [nvim-config-live-checks-2026-10-29.md](nvim-config-live-checks-2026-10-29.md)
+
+## streamtap
+
+- [ ] Installierte App von Hand: App starten, Extension entpackt in Chrome laden, Mitschnitt ohne Kommandozeile (`streamtap/setup-exe-aus-github-release-bei-tag-und-rolling-build-auf-m`)
+- [ ] Installierte App mit stdin-Token, Rechte-Warnung, Revoke-Dialog, Sprache/Theme, Kopplung neu registrieren (`streamtap/handlauf-installierte-app-mit-stdin-token-rechte-warnung-rev`)
+- [ ] Erster Release-Tag `v0.1.0`: Entwurf prüfen, Zip und Prüfsumme testen, selbst veröffentlichen (`streamtap/erster-release-tag-v0-1-0-entwurf-pruefen-und-veroeffentlich`)
+- [ ] DRM-Badge mit echter DRM-Quelle im Browser prüfen (`streamtap/drm-badge-mit-echter-drm-quelle-im-browser-pruefen`)
 
 ## casedesk.nvim
 
