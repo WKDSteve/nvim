@@ -249,7 +249,7 @@ return {
       --     -- clear = "<lt>x",
       --   },
       --   capture = true,
-      --   output_dir = nil, -- string; only used with capture = true, nil = stdpath("config")/docs/debug_views
+      --   output_dir = nil, -- string; only used with capture = true, nil = stdpath("state")/debug_views
       --   -- The <lt>m/<lt>n/<lt>e popup: lib.nvim.messages + ui.kit.message_log
       --   -- (live, paginated) when ui.nvim is installed, a static
       --   -- lib.nvim.output.viewer dump otherwise.
