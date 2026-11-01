@@ -102,7 +102,10 @@ local function open_week(n)
   open_weeks[bufnr] = n
   remember_week(n)
 
-  local map = vim.keymap.set
+  ---@param ... any
+  local function map(...)
+    vim.keymap.set(...)
+  end
   local opts = { buffer = bufnr, silent = true }
   map("n", "<leader>ln", function()
     open_week(n + 1)
