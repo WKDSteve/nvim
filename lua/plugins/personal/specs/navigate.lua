@@ -155,6 +155,14 @@ return {
       --   limit = 100, -- maximum matches collected per search
       -- },
 
+      -- A task id (`<area>/<slug>`) under the cursor opens its task file.
+      -- Without `vaults` only tasks.nvim's own vault (tasks-vault) is asked, so
+      -- ids of the tricentis-vault (`SAP-Support/...`) would not resolve.
+      -- `$VAR`, `${VAR}` and `~` are expanded.
+      tasks = {
+        vaults = { "$REPOS_DIR/tasks-vault", "$REPOS_DIR/tricentis-vault" },
+      },
+
       -- Normal-mode keymaps (`false` disables one; a list binds several lhs;
       -- `mappings = false` disables all).
       mappings = {
