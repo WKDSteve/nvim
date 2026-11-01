@@ -1,1 +1,0 @@
-E:/repos/tasks-vault/rules-desktop/handovers/appkit-extraktion-stand-2026-10-16_HANDOVER.md

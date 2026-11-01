@@ -6,6 +6,8 @@ refs: [ALL/design-pattern-index-2026-10-31.md]
 
 # Design Patterns als lib.nvim-Module: Analyse (2026-10-31)
 
+> **Umsetzung (2026-10-31):** Die Pattern-Sammlung ist in `lib.nvim` angelegt: Katalog `docs/patterns.md`, Module unter `lua/lib/lua/patterns/` und `lua/lib/nvim/patterns/` (34 Module, 9 Verweise auf bestehende Feature-Module), `:help lib.nvim-patterns`, API-Index `docs/API/patterns.md`. Wegweiser in den Regeln: `LUA-09` (rules-vault). Task `lib.nvim/design-pattern-sammlung`, Analyse `design-patterns-in-lib-nvim-analyse-2026-10-31.md`.
+
 Frage: Sollen Design Patterns als Module in `lib.nvim` angelegt und in allen Repos verwendet werden, um einen Standard zu schaffen und die Patterns im Code sichtbar zu machen (der Modulname traegt den Pattern-Namen)?
 
 **Kurzantwort:** Ja fuer die *verhaltenstragenden* Patterns, nein fuer die *strukturellen*. Die meisten lohnenden Module gibt es in lib.nvim schon. Das eigentliche Problem ist die Nutzung, nicht der Bestand: die Repos bauen dieselben Dinge selbst nach. Der groesste Hebel sind daher Adoption, Auffindbarkeit (Pattern-Karte in der Doku) und ein Lint-Gate, dazu zwei oder drei neue Module. Ein Umbenennen auf GoF-Namen (`lib.patterns.observer`) oder ein zweiter Alias-Namensraum lohnt nicht.

@@ -6,6 +6,8 @@ task: ALL/design-pattern-index
 
 # Design-Pattern-Index (2026-10-31)
 
+> **Umsetzung (2026-10-31):** Die Pattern-Sammlung ist in `lib.nvim` angelegt: Katalog `docs/patterns.md`, Module unter `lua/lib/lua/patterns/` und `lua/lib/nvim/patterns/` (34 Module, 9 Verweise auf bestehende Feature-Module), `:help lib.nvim-patterns`, API-Index `docs/API/patterns.md`. Wegweiser in den Regeln: `LUA-09` (rules-vault). Task `lib.nvim/design-pattern-sammlung`, Analyse `design-patterns-in-lib-nvim-analyse-2026-10-31.md`.
+
 Ergebnis der Task `ALL/design-pattern-index`. 484 bestaetigte Verwendungen, 105 Kandidaten, 50 Repos mit Treffern.
 
 **Methode:** 12 Durchlaeufe (je 1 Agent, Repo-Gruppen), je Repo Modulbaum + Grep nach Pattern-Signaturen + Lesen der Treffer-Stellen. Es ist ein Stichproben-Index (die Repos haben zusammen ca. 1 Mio. Zeilen), kein vollstaendiges Audit; Zeilenangaben sind teils der Beginn des Konstrukts. In Lua sind Patterns meist klasslos umgesetzt (Closures, Modul-Tabellen, Callbacks), Beispiele: Observer = Autocmd/User-Event, Strategy = Funktions-Tabelle, Facade = Modul-API.

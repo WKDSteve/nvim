@@ -1,1 +1,0 @@
-E:/repos/tasks-vault/lib.nvim/handovers/session-stand-2026-10-15_HANDOVER.md
