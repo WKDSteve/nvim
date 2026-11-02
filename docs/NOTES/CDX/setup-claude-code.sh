@@ -111,6 +111,28 @@ node "$SCRIPT_DIR/merge-claude-settings.js" \
   "$NVIM_CONFIG_DIR"
 
 echo
+echo "[git] Globale Hooks"
+HOOK_SRC="${REPOS_DIR_VALUE:+$REPOS_DIR_VALUE/tasks-vault/TOOLS/scripts/git-global-hooks}"
+HOOK_DST="$HOME/.config/git/global-hooks"
+if [ -z "$HOOK_SRC" ] || [ ! -d "$HOOK_SRC" ]; then
+  echo "  Quelle fehlt (${HOOK_SRC:-REPOS_DIR unbekannt}): Repo tasks-vault klonen, dann das Skript erneut ausfuehren."
+else
+  mkdir -p "$HOOK_DST"
+  cp "$HOOK_SRC/pre-push" "$HOOK_SRC/commit-msg" "$HOOK_DST/"
+  chmod +x "$HOOK_DST/pre-push" "$HOOK_DST/commit-msg"
+  CURRENT_HOOKS="$(git config --global --get core.hooksPath || true)"
+  if [ -z "$CURRENT_HOOKS" ]; then
+    git config --global core.hooksPath "$HOOK_DST"
+    echo "  core.hooksPath gesetzt: $HOOK_DST"
+  elif [ "$CURRENT_HOOKS" = "$HOOK_DST" ]; then
+    echo "  core.hooksPath bereits gesetzt."
+  else
+    echo "  core.hooksPath zeigt auf '$CURRENT_HOOKS' (fremd): nicht ueberschrieben."
+  fi
+  echo "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
+fi
+
+echo
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"
 echo "  Was auf dieser Maschine schon da ist:"
 node "$SCRIPT_DIR/setup-devtools.js" --status

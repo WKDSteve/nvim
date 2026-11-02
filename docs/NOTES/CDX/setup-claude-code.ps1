@@ -166,6 +166,32 @@ $mergeScript = Join-Path $PSScriptRoot 'merge-claude-settings.js'
 
 node $mergeScript $templatePath $settingsPath $nvimConfig
 
+# --- 4. Globale Git-Hooks (pre-push: kein Force-Push ueber fremde Commits) -----
+
+Write-Host "`n[git] Globale Hooks"
+$hookSource = if ($reposDir) { Join-Path $reposDir 'tasks-vault/TOOLS/scripts/git-global-hooks' } else { $null }
+$hookTarget = Join-Path $HOME '.config/git/global-hooks'
+if (-not $hookSource -or -not (Test-Path $hookSource)) {
+    Write-Host "  Quelle fehlt ($hookSource): Repo tasks-vault klonen, dann das Skript erneut ausfuehren." -ForegroundColor Yellow
+} else {
+    New-Item -ItemType Directory -Path $hookTarget -Force | Out-Null
+    foreach ($name in 'pre-push', 'commit-msg') {
+        # Als Bytes kopieren: die Hooks muessen LF-Zeilenenden behalten (sh).
+        Copy-Item (Join-Path $hookSource $name) (Join-Path $hookTarget $name) -Force
+    }
+    $hooksPath = (git config --global --get core.hooksPath)
+    $wanted = $hookTarget.Replace('\', '/')
+    if (-not $hooksPath) {
+        git config --global core.hooksPath $wanted
+        Write-Host "  core.hooksPath gesetzt: $wanted"
+    } elseif ($hooksPath.Replace('\', '/') -eq $wanted) {
+        Write-Host "  core.hooksPath bereits gesetzt."
+    } else {
+        Write-Host "  core.hooksPath zeigt auf '$hooksPath' (fremd): nicht ueberschrieben. pre-push dort selbst einbinden." -ForegroundColor Yellow
+    }
+    Write-Host "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
+}
+
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
 Write-Host "  Was auf dieser Maschine schon da ist:"
 node (Join-Path $PSScriptRoot 'setup-devtools.js') --status
