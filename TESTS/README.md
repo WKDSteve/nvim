@@ -28,8 +28,10 @@ it is finished, so a silent minute is not a hang. Give a full run a timeout of
 at least 5 minutes (a wrapper with the usual 2-minute limit kills it in the
 middle of the sync specs), or filter, e.g. `run.lua sync_status`.
 
-The specs are not part of the CI workflow yet (it would need a lib.nvim
-checkout); CI lints and format-checks this folder.
+CI lints and format-checks this folder and runs every spec except `sync/` (the
+`specs` job checks out lib.nvim at `ci-verified`); `--skip=<part>` leaves out the
+specs whose path contains `<part>`, e.g. `run.lua --skip=sync/`. The `sync/`
+specs stay local: they work on real git repositories and kill real process trees.
 
 ## Specs
 

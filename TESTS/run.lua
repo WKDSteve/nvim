@@ -98,9 +98,16 @@ local specs = {
 }
 
 -- Optional filter: only the specs whose path contains one of the arguments.
-local wanted = {}
+-- `--skip=<part>` leaves out the specs whose path contains <part> (CI skips `sync/`, which works on
+-- real git repositories and kills real process trees).
+local wanted, skipped = {}, {}
 for i = 1, #(arg or {}) do
-  wanted[#wanted + 1] = arg[i]
+  local skip = arg[i]:match("^%-%-skip=(.+)$")
+  if skip then
+    skipped[#skipped + 1] = skip
+  else
+    wanted[#wanted + 1] = arg[i]
+  end
 end
 
 ---Straight to stdout: `print` in a headless Neovim goes through the message area
@@ -116,6 +123,11 @@ for _, name in ipairs(specs) do
   for _, w in ipairs(wanted) do
     if name:find(w, 1, true) then
       selected = true
+    end
+  end
+  for _, s in ipairs(skipped) do
+    if name:find(s, 1, true) then
+      selected = false
     end
   end
   if selected then
