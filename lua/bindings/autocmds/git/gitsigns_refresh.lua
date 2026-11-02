@@ -16,8 +16,10 @@ function M.enable(cfg, shared)
 
   local events = shared.norm_events(cfg.events, { "BufEnter", "FocusGained" })
   Autocmd.create(events, function()
-    local ok, gs = pcall(require, "gitsigns")
-    if ok and gs.refresh then
+    -- Never `require` it here: that loaded gitsigns with the first buffer, long before its own
+    -- trigger. Not loaded yet means nothing to refresh.
+    local gs = package.loaded["gitsigns"]
+    if type(gs) == "table" and gs.refresh then
       pcall(gs.refresh)
     end
   end, {

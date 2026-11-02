@@ -101,7 +101,8 @@ Der Plugin-Spec (`lazy = false`) lädt `nvim-treesitter/nvim-treesitter-textobje
 aber es gibt in diesem Repo **keine** Konfiguration dafür (kein
 `textobjects`-Block, keine `select_textobject`/`move`-Keymaps) — das Plugin ist
 installiert, aber praktisch ungenutzt. Textobjects laufen stattdessen über
-`echasnovski/mini.ai` und `wellle/targets.vim`
-([lua/plugins/textobjects.lua](../../../../../lua/plugins/textobjects.lua)), die
-funktional dieselbe Rolle übernehmen. Siehe dazu ggf. eine eigene
-Mini.ai/Targets-Doku außerhalb dieses Bindings-Ordners.
+`echasnovski/mini.ai`
+([lua/plugins/textobjects.lua](../../../../../lua/plugins/textobjects.lua)), das
+funktional dieselbe Rolle übernimmt (`wellle/targets.vim` ist seit 2026-11-02 entfernt).
+mini.ai legt „next“ auf `aN`/`iN` und „last“ auf `aL`/`iL`, damit Neovims eingebaute
+`an`/`in` (0.12, Inkrementalauswahl) frei bleiben.

@@ -10,13 +10,16 @@ return {
     version = "*",
     event = "VeryLazy",
     config = function()
-      require("mini.ai").setup()
+      -- Neovim 0.12 ships `an` / `in` (incremental selection); mini.ai's default "next" mappings
+      -- would shadow them. Next and last move to capitals: `aN`/`iN` next, `aL`/`iL` last.
+      require("mini.ai").setup({
+        mappings = {
+          around_next = "aN",
+          inside_next = "iN",
+          around_last = "aL",
+          inside_last = "iL",
+        },
+      })
     end,
-  },
-
-  -- wellle/targets.vim: Extra textobjects for quotes, args, etc.
-  {
-    "wellle/targets.vim",
-    event = "VeryLazy",
   },
 }
