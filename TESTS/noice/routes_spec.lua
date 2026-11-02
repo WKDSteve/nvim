@@ -11,7 +11,7 @@ return function(H)
   -- as an OR of sub-filters. Only these keys are modelled; any other key (`not`, `cond`,
   -- `min_height`, ...) errors so the model can never silently disagree with noice -- extend
   -- it when a route needs one.
-  local modelled = { event = true, kind = true, find = true, any = true }
+  local modelled = { event = true, kind = true, find = true, any = true, min_height = true }
   local matches
   function matches(filter, msg)
     for k in pairs(filter) do
@@ -30,6 +30,9 @@ return function(H)
       return false
     end
     if filter.find and not msg.text:find(filter.find) then
+      return false
+    end
+    if filter.min_height and (msg.height or 1) < filter.min_height then
       return false
     end
     if filter.any then
@@ -80,6 +83,22 @@ return function(H)
     route({ event = "msg_show", kind = "", text = "file written" }),
     "mini",
     "an `any` route is modelled (msg_show 'written' -> mini)"
+  )
+
+  eq(
+    route({ event = "msg_show", kind = "", text = "long output", height = 25 }),
+    "split",
+    "a msg_show of 20+ lines goes to the split (min_height route in front of the catch-all)"
+  )
+  eq(
+    route({ event = "msg_show", kind = "", text = "short output", height = 3 }),
+    "mini",
+    "a short msg_show still goes to the catch-all mini view"
+  )
+  eq(
+    route({ event = "lsp", kind = "hover", text = "docs" }),
+    nil,
+    "the view-less hover skip route is gone (hover is shown by hover.nvim)"
   )
 
   -- The BufReadPost text is still skipped as a message and as a notify ...

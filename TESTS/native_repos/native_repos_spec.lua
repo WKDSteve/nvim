@@ -36,7 +36,7 @@ local function spec(H)
   end
   -- every desktop app: the same three scripts (ai-desktop's build-install.ps1 hands over to setup.ps1, which
   -- configures build/ itself; a bare `cmake --build build` failed on a checkout without it)
-  for _, name in ipairs({ "tasks-desktop", "rules-desktop", "docmap-desktop", "ai-desktop" }) do
+  for _, name in ipairs({ "tasks-desktop", "rules-desktop", "docmap-desktop", "ai-desktop", "streamtap" }) do
     local entry = assert(natives.get(name))
     eq(
       vim.tbl_contains(entry.build, "scripts/build-install.ps1"),
@@ -167,13 +167,20 @@ local function spec(H)
 
   eq(natives.get("nope"), nil, "unknown name")
   eq(vim.tbl_contains(natives.names(), "takt"), true, "takt is listed")
-  -- streamtap (spike): its build script (refuses while the sink runs, touches the exe), no install yet
+  -- streamtap follows the desktop-app convention: build-install.ps1 [-BuildOnly] and uninstall.ps1
   local streamtap = natives.get("streamtap")
   ok(
-    streamtap and streamtap.build and vim.tbl_contains(streamtap.build, "scripts/build.ps1"),
-    "streamtap builds with scripts/build.ps1"
+    streamtap and streamtap.build and vim.tbl_contains(streamtap.build, "-BuildOnly"),
+    "streamtap builds with scripts/build-install.ps1 -BuildOnly"
   )
-  eq(streamtap and streamtap.install, nil, "streamtap has no install command yet")
+  ok(
+    streamtap and streamtap.install and vim.tbl_contains(streamtap.install, "scripts/build-install.ps1"),
+    "streamtap installs with scripts/build-install.ps1"
+  )
+  ok(
+    streamtap and streamtap.uninstall and vim.tbl_contains(streamtap.uninstall, "scripts/uninstall.ps1"),
+    "streamtap uninstalls with scripts/uninstall.ps1"
+  )
 
   -- what a build run covers: only apps with a plain build command are built, the others are named
   local with_build = { repo = "o/a", name = "a", build = { "x" }, hint = "ha" }
