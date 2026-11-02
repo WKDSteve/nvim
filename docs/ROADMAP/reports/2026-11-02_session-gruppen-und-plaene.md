@@ -1,0 +1,1 @@
+E:/repos/tasks-vault/nvim-config/ROADMAP/reports/2026-11-02_session-gruppen-und-plaene.md
