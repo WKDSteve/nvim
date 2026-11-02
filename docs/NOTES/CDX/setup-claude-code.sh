@@ -118,8 +118,8 @@ if [ -z "$HOOK_SRC" ] || [ ! -d "$HOOK_SRC" ]; then
   echo "  Quelle fehlt (${HOOK_SRC:-REPOS_DIR unbekannt}): Repo tasks-vault klonen, dann das Skript erneut ausfuehren."
 else
   mkdir -p "$HOOK_DST"
-  cp "$HOOK_SRC/pre-push" "$HOOK_SRC/commit-msg" "$HOOK_DST/"
-  chmod +x "$HOOK_DST/pre-push" "$HOOK_DST/commit-msg"
+  cp "$HOOK_SRC"/* "$HOOK_DST/"
+  chmod +x "$HOOK_DST"/*
   CURRENT_HOOKS="$(git config --global --get core.hooksPath || true)"
   if [ -z "$CURRENT_HOOKS" ]; then
     git config --global core.hooksPath "$HOOK_DST"

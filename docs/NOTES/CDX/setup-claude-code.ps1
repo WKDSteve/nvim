@@ -175,10 +175,8 @@ if (-not $hookSource -or -not (Test-Path $hookSource)) {
     Write-Host "  Quelle fehlt ($hookSource): Repo tasks-vault klonen, dann das Skript erneut ausfuehren." -ForegroundColor Yellow
 } else {
     New-Item -ItemType Directory -Path $hookTarget -Force | Out-Null
-    foreach ($name in 'pre-push', 'commit-msg') {
-        # Als Bytes kopieren: die Hooks muessen LF-Zeilenenden behalten (sh).
-        Copy-Item (Join-Path $hookSource $name) (Join-Path $hookTarget $name) -Force
-    }
+    # Alle Dateien (pre-push = Guard, die uebrigen reichen an den Hook des Repos weiter); Copy-Item laesst die LF-Zeilenenden (sh).
+    Get-ChildItem $hookSource -File | ForEach-Object { Copy-Item $_.FullName (Join-Path $hookTarget $_.Name) -Force }
     $hooksPath = (git config --global --get core.hooksPath)
     $wanted = $hookTarget.Replace('\', '/')
     if (-not $hooksPath) {
