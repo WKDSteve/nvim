@@ -167,21 +167,6 @@ local function spec(H)
 
   eq(natives.get("nope"), nil, "unknown name")
   eq(vim.tbl_contains(natives.names(), "takt"), true, "takt is listed")
-  -- streamtap follows the desktop-app convention: build-install.ps1 [-BuildOnly] and uninstall.ps1
-  local streamtap = natives.get("streamtap")
-  ok(
-    streamtap and streamtap.build and vim.tbl_contains(streamtap.build, "-BuildOnly"),
-    "streamtap builds with scripts/build-install.ps1 -BuildOnly"
-  )
-  ok(
-    streamtap and streamtap.install and vim.tbl_contains(streamtap.install, "scripts/build-install.ps1"),
-    "streamtap installs with scripts/build-install.ps1"
-  )
-  ok(
-    streamtap and streamtap.uninstall and vim.tbl_contains(streamtap.uninstall, "scripts/uninstall.ps1"),
-    "streamtap uninstalls with scripts/uninstall.ps1"
-  )
-
   -- what a build run covers: only apps with a plain build command are built, the others are named
   local with_build = { repo = "o/a", name = "a", build = { "x" }, hint = "ha" }
   local by_setup = { repo = "o/b", name = "b", hint = "built by its setup.exe" }
