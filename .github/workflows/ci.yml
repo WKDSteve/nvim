@@ -43,3 +43,25 @@ jobs:
       - uses: leafo/gh-actions-luarocks@v4
       - run: luarocks install luacheck 1.2.0
       - run: luacheck lua init.lua after TESTS scripts/tasks.lua scripts/tasks-ci.lua
+
+  specs:
+    name: specs (all but sync/)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      # lib.nvim is a hard dependency of the specs (TESTS/run.lua looks at $LIB_NVIM_DIR first).
+      - uses: actions/checkout@v5
+        with:
+          repository: WKDSteve/lib.nvim
+          path: .deps/lib.nvim
+          ref: ci-verified
+      - uses: rhysd/action-setup-vim@v1
+        with:
+          neovim: true
+          version: stable
+      # `sync/` works on real git repositories and kills real process trees (about 3 of the 3.5
+      # minutes of a full run): it stays a local suite, see TESTS/README.md.
+      - run: nvim -n -i NONE --headless -u NONE -l TESTS/run.lua --skip=sync/
+        env:
+          LIB_NVIM_DIR: ${{ github.workspace }}/.deps/lib.nvim
