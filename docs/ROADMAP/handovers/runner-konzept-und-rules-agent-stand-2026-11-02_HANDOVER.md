@@ -1,0 +1,1 @@
+E:/repos/tasks-vault/ALL/handovers/runner-konzept-und-rules-agent-stand-2026-11-02_HANDOVER.md
