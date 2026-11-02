@@ -73,6 +73,7 @@ Nur für ein Vorhaben aus mehreren Tasks in Etappen mit eigenem Ziel (nicht für
 - Keine Co-Autorenschaft von Claude in den Commits.
 - Am Ende jeder Ausgabe gibst du eine laufende Liste aller Commits des Chats aus mit kurzer Beschreibung + welches Repository. Jedes bekommt einen grünen Haken, wenn das Commit durch einen höheren Reasoning-Faktor als `normal` reviewed wurde. `ultracode`-Agenten oder explizit durch mich auf ultracode gestelltes reasoning bekommt einen Stern als Symbol. Ausgenommen sind Commits, die reine Dokumentationen upgedatet haben - diese bekommen einen grünen Haken auch ohne review. Bereitws reviewed commits - sog. Fix-Committs -  werden normalerweiße nicht nochmals reviewed aßer es ist explizit angegeben.
 - **Review nach Abschluss:** Sind die aktuellen Aufgaben abgeschlossen, reviewst du zu einem guten Zeitpunkt (nicht mitten in der Arbeit, sondern wenn der Stand stimmig ist) jedes Commit des Chats, das nicht reine Doku war, gleich selbst mit hohem Reasoning (`high` oder mehr), damit es einen grünen Haken bekommt. Gefundene Bugs, Security- und Performance-Probleme fixt du direkt (Fix-Commit, mit Test) und führst sie in der Commit-Liste mit; die Fix-Commits werden nicht nochmals reviewed. Nicht nachfragen, ob reviewed werden soll.
+- **Commits prüfen:** Ein Commit wird mit `scripts/test.sh ci commit <sha>` geprüft (eigener Git-Worktree, Vergleich mit dem Parent), nie im Arbeitsbaum, und nie ausgelassen, weil die Suite rot ist; Regel: Abschnitt „Commits prüfen“ der `CLAUDE.md` des Repos.
 
 ## Code-Qualität
 
