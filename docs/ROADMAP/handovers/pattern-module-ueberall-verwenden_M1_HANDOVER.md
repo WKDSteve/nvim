@@ -1,1 +1,0 @@
-E:/repos/tasks-vault/lib.nvim/handovers/pattern-module-ueberall-verwenden_M1_HANDOVER.md
