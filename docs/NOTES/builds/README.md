@@ -33,9 +33,15 @@ Weitere Befehle: `:MyNative list` (Git- und Build-Stand), `:MyNative build [name
 `:MyPlugins runner start` und `runner autostart on` mit einer Fehlermeldung ab, weil CrowdStrike Falcon dort eigene
 unsignierte Programme meldet (ein Runner baut die nativen Apps in seinen CI-Jobs). `list`, `clone`, `pull`,
 `uninstall`, `runner stop|status` und `runner autostart off|status` bleiben erlaubt. Auch die lazy.nvim-`build`-Hooks
-bauen dort nichts Natives: telescope-fzf-native wird nicht gebaut (Telescope lädt dann die `fzf`-Erweiterung nicht),
+bauen dort nichts Natives: nvim-treesitter führt kein `:TSUpdate` aus und installiert beim Start keine Injection-Parser (`:TSUpdate` und `:TSInstall` von Hand gehen), telescope-fzf-native wird nicht gebaut (Telescope lädt dann die `fzf`-Erweiterung nicht),
 mdview.nvim baut dort gar nicht, denn auch `npm run build` (wasm-pack) kompiliert und startet native Build-Skripte
 und lädt `wasm-bindgen.exe`/`wasm-opt.exe`; mdview nimmt dann seine Release-Dateien.
+
+**Fremde Bauwege, die `machine_guard` nicht abdeckt** (kommen aus anderen Paketen, nicht aus dieser Config): Mason
+(lsp.nvim) lädt Language-Server herunter und baut manche über cargo oder go; blink.cmp (lsp.nvim) lädt eine
+vorgebaute Fuzzy-Bibliothek und baut sie sonst mit cargo; winget installiert nur auf Anforderung von
+`:MyNative deps` (dort gesperrt). Auf der Workstation Mason- und blink-Installationen nur bewusst anstoßen und
+auf vorgebaute Dateien achten; der Guard greift hier nicht.
 
 ## Ohne nvim
 

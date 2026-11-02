@@ -48,7 +48,9 @@ plugins.add({
 
     lazy = false,
 
-    build = ":TSUpdate",
+    -- Compiles parsers: left out on the workstation (EDR, see machine_guard). `:TSUpdate` by hand
+    -- stays possible there.
+    build = require("machine_guard").lazy_build(":TSUpdate"),
 
     -- Was pinned to main@f873ec29 (2026-04-01) because the next commit,
     -- c82bf96f ("feat!: drop support for Nvim 0.11"), rewrote
@@ -89,8 +91,16 @@ plugins.add({
           end, INJECTION_PARSERS)
 
           if #missing > 0 and type(ts.install) == "function" then
-            notify.info("Installing missing injection parsers: " .. table.concat(missing, ", "))
-            pcall(ts.install, missing)
+            if require("machine_guard").active() then
+              -- A silent compile at startup is what the workstation's EDR reports.
+              notify.info(
+                "Missing injection parsers (run :TSInstall by hand): "
+                  .. table.concat(missing, ", ")
+              )
+            else
+              notify.info("Installing missing injection parsers: " .. table.concat(missing, ", "))
+              pcall(ts.install, missing)
+            end
           end
         end
       end

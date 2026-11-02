@@ -194,6 +194,9 @@ return function(H)
     -- scripts and proc-macro DLLs, and which fetches and runs wasm-bindgen.exe and wasm-opt.exe
     eq(mdview.build, false, "mdview builds nothing on the workstation")
 
+    local tsp = assert(lazy_spec("lua/plugins/treesitter.lua", "nvim-treesitter/nvim-treesitter"))
+    eq(tsp.build, false, "nvim-treesitter runs no :TSUpdate build hook on the workstation")
+
     -- uninstall stays allowed: it asks its question as everywhere
     local answer_cb
     dialog.yesno = function(_, _, cb)
@@ -220,6 +223,8 @@ return function(H)
     fzf = assert(lazy_spec("lua/plugins/telescope.lua", "nvim-telescope/telescope-fzf-native.nvim"))
     ok(type(fzf.build) == "string" and fzf.build ~= "", "fzf-native is compiled elsewhere")
     eq(telescope_extensions(), { "fzf" }, "...and loaded")
+    tsp = assert(lazy_spec("lua/plugins/treesitter.lua", "nvim-treesitter/nvim-treesitter"))
+    eq(tsp.build, ":TSUpdate", "nvim-treesitter keeps its :TSUpdate hook elsewhere")
     mdview = assert(lazy_spec("lua/plugins/personal/specs/view.lua", "WKDSteve/mdview.nvim"))
     eq(
       mdview.build,
