@@ -121,7 +121,7 @@ require("lazy").setup({
 -- did nothing.
 local startup = require("startup")
 -- Event-loop heartbeat for the first seconds (stalls, busy share), shown by
--- :StartupReport; stops itself. Off: vim.g.startup_heartbeat = false.
+-- :StartupReport; stops itself. Off: vim.g.startup_heartbeat = false or 0.
 require("startup.heartbeat").start()
 startup.setup_usercmds()
 require("bindings.usrcmds.plugin_repos").enable()

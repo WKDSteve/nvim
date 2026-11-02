@@ -32,6 +32,9 @@ return {
   -- mapping helpers rather than hand-rolled closures.
   {
     "hrsh7th/nvim-cmp",
+    -- optional: without lsp.nvim's main spec for nvim-cmp (blink is the default) this fragment must
+    -- not make lazy install nvim-cmp as an orphan.
+    optional = true,
     opts = function(_, opts)
       opts.sources = opts.sources or {}
 

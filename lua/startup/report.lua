@@ -71,7 +71,7 @@ function M.heartbeat_lines(stats, state)
 
   if not state.started then
     add(
-      "  Event loop: not recorded (vim.g.startup_heartbeat = false, or start() not called).",
+      "  Event loop: not recorded (vim.g.startup_heartbeat = false or 0, or start() not called).",
       "StartupMuted"
     )
     add("  Stalls with their owners: scripts/startup-probe (PROBE=stall,where)", "StartupMuted")

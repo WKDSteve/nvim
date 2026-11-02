@@ -108,6 +108,12 @@ return function(H)
     ok(not hb.start(), "switched off with 0: start() does nothing")
     ok(not hb.state.started, "switched off with 0: not marked as started")
 
+    -- A string '0' (`let g:startup_heartbeat = '0'`) is falsy in Vimscript and switches it off too.
+    vim.g.startup_heartbeat = "0"
+    hb = fresh()
+    ok(not hb.start(), "switched off with '0': start() does nothing")
+    ok(not hb.state.started, "switched off with '0': not marked as started")
+
     vim.g.startup_heartbeat = nil
     hb = fresh()
     local timers_before = live_timers()
