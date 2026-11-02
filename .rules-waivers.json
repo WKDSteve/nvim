@@ -7,7 +7,7 @@
   "NEW-13": "Plugin-repo shape rule (doc/<name>.txt for `:h <name>`). A configuration is not required from a runtimepath entry a user looks up in vimdoc; its documentation is docs/.",
   "NEW-27": "Same check as LUA-80 (config/init.lua + config/DEFAULTS.lua) and waived for the same reason.",
   "NEW-45": "Satisfied by the dot-prefixed variant: .stylua.toml is present at the repo root, with line_endings = \"Unix\" matching .gitattributes' eol=lf. stylua and the CI stylua-action both read .stylua.toml; the rule's file_exists check only knows the undotted spelling.",
-  "NEW-49": "This repo has no test suite (no TESTS/, no *_spec.lua), so no busted globals reach luacheck. The busted names are already declared in .luarc.json for the editor-side LuaLS run.",
+  "NEW-49": "NEW-49 targets busted globals (describe/it/...) in luacheck. The specs under TESTS/ use no such globals: TESTS/run.lua passes the harness table H to every spec. The busted names are only declared in .luarc.json for the editor-side LuaLS run.",
   "UI-62": "Plugin-repo shape rule (lua/<modul>/health.lua). Same reason as NEW-10.",
   "REL-05": "Release gate for a published plugin (doc/<name>.txt). This repo is never released as a plugin.",
   "REL-16": "Release gate for a published plugin (lua/<name>/health.lua). Same reason as NEW-10."
