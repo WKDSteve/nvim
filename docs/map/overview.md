@@ -932,7 +932,7 @@ flowchart LR
 | warn | `placeholder-readme-link` | docs/ROADMAP/IDEAS/IDEAS/blueprint.nvim.md links to '$RULES_VAULT/rulesets/lua/archiv/Zentrale-Prinzipien.md', which starts with the placeholder $RULES_VAULT: no Markdown viewer expands it |
 | warn | `placeholder-readme-link` | docs/ROADMAP/IDEAS/IDEAS/blueprint.nvim.md links to '$RULES_VAULT/rulesets/lua/archiv/Checklist.md', which starts with the placeholder $RULES_VAULT: no Markdown viewer expands it |
 | warn | `placeholder-readme-link` | docs/ROADMAP/IDEAS/IDEAS/blueprint.nvim.md links to '$RULES_VAULT/rulesets/lua/archiv/Arch&Coding-Regeln.md', which starts with the placeholder $RULES_VAULT: no Markdown viewer expands it |
-| warn | `require-not-declared` | requires "config.blink_path_guard" (line 175), which no file in this tree declares |
+| warn | `require-not-declared` | requires "config.blink_path_guard" (line 178), which no file in this tree declares |
 | warn | `require-not-declared` | requires "config.neotree.job_handle_close" (line 73), which no file in this tree declares |
 | warn | `test-references-missing` | TESTS/native_repos/workstation_spec.lua:49 references 'runner._terminal', but bindings.usrcmds.plugin_repos.runner has no '_terminal' |
 | warn | `test-references-missing` | TESTS/plugin_repos/runner_spec.lua:135 references 'runner._terminal', but bindings.usrcmds.plugin_repos.runner has no '_terminal' |
