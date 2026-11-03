@@ -55,7 +55,7 @@ if ($present) {
     Write-Host "  $device steht bereits in der Registry."
 } else {
     # LF only: ssh-keygen reads the registry, a CR would end up in the line
-    $line = "$email,$device namespaces=`"git`" $($parts[0]) $($parts[1]) $device`n"
+    $line = "$device,$email namespaces=`"git`" $($parts[0]) $($parts[1]) $device`n"
     [IO.File]::AppendAllText($signers, $line, [Text.UTF8Encoding]::new($false))
     Write-Host "  $device in die Registry eingetragen: $signers" -ForegroundColor Yellow
     Write-Host "  -> nvim-Config committen und pushen; auf dem Runner-Rechner pullen." -ForegroundColor Yellow

@@ -33,7 +33,7 @@ EMAIL="$(git config --global user.email || echo unknown)"
 if [ -f "$SIGNERS" ] && grep -qF "$KBLOB" "$SIGNERS"; then
   echo "  $DEVICE steht bereits in der Registry."
 else
-  printf '%s,%s namespaces="git" %s %s %s\n' "$EMAIL" "$DEVICE" "$KTYPE" "$KBLOB" "$DEVICE" >> "$SIGNERS"
+  printf '%s,%s namespaces="git" %s %s %s\n' "$DEVICE" "$EMAIL" "$KTYPE" "$KBLOB" "$DEVICE" >> "$SIGNERS"
   echo "  $DEVICE in die Registry eingetragen: $SIGNERS"
   echo "  -> nvim-Config committen und pushen; auf dem Runner-Rechner pullen."
 fi
