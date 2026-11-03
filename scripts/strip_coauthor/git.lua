@@ -525,6 +525,12 @@ end
 ---Force-push the rewritten branches. `--force-with-lease` carries the exact
 ---remote tip this ran against, so a branch someone else advanced in the
 ---meantime is rejected rather than overwritten.
+---
+---The global pre-push guard (tasks-vault TOOLS/history-rewrite-runbook.md)
+---refuses a push that drops remote commits, which a rewrite does on purpose.
+---This never switches the guard off itself: started with ALLOW_FORCE_PUSH=1
+---(the person meant the rewrite), git inherits it; without it the refusal is
+---reported with that way out.
 ---@param dir string
 ---@param pending StripCoauthor.Pending[]
 ---@return StripCoauthor.PushResult[]
@@ -536,11 +542,12 @@ function M.push(dir, pending)
     if code == 0 then
       out[#out + 1] = { branch = item.branch, status = "pushed" }
     else
-      out[#out + 1] = {
-        branch = item.branch,
-        status = "failed",
-        detail = vim.split(err, "\n", { trimempty = true })[1],
-      }
+      local detail = vim.split(err, "\n", { trimempty = true })[1]
+      if err:find("ALLOW_FORCE_PUSH", 1, true) then
+        detail = "refused by the pre-push guard: a rewrite drops the old commits on purpose;"
+          .. " run again with ALLOW_FORCE_PUSH=1 (history-rewrite-runbook.md)"
+      end
+      out[#out + 1] = { branch = item.branch, status = "failed", detail = detail }
     end
   end
   return out

@@ -146,6 +146,10 @@ return function(H)
   git(bare, { "init", "-q", "--bare", "-b", "main" })
   local work = H.tmpdir()
   git(work, { "init", "-q", "-b", "main" })
+  -- The machine's global pre-push guard would refuse the rewrite (that is its job); this throwaway
+  -- repository gets a hooks folder of its own, so the spec does not depend on the machine.
+  local no_hooks = H.tmpdir()
+  git(work, { "config", "core.hooksPath", no_hooks })
   git(work, { "remote", "add", "origin", bare })
   commit(work, "a", "root", "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>")
   commit(work, "b", "second")
@@ -173,6 +177,22 @@ return function(H)
   eq(#pending, 1, "main is pending")
   local pending_tags = gitx.pending_tags(work)
   eq(#pending_tags, 2, "both moved tags are pending")
+
+  -- A guard like the global one refuses: the result names the way out, nothing is pushed.
+  local guard_hooks = H.tmpdir()
+  H.write(
+    guard_hooks .. "/pre-push",
+    "#!/bin/sh\necho 'pre-push: this would drop commits. Pull/rebase first, or ALLOW_FORCE_PUSH=1.' >&2\nexit 1\n"
+  )
+  git(work, { "config", "core.hooksPath", guard_hooks })
+  local refused = gitx.push(work, pending)
+  eq(refused[1].status, "failed", "a push the guard refuses fails")
+  ok(
+    tostring(refused[1].detail):find("run again with ALLOW_FORCE_PUSH=1", 1, true) ~= nil,
+    "... and says how to mean it: " .. tostring(refused[1].detail)
+  )
+  eq(#gitx.pending_push(work), 1, "... and main is still pending")
+  git(work, { "config", "core.hooksPath", no_hooks })
 
   for _, r in ipairs(gitx.push(work, pending)) do
     eq(r.status, "pushed", "branch pushed: " .. tostring(r.detail))
@@ -203,6 +223,8 @@ return function(H)
     "#!/bin/sh\necho x >> '" .. counter .. "'\ncat > /dev/null\n"
   )
   vim.uv.fs_chmod(bare4 .. "/hooks/pre-receive", 493)
+  -- a global core.hooksPath (the machine's guard folder) would hide the remote's own hooks folder
+  git(bare4, { "config", "core.hooksPath", bare4 .. "/hooks" })
   local function pushes()
     local lines = vim.fn.filereadable(counter) == 1 and vim.fn.readfile(counter) or {}
     return #lines
