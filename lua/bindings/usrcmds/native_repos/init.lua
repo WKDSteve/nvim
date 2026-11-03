@@ -1,7 +1,7 @@
 ---@module 'bindings.usrcmds.native_repos'
 ---@brief `:MyNative {list|clone|pull|deps|build|install|uninstall} [name]` - the native apps next to the plugin checkouts.
 ---@description
---- Sister of `:MyPlugins` for the native apps (tasks-desktop, rules-desktop, ai-desktop, takt, docmap-desktop, appkit;
+--- Sister of `:MyPlugins` for the native apps (tasks-desktop, rules-desktop, ai-desktop, takt, pult, docmap-desktop, appkit;
 --- the list is `plugins.personal.core.natives`). They are no lazy specs, so `:MyPlugins` never sees them.
 ---
 ---  - `list`           per app: cloned or not, git state, and whether the build is current (artifact older than the

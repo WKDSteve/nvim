@@ -36,7 +36,14 @@ local function spec(H)
   end
   -- every desktop app: the same three scripts (ai-desktop's build-install.ps1 hands over to setup.ps1, which
   -- configures build/ itself; a bare `cmake --build build` failed on a checkout without it)
-  for _, name in ipairs({ "tasks-desktop", "rules-desktop", "docmap-desktop", "ai-desktop" }) do
+  for _, name in ipairs({
+    "tasks-desktop",
+    "rules-desktop",
+    "docmap-desktop",
+    "ai-desktop",
+    "takt",
+    "pult",
+  }) do
     local entry = assert(natives.get(name))
     eq(
       vim.tbl_contains(entry.build, "scripts/build-install.ps1"),

@@ -67,11 +67,22 @@ M.list = {
     sources = { "src", "CMakeLists.txt" },
     needs = { "cmake", "mingw64" },
   }),
-  {
+  -- phase 0: a headless player (NullBackend unless TAKT_LIBMPV_DIR / FFMPEG_DIR are set, docs/BUILD.md)
+  desktop({
     repo = "WKDSteve/takt",
     name = "takt",
-    hint = "nothing to build yet (the repo is still a skeleton)",
-  },
+    artifact = "target/release/takt-player.exe",
+    sources = { "apps", "crates", "Cargo.toml", "Cargo.lock" },
+    needs = { "rust", "msvc" },
+  }),
+  -- two programs: pult.exe (command line) and pult-app.exe (the window, Start menu entry "pult")
+  desktop({
+    repo = "WKDSteve/pult",
+    name = "pult",
+    artifact = "target/release/pult-app.exe",
+    sources = { "crates", "Cargo.toml", "Cargo.lock" },
+    needs = { "rust", "msvc" },
+  }),
   -- spike stage: only the sink CLI is built; no installer yet, the extension is loaded unpacked from extension/
   {
     repo = "WKDSteve/streamtap",

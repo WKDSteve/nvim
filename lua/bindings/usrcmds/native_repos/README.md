@@ -2,7 +2,7 @@
 
 Sister of `:MyPlugins` for the native apps next to the plugin checkouts. The list is
 [`plugins.personal.core.natives`](../../../plugins/personal/core/natives.lua): `tasks-desktop`, `rules-desktop`,
-`ai-desktop`, `takt`, `streamtap`, `docmap-desktop`, `appkit`. They are no lazy specs (built, not loaded), so `:MyPlugins` never sees them.
+`ai-desktop`, `takt`, `pult`, `streamtap`, `docmap-desktop`, `appkit`. They are no lazy specs (built, not loaded), so `:MyPlugins` never sees them.
 
 ```vim
 :MyNative list               " per app: git state, build current / stale / missing
@@ -30,7 +30,9 @@ Sister of `:MyPlugins` for the native apps next to the plugin checkouts. The lis
 - Every desktop app has the same three scripts: `scripts/build-install.ps1 -BuildOnly` is the build,
   `scripts/build-install.ps1` builds and installs, `scripts/uninstall.ps1` removes. ai-desktop's `build-install.ps1`
   hands over to `scripts/setup.ps1`, which configures `build/` when it is not there (a bare `cmake --build build`
-  cannot). `takt` (a skeleton) and `appkit` (a library) have no command and only print their hint. `streamtap`
+  cannot). `takt` builds and installs its headless player (phase 0), `pult` its two programs (`pult.exe`,
+  `pult-app.exe` with a Start menu entry); both name a program that runs from `targetelease` instead of failing in
+  cargo. `appkit` (a library) has no command and only prints its hint. `streamtap`
   (spike stage) builds its sink CLI with `scripts/build.ps1` (refuses while the sink runs, touches the exe so a
   no-op build counts as current) and has no install or uninstall command yet.
 - `deps`: the tools are in [`toolchain.lua`](toolchain.lua), each app names its own (`needs`). Installed for the

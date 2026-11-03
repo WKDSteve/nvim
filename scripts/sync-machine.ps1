@@ -41,7 +41,7 @@ $extra = @(
     'tasks-vault', 'rules-vault', 'WKDBooks', 'WKDBook-Tricentis', 'Configs',
     'my-zsh', 'wkd', 'FightingGame', 'Kurse',
     'tasks-desktop', 'rules-desktop', 'docmap-desktop', 'ai-desktop', 'appkit',
-    'streamtap'
+    'streamtap', 'takt', 'pult'
 )
 
 # Native build artifacts: where the artifact lives, which paths feed it, and
@@ -90,6 +90,18 @@ $natives = @{
         Sources  = @('desktop\crates', 'desktop\Cargo.toml', 'desktop\Cargo.lock')
         Hint     = 'scripts\build.ps1   (cargo release build of the sink; stop a running sink first; spike: no install)'
         Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build.ps1'
+    }
+    'takt' = @{
+        Artifact = 'target\release\takt-player.exe'
+        Sources  = @('apps', 'crates', 'Cargo.toml', 'Cargo.lock')
+        Hint     = 'scripts\build-install.ps1 -BuildOnly   (build and install: without -BuildOnly; tools: :MyNative deps)'
+        Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-install.ps1 -BuildOnly'
+    }
+    'pult' = @{
+        Artifact = 'target\release\pult-app.exe'
+        Sources  = @('crates', 'Cargo.toml', 'Cargo.lock')
+        Hint     = 'scripts\build-install.ps1 -BuildOnly   (build and install: without -BuildOnly; close a pult that runs from target\release first)'
+        Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-install.ps1 -BuildOnly'
     }
 }
 
