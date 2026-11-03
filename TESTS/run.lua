@@ -74,6 +74,7 @@ local specs = {
   "profile/profile_spec.lua",
   "startup/heartbeat_spec.lua",
   "repo_backup/repo_backup_spec.lua",
+  "machine_once/machine_once_spec.lua",
   "cdx/usrcmds_help_spec.lua",
   "cdx/prompt_templates_spec.lua",
   "execute/execute_spec.lua",

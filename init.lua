@@ -305,6 +305,12 @@ startup.on("UIReady", "repo_backup", function()
   require("config.repo_backup").run()
 end)
 
+-- UIReady: setup steps that a machine runs once (lua/machine_once.lua), e.g. commit
+-- signing on BERNHARDPC and the workstation. Async; nothing to do once its marker is there.
+startup.on("UIReady", "machine_once", function()
+  require("machine_once").run()
+end)
+
 -- UIReady: keymaps cannot be pressed before the UI accepts input. This pulls
 -- in ~19 submodules and is the single largest phase body, so keeping it off the
 -- synchronous path is what actually shortens time-to-first-paint.
