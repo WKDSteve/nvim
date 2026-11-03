@@ -190,6 +190,9 @@ if (-not $hookSource -or -not (Test-Path $hookSource)) {
     Write-Host "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
 }
 
+Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
+& (Join-Path $PSScriptRoot 'setup-git-signing.ps1')
+
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
 Write-Host "  Was auf dieser Maschine schon da ist:"
 node (Join-Path $PSScriptRoot 'setup-devtools.js') --status

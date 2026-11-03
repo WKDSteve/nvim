@@ -27,6 +27,8 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `merge-claude-settings.js`   | Gemeinsame Merge-Logik fuer `settings.json`, von beiden Setup-Skripten unten aufgerufen (verhindert, dass Windows- und Unix-Skript bei dieser Logik auseinanderlaufen) |
 | `setup-claude-code.ps1`      | Windows: rollt die Vorlagen oben nach `~/.claude/` aus. Idempotent. |
 | `setup-claude-code.sh`       | Linux/macOS: dasselbe wie oben, plus `~/.claude/env.sh` fuer die Env-Variablen. Idempotent. |
+| `setup-git-signing.ps1/.sh`  | Commit-Signatur dieses Geraets: eigener SSH-Key (`~/.ssh/git-signing_ed25519`), `commit.gpgsign`, Eintrag in `git-allowed-signers`. Von beiden Setup-Skripten aufgerufen, auch allein lauffaehig. Idempotent. |
+| `git-allowed-signers`        | **Geraete-Registry**: je Geraet eine Zeile (`allowed_signers` von ssh-keygen). Der runner-guard von testing.nvim gibt Push-Laeufe oeffentlicher Repos ohne `testing ci trust` frei, wenn alle neuen Commits von einem dieser Keys signiert sind. Geraet raus = Zeile loeschen, committen, auf dem Runner-Rechner pullen. |
 
 ## Funktionsprinzip
 
@@ -118,7 +120,15 @@ Ablauf (beide Skripte, gleiches Prinzip):
    Backup, falls dort schon etwas anderes liegt).
 3. Merged `settings.global.json` in `~/.claude/settings.json` (mit Backup,
    ueber `merge-claude-settings.js`).
-4. Optional: zeigt mit `node setup-devtools.js --status`, was schon
+4. Richtet die Commit-Signatur ein (`setup-git-signing.*`): erzeugt bei Bedarf
+   den Signing-Key, setzt `gpg.format ssh`/`commit.gpgsign true` und traegt
+   das Geraet in `git-allowed-signers` ein. Neuer Eintrag: nvim-Config
+   committen und pushen, auf dem Runner-Rechner (STEVESPC) pullen. Dort setzt
+   es auch `TESTING_ALLOWED_SIGNERS`; nach einer Aenderung des Pfads einmal
+   `testing ci runner-guard install` (macht `runners.ps1 start|ensure` mit).
+   Aus der Claude-App gestartet landet die User-Env-Var nur im App-Container:
+   das Skript selbst in einem normalen Terminal laufen lassen.
+5. Optional: zeigt mit `node setup-devtools.js --status`, was schon
    installiert ist, und fragt nach Toolchain-Profilen (`nvim,cpp,rust,web,tauri`,
    `all` = alle, leer = ueberspringen). Auf der Workstation warnen Skript und
    `setup-devtools.js` vor unsignierten Paketen und fragen immer (auch mit `--yes`).

@@ -133,6 +133,10 @@ else
 fi
 
 echo
+echo "[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
+bash "$SCRIPT_DIR/setup-git-signing.sh"
+
+echo
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"
 echo "  Was auf dieser Maschine schon da ist:"
 node "$SCRIPT_DIR/setup-devtools.js" --status
