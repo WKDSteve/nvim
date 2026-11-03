@@ -134,7 +134,7 @@ fi
 
 echo
 echo "[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
-bash "$SCRIPT_DIR/setup-git-signing.sh"
+bash "$SCRIPT_DIR/setup-git-signing.sh" || echo "  Signatur nicht eingerichtet (siehe oben)."
 
 echo
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"

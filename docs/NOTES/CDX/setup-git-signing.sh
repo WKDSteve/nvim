@@ -11,7 +11,7 @@ DEVICE="$(hostname -s 2>/dev/null || hostname)"
 
 if ! command -v ssh-keygen > /dev/null 2>&1; then
   echo "  ssh-keygen fehlt (OpenSSH-Client): Signatur nicht eingerichtet."
-  exit 0
+  exit 1
 fi
 
 if [ ! -f "$KEY" ]; then

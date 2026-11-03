@@ -23,7 +23,8 @@ $device = $env:COMPUTERNAME
 $keygen = (Get-Command ssh-keygen -ErrorAction SilentlyContinue).Source
 if (-not $keygen) {
     Write-Host "  ssh-keygen fehlt (Windows-Feature 'OpenSSH-Client' oder Git for Windows): Signatur nicht eingerichtet." -ForegroundColor Yellow
-    return
+    # exit 1, not return: machine_once.lua must not mark a step done that set up nothing
+    exit 1
 }
 
 if (-not (Test-Path $keyFile)) {
@@ -34,7 +35,7 @@ if (-not (Test-Path $keyFile)) {
     )
     if (-not (Test-Path "$keyFile.pub")) {
         Write-Host "  Signing-Key konnte nicht erzeugt werden ($keyFile)." -ForegroundColor Yellow
-        return
+        exit 1
     }
     Write-Host "  Signing-Key erzeugt: $keyFile"
 } else {
