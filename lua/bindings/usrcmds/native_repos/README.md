@@ -31,10 +31,11 @@ Sister of `:MyPlugins` for the native apps next to the plugin checkouts. The lis
   `scripts/build-install.ps1` builds and installs, `scripts/uninstall.ps1` removes. ai-desktop's `build-install.ps1`
   hands over to `scripts/setup.ps1`, which configures `build/` when it is not there (a bare `cmake --build build`
   cannot). `takt` builds and installs its headless player (phase 0), `pult` its two programs (`pult.exe`,
-  `pult-app.exe` with a Start menu entry); both name a program that runs from `targetelease` instead of failing in
+  `pult-app.exe` with a Start menu entry); both name a program that runs from `target\release` instead of failing in
   cargo. `appkit` (a library) has no command and only prints its hint. `streamtap`
-  (spike stage) builds its sink CLI with `scripts/build.ps1` (refuses while the sink runs, touches the exe so a
-  no-op build counts as current) and has no install or uninstall command yet.
+  builds with `build-install.ps1 -BuildOnly`, which hands over to `scripts/build.ps1` (sink, host and app; it
+  refuses while one of them runs and touches the exes, so a no-op build counts as current); the install puts the
+  programs and the extension in `%LOCALAPPDATA%\streamtap`.
 - `deps`: the tools are in [`toolchain.lua`](toolchain.lua), each app names its own (`needs`). Installed for the
   current user: rustup (winget), the Tauri CLI (cargo), the MinGW-w64 packages of MSYS2 (pacman). Only named, since
   they need an administrator: Node.js, CMake, the MSVC build tools, MSYS2 itself.

@@ -88,8 +88,8 @@ $natives = @{
     'streamtap' = @{
         Artifact = 'desktop\target\release\streamtap-sink.exe'
         Sources  = @('desktop\crates', 'desktop\Cargo.toml', 'desktop\Cargo.lock')
-        Hint     = 'scripts\build.ps1   (cargo release build of the sink; stop a running sink first; spike: no install)'
-        Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build.ps1'
+        Hint     = 'scripts\build-install.ps1 -BuildOnly   (build and install: without -BuildOnly; stop a running sink, host or app first)'
+        Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-install.ps1 -BuildOnly'
     }
     'takt' = @{
         Artifact = 'target\release\takt-player.exe'

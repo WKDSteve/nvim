@@ -83,17 +83,16 @@ M.list = {
     sources = { "crates", "Cargo.toml", "Cargo.lock" },
     needs = { "rust", "msvc" },
   }),
-  -- spike stage: only the sink CLI is built; no installer yet, the extension is loaded unpacked from extension/
-  {
+  -- build-install.ps1 -BuildOnly hands over to scripts/build.ps1 (sink, host and app; it refuses while one of them
+  -- runs and touches the exes, so a no-op build is current); the install puts programs and extension in
+  -- %LOCALAPPDATA%\streamtap
+  desktop({
     repo = "WKDSteve/streamtap",
     name = "streamtap",
     artifact = "desktop/target/release/streamtap-sink.exe",
     sources = { "desktop/crates", "desktop/Cargo.toml", "desktop/Cargo.lock" },
     needs = { "rust", "msvc" },
-    -- the script refuses while the sink runs (it locks the exe) and touches the exe, so a no-op build is current
-    build = ps("scripts/build.ps1"),
-    hint = "scripts/build.ps1 (cargo release build of the sink; no install yet; extension: load unpacked)",
-  },
+  }),
   desktop({
     repo = "WKDSteve/docmap-desktop",
     name = "docmap-desktop",

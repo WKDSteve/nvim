@@ -43,6 +43,7 @@ local function spec(H)
     "ai-desktop",
     "takt",
     "pult",
+    "streamtap",
   }) do
     local entry = assert(natives.get(name))
     eq(
@@ -174,13 +175,6 @@ local function spec(H)
 
   eq(natives.get("nope"), nil, "unknown name")
   eq(vim.tbl_contains(natives.names(), "takt"), true, "takt is listed")
-  -- streamtap (spike): its build script (refuses while the sink runs, touches the exe), no install yet
-  local streamtap = natives.get("streamtap")
-  ok(
-    streamtap and streamtap.build and vim.tbl_contains(streamtap.build, "scripts/build.ps1"),
-    "streamtap builds with scripts/build.ps1"
-  )
-  eq(streamtap and streamtap.install, nil, "streamtap has no install command yet")
 
   -- what a build run covers: only apps with a plain build command are built, the others are named
   local with_build = { repo = "o/a", name = "a", build = { "x" }, hint = "ha" }
