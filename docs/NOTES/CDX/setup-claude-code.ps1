@@ -190,6 +190,25 @@ if (-not $hookSource -or -not (Test-Path $hookSource)) {
     Write-Host "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
 }
 
+# Der pre-push des Vaults liegt in .git/hooks (nicht versioniert, der globale Hook ruft ihn auf): prueft den gepushten
+# Commit im Snapshot, nicht den geteilten Arbeitsbaum. Auf der Workstation wird testing ci abgelehnt, der Hook wuerde
+# dort jeden Push blockieren.
+Write-Host "`n[git] pre-push-Gate von tasks-vault"
+$vaultRoot = if ($reposDir) { Join-Path $reposDir 'tasks-vault' } else { $null }
+$testingDriver = if ($reposDir) { Join-Path $reposDir 'testing.nvim/scripts/testing.lua' } else { $null }
+if ($isWorkstation) {
+    Write-Host "  Workstation: nicht installiert (dort prueft nur die CI)."
+} elseif (-not $vaultRoot -or -not (Test-Path $vaultRoot) -or -not (Test-Path $testingDriver)) {
+    Write-Host "  tasks-vault oder testing.nvim fehlt unter '$reposDir': klonen, dann das Skript erneut ausfuehren." -ForegroundColor Yellow
+} elseif (-not (Get-Command nvim -ErrorAction SilentlyContinue)) {
+    Write-Host "  nvim nicht auf dem PATH: Hook nicht installiert." -ForegroundColor Yellow
+} else {
+    & nvim -n -i NONE --headless -u NONE -l $testingDriver ci hook install --run=fast --verify=fast --snapshot "--root=$vaultRoot"
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  Hook nicht installiert (Exit $LASTEXITCODE), siehe Ausgabe oben." -ForegroundColor Yellow
+    }
+}
+
 Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
 & (Join-Path $PSScriptRoot 'setup-git-signing.ps1')
 
