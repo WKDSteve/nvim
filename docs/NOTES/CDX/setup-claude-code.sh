@@ -167,6 +167,11 @@ else
   echo "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
 fi
 
+# merge=ours in .gitattributes (generated docs/map): git knows the driver only when it is configured per machine.
+# Without it, pull --rebase --autostash conflicts as soon as a session has regenerated the map.
+git config --global merge.ours.driver true
+echo "  merge.ours.driver gesetzt."
+
 # The pre-push of the vault lives in .git/hooks (not versioned, the global hook calls it): it checks the pushed commit
 # on a snapshot, not the shared working tree. testing ci is refused on the workstation, the hook would block every push
 # there. Same step as in setup-claude-code.ps1. A failure here only warns, under `set -e` too.

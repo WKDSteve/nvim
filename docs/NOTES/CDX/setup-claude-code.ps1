@@ -190,6 +190,11 @@ if (-not $hookSource -or -not (Test-Path $hookSource)) {
     Write-Host "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
 }
 
+# merge=ours in .gitattributes (generierte docs/map): Git kennt den Treiber nur, wenn er pro Rechner konfiguriert ist.
+# Ohne ihn bleibt es beim Konflikt in pull --rebase --autostash, sobald eine Sitzung die Karte neu erzeugt hat.
+git config --global merge.ours.driver true
+Write-Host "  merge.ours.driver gesetzt."
+
 # Der pre-push des Vaults liegt in .git/hooks (nicht versioniert, der globale Hook ruft ihn auf): prueft den gepushten
 # Commit im Snapshot, nicht den geteilten Arbeitsbaum. Auf der Workstation wird testing ci abgelehnt, der Hook wuerde
 # dort jeden Push blockieren.
