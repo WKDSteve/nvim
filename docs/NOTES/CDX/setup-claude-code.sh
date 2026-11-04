@@ -41,13 +41,48 @@ else
   echo "  REPOS_DIR bereits gesetzt: $REPOS_DIR_VALUE"
 fi
 
+# A variable the setup keeps once it is set: this shell first, then the env file of the last run.
+known_value() {
+  local value="${!1:-}"
+  if [ -z "$value" ] && [ -f "$ENV_FILE" ]; then
+    value="$(sed -n "s/^export $1=\"\(.*\)\"$/\1/p" "$ENV_FILE" | tail -1)"
+  fi
+  printf '%s' "$value"
+}
+
+# TESTING_TRUST_ROOTS: testing.nvim runs a project's .testing.lua only once it is trusted. Without it local runs end
+# with exit 2, and so does the pre-push gate of tasks-vault below, for every push. A list that is set stays.
+TRUST_ROOTS_VALUE="$(known_value TESTING_TRUST_ROOTS)"
+TRUST_ROOTS_VALUE="${TRUST_ROOTS_VALUE:-$REPOS_DIR_VALUE}"
+
+# RULES_VAULT, TASKS_VAULT: roots of the repos of the same name, as in setup-claude-code.ps1.
+RULES_VAULT_VALUE="$(known_value RULES_VAULT)"
+if [ -z "$RULES_VAULT_VALUE" ] && [ -d "$REPOS_DIR_VALUE/rules-vault" ]; then
+  RULES_VAULT_VALUE="$REPOS_DIR_VALUE/rules-vault"
+fi
+TASKS_VAULT_VALUE="$(known_value TASKS_VAULT)"
+if [ -z "$TASKS_VAULT_VALUE" ] && [ -d "$REPOS_DIR_VALUE/tasks-vault" ]; then
+  TASKS_VAULT_VALUE="$REPOS_DIR_VALUE/tasks-vault"
+fi
+
 cat > "$ENV_FILE" <<EOF
 # Generiert von setup-claude-code.sh - nicht von Hand editieren.
 export NVIM_CONFIG_DIR="$NVIM_CONFIG_DIR"
 # Alter Name, fuer aeltere Skripte/Notizen weiter gesetzt.
 export NVIM_CONFIG="$NVIM_CONFIG_DIR"
 export REPOS_DIR="$REPOS_DIR_VALUE"
+export TESTING_TRUST_ROOTS="$TRUST_ROOTS_VALUE"
 EOF
+if [ -n "$RULES_VAULT_VALUE" ]; then
+  echo "export RULES_VAULT=\"$RULES_VAULT_VALUE\"" >> "$ENV_FILE"
+else
+  echo "  RULES_VAULT nicht gesetzt und $REPOS_DIR_VALUE/rules-vault fehlt: Repo rules-vault klonen, dann das Skript erneut ausfuehren."
+fi
+if [ -n "$TASKS_VAULT_VALUE" ]; then
+  echo "export TASKS_VAULT=\"$TASKS_VAULT_VALUE\"" >> "$ENV_FILE"
+else
+  echo "  TASKS_VAULT nicht gesetzt und $REPOS_DIR_VALUE/tasks-vault fehlt: Repo tasks-vault klonen, dann das Skript erneut ausfuehren."
+fi
 echo "  $ENV_FILE geschrieben."
 
 # NVIM_MACHINE_ROLE (workstation | nicht gesetzt = privater Rechner) wird hier nicht gesetzt, nur angezeigt:
