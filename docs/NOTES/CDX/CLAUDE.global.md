@@ -74,6 +74,8 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   `USERDOMAIN` ist `AzureAD` oder der Rechnername (`COMPUTERNAME`) beginnt mit
   `TRI-`: unklar, nachfragen, bevor etwas gebaut oder gestartet wird (die App
   kennt eine neu gesetzte Variable erst nach einem Neustart).
+- Der Git-User `lavalue` (`bartl.stefan@pm.me`) bin ich auf der Workstation, bewusst
+  anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
 - Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
   Messungen auf der Workstation); `not-on-workstation` = nie dort (native
   Programme bauen/installieren/starten, Runner, Tests und Builds der nativen
