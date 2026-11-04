@@ -27,10 +27,16 @@ $line = "$variable=300"
 # `pwsh -File` hands a list over as one string with commas.
 foreach ($n in @($Name | ForEach-Object { $_ -split ',' })) {
   $path = Join-Path (Join-Path $Root $n) '.env'
-  $lines = if (Test-Path $path) { @(Get-Content $path) } else { @() }
-  if (@($lines | Where-Object { $_ -like "$variable=*" }).Count -gt 0) { continue }
-  # No byte order mark: the runner splits each line at '=', and a mark would become part of the first name.
-  $text = ((@($lines) + $line) -join "`n") + "`n"
-  [System.IO.File]::WriteAllText($path, $text, [System.Text.UTF8Encoding]::new($false))
-  Write-Output "$n now waits 300 s for its worker (a running runner reads .env after stop and start)"
+  # One .env that cannot be written costs that runner the longer wait, not the start of the others.
+  try {
+    $lines = if (Test-Path $path) { @(Get-Content $path) } else { @() }
+    if (@($lines | Where-Object { $_ -like "$variable=*" }).Count -gt 0) { continue }
+    # No byte order mark: the runner splits each line at '=', and a mark would become part of the first name.
+    $text = ((@($lines) + $line) -join "`n") + "`n"
+    [System.IO.File]::WriteAllText($path, $text, [System.Text.UTF8Encoding]::new($false))
+    Write-Output "$n now waits 300 s for its worker (a running runner reads .env after stop and start)"
+  }
+  catch {
+    Write-Output "warning: $n keeps the 30 s wait for its worker: $($_.Exception.Message)"
+  }
 }
