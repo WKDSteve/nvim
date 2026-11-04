@@ -17,7 +17,8 @@
             start and ensure also write the job-started hook that keeps foreign code off the runner (pull requests,
             foreign actors, unreviewed commits of public repositories; testing.nvim docs/RUNNER-GUARD.md); -NoGuard
             leaves that out, `testing ci trust <owner/repo>` releases a commit after you reviewed it
-    stop    stop the runner processes (a running job is cancelled)
+            start and ensure also give each runner the longer wait for its worker (scripts/runner_env.ps1)
+    stop   stop the runner processes (a running job is cancelled)
     check   are the tools the workflows rely on here (git, gh, nvim, cargo, jq, shellcheck, Inno Setup, ...)? One
             line per tool, exit 1 when one is missing; also finds a ~/.cargo/bin whose programs vanished
             (scripts/runner_tools_check.ps1; takes no repo names)
@@ -125,6 +126,8 @@ switch ($Action) {
         $problems | ForEach-Object { Write-Output "  $_" }
       }
     }
+    # On a busy machine a worker misses the 30 s of its hand-over and the job is lost before its first step.
+    & (Join-Path $PSScriptRoot 'runner_env.ps1') -Root $Root -Name $names
     # Foreign code must not reach the runner: the job-started hook (testing.nvim, docs/RUNNER-GUARD.md) refuses pull
     # requests, foreign actors and unreviewed commits of public repositories. It lives in each runner's .env, which
     # the runner reads at its start, so this is the moment to (re)write it. Idempotent; -NoGuard leaves it out
