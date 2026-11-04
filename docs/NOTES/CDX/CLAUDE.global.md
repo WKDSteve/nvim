@@ -101,6 +101,8 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   ablegen.
 - `$REPOS_DIR/tasks-vault/HEREDOC.md` beachten:
   keine großen/escape-haltigen Literale durch die Shell jagen.
+- Tasks im tasks-vault nur mit `tasks done` abschließen, nie `status: done` von
+  Hand; `<area>/ROADMAP/TASKS.md` gehört in denselben Commit.
 
 ## Docs/README-Pflege
 
