@@ -184,6 +184,8 @@ return function(H)
     guard_hooks .. "/pre-push",
     "#!/bin/sh\necho 'pre-push: this would drop commits. Pull/rebase first, or ALLOW_FORCE_PUSH=1.' >&2\nexit 1\n"
   )
+  -- git ignores a hook without the executable bit on Linux and macOS: the push would simply go through
+  vim.uv.fs_chmod(guard_hooks .. "/pre-push", 493)
   git(work, { "config", "core.hooksPath", guard_hooks })
   local refused = gitx.push(work, pending)
   eq(refused[1].status, "failed", "a push the guard refuses fails")
