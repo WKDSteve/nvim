@@ -132,6 +132,23 @@ else
   echo "  Hinweis: History-Rewrites brauchen ALLOW_FORCE_PUSH=1 (TOOLS/history-rewrite-runbook.md)."
 fi
 
+# The pre-push of the vault lives in .git/hooks (not versioned, the global hook calls it): it checks the pushed commit
+# on a snapshot, not the shared working tree. testing ci is refused on the workstation, the hook would block every push
+# there. Same step as in setup-claude-code.ps1. A failure here only warns, under `set -e` too.
+echo
+echo "[git] pre-push-Gate von tasks-vault"
+VAULT_ROOT="${REPOS_DIR_VALUE:+$REPOS_DIR_VALUE/tasks-vault}"
+TESTING_DRIVER="${REPOS_DIR_VALUE:+$REPOS_DIR_VALUE/testing.nvim/scripts/testing.lua}"
+if [ "$MACHINE_ROLE" = "workstation" ]; then
+  echo "  Workstation: nicht installiert (dort prueft nur die CI)."
+elif [ -z "$VAULT_ROOT" ] || [ ! -d "$VAULT_ROOT" ] || [ ! -f "$TESTING_DRIVER" ]; then
+  echo "  tasks-vault oder testing.nvim fehlt unter '$REPOS_DIR_VALUE': klonen, dann das Skript erneut ausfuehren."
+elif ! command -v nvim > /dev/null 2>&1; then
+  echo "  nvim nicht auf dem PATH: Hook nicht installiert."
+elif ! nvim -n -i NONE --headless -u NONE -l "$TESTING_DRIVER" ci hook install --run=fast --verify=fast --snapshot "--root=$VAULT_ROOT"; then
+  echo "  Hook nicht installiert, siehe Ausgabe oben."
+fi
+
 echo
 echo "[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
 bash "$SCRIPT_DIR/setup-git-signing.sh" || echo "  Signatur nicht eingerichtet (siehe oben)."
