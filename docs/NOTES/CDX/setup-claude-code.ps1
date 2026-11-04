@@ -209,6 +209,40 @@ if ($isWorkstation) {
     }
 }
 
+# WKDBook-Tricentis und tricentis-vault werden nur von Hand gepusht (Kundendaten, Arbeitsaufgaben): der pre-push fragt
+# nach (Terminal oder Neovim) und weist jeden unbestaetigten Push ab - Claude, Agenten, Plugin-Jobs, GUI-Clients.
+# Auf jeder Maschine, auch der Workstation. Ein fremder pre-push bleibt, wie er ist (install.sh meldet ihn).
+Write-Host "`n[git] pre-push nur von Hand: WKDBook-Tricentis, tricentis-vault"
+$manualPushRepos = @()
+if ($reposDir) {
+    foreach ($name in @('WKDBook-Tricentis', 'tricentis-vault')) {
+        $path = Join-Path $reposDir $name
+        if (Test-Path (Join-Path $path '.git')) { $manualPushRepos += $path.Replace('\', '/') }
+        else { Write-Host "  $name fehlt unter '$reposDir': uebersprungen." }
+    }
+}
+# Der bash von Git for Windows, nicht der aus WindowsApps (WSL): der kennt keine Windows-Pfade wie C:/repos.
+$bash = $null
+if (Get-Command git -ErrorAction SilentlyContinue) {
+    $candidate = Join-Path (Split-Path (Split-Path (Get-Command git).Source)) 'bin/bash.exe'
+    if (Test-Path $candidate) { $bash = $candidate }
+}
+if (-not $bash) {
+    $found = (Get-Command bash -ErrorAction SilentlyContinue).Source
+    if ($found -and $found -notmatch 'WindowsApps') { $bash = $found }
+}
+$installSh = (Join-Path $PSScriptRoot '../../../scripts/git-hooks/install.sh').Replace('\', '/')
+if ($manualPushRepos.Count -eq 0) {
+    Write-Host "  Keines der beiden Repos vorhanden: nichts installiert."
+} elseif (-not $bash) {
+    Write-Host "  bash nicht gefunden (Git for Windows): Hook nicht installiert." -ForegroundColor Yellow
+} else {
+    & $bash $installSh --manual-push-only @manualPushRepos
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "  Nicht ueberall installiert (Exit $LASTEXITCODE), siehe Ausgabe oben." -ForegroundColor Yellow
+    }
+}
+
 Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
 & (Join-Path $PSScriptRoot 'setup-git-signing.ps1')
 

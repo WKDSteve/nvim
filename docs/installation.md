@@ -124,11 +124,29 @@ bleiben). Hooks liegen in `.git/hooks` und werden nicht mitgepusht, deshalb gilt
 nach dem Klonen/Einrichten einmal** ausführen:
 
 ```sh
-bash scripts/git-hooks/install.sh <repo> [<repo> ...]          # beide Hooks
-bash scripts/git-hooks/install.sh --commit-msg-only <repo> ...  # nur commit-msg
+bash scripts/git-hooks/install.sh <repo> [<repo> ...]           # beide Hooks
+bash scripts/git-hooks/install.sh --commit-msg-only <repo> ...   # nur commit-msg
+bash scripts/git-hooks/install.sh --manual-push-only <repo> ...  # nur pre-push "nur von Hand"
 ```
 
 Die Hooks sind Einzeiler, die das Skript aus diesem Checkout aufrufen (spätere Änderungen brauchen keine
 Neuinstallation). Ein fremder Hook gleichen Namens wird nie überschrieben, sondern gemeldet. Es wird
-kein globales `core.hooksPath` gesetzt. Tests: `bash scripts/git-hooks/test-commit-msg-no-claude-trailer.sh`
-und `bash scripts/git-hooks/test-large-files.sh`. Bereits bestehende Historie wird nicht verändert.
+kein globales `core.hooksPath` gesetzt. Tests: `bash scripts/git-hooks/test-commit-msg-no-claude-trailer.sh`,
+`bash scripts/git-hooks/test-large-files.sh` und `bash scripts/git-hooks/test-pre-push-manual-only.sh`.
+Bereits bestehende Historie wird nicht verändert.
+
+### Repos, die nur von Hand gepusht werden
+
+`WKDBook-Tricentis` und `tricentis-vault` (Kundendaten, Arbeitsaufgaben) bekommen den pre-push
+`pre-push-manual-only.sh`; `docs/NOTES/CDX/setup-claude-code.ps1` installiert ihn auf jeder Maschine. Committen
+bleibt frei, ein Push braucht eine Bestätigung (Vorgabe: Nein):
+
+- **Im Neovim-Terminal** (oder lazygit in Neovim) fragt der Hook per Dialog (`nvim-ask` aus lib.nvim). `git push`
+  ist dort der normale Weg.
+- **Unter Linux/macOS** fragt er im Terminal.
+- **Ohne jemanden, der antworten kann**, wird der Push abgewiesen: Claude, Agenten, Plugin-Jobs, GUI-Clients und auch
+  ein normales PowerShell-Fenster (Git for Windows startet Hooks ohne `/dev/tty`). Von dort pusht man bewusst mit
+  `git push --no-verify`.
+
+`scripts/sync-machine.ps1` meldet in diesen beiden Repos daher öfter „ungepusht“: Das ist die Erinnerung, von Hand
+zu pushen.

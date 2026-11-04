@@ -1,20 +1,27 @@
 #!/usr/bin/env bash
 # install.sh -- install the git hooks of this directory into one or more repos.
 #
-#   bash scripts/git-hooks/install.sh [--commit-msg-only] <repo> [<repo> ...]
+#   bash scripts/git-hooks/install.sh [--commit-msg-only|--manual-push-only] <repo> [<repo> ...]
 #
 # Installs two hooks, each as a one-liner that calls the script from this checkout
 # (later changes to the scripts need no reinstall):
 #   pre-commit  -> pre-commit-large-files.sh        (marker: large-files-hook)
 #   commit-msg  -> commit-msg-no-claude-trailer.sh  (marker: no-claude-trailer-hook)
-# --commit-msg-only installs just the commit-msg hook. An existing hook that is not
-# ours is left alone (reported, exit 1).
+# --commit-msg-only installs just the commit-msg hook.
+# --manual-push-only installs just the pre-push hook of repos that are pushed only by
+# hand, after a confirmation (WKDBook-Tricentis, tricentis-vault):
+#   pre-push    -> pre-push-manual-only.sh          (marker: manual-push-hook)
+# An existing hook that is not ours is left alone (reported, exit 1).
 
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 status=0
 only_commit_msg=0
+only_manual_push=0
 if [ "$1" = "--commit-msg-only" ]; then
   only_commit_msg=1
+  shift
+elif [ "$1" = "--manual-push-only" ]; then
+  only_manual_push=1
   shift
 fi
 
@@ -39,6 +46,10 @@ for repo in "$@"; do
   }
   case "$hooks" in /* | [A-Za-z]:*) ;; *) hooks="$repo/$hooks" ;; esac
   mkdir -p "$hooks"
+  if [ "$only_manual_push" -eq 1 ]; then
+    install_hook "$hooks" pre-push "$here/pre-push-manual-only.sh" "# manual-push-hook"
+    continue
+  fi
   if [ "$only_commit_msg" -eq 0 ]; then
     install_hook "$hooks" pre-commit "$here/pre-commit-large-files.sh" "# large-files-hook"
   fi
