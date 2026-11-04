@@ -90,11 +90,13 @@ local defaults = {
 ---re-wrap on demand, which is what picks up a submodule first required
 ---after that point (a `bindings/mappings/*` handler pulled in on first
 ---keypress).
+---
+---Only prefixes this config owns: `lsp` is lsp.nvim's tree (there is no `lua/lsp` here), and wrapping
+---it put that plugin's calls into this namespace.
 local SELF_PREFIXES = {
   "config",
   "bindings",
   "plugins",
-  "lsp",
   "startup",
   "machine",
   "my",
