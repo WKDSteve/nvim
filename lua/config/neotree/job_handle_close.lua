@@ -1,3 +1,4 @@
+---@module 'config.neotree.job_handle_close'
 -- config/neotree/job_handle_close.lua -- local patch for neo-tree's `utils.job`.
 --
 -- `require("neo-tree.utils").job` spawns git (status on BufWritePost and

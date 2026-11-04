@@ -1,3 +1,4 @@
+---@module 'config.blink_path_guard'
 -- config/blink_path_guard.lua -- local patch for blink.cmp's cmdline source.
 --
 -- `blink.cmp.sources.cmdline.utils.get_completions` drops System32 (Windows) or
