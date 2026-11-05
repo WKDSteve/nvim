@@ -12,8 +12,8 @@
 return {
   -- Provider-agnostic ask/stream layer (claude/ollama/openai/gemini/ai_desktop),
   -- built on lib.nvim.net.curl. `keys`/`cmd` load it lazily. `ai_prefix` is
-  -- shared with opts so the keys table and the plugin's own mappings cannot
-  -- drift apart.
+  -- shared with opts, and TESTS/plugins_keys_mirror_spec.lua fails when the keys
+  -- table and the plugin's own mappings drift apart.
   (function()
     -- ai.nvim's default keymap prefix "<leader>a" collides with the Avante
     -- mappings ("<leader>aa/ae/ar/af/as") of config/ai/anthropic, so the prefix
@@ -26,14 +26,24 @@ return {
       { "a", "Ask (prompt for text)" },
       { "s", "Quick action: stream context + a typed task" },
       { "e", "Explain (badge, no panel)" },
+      { "c", "Ask about the last message (editable first)" },
+      { "r", "Rewrite current line with AI-generated code" },
+      { "o", "Insert AI-generated code after current line" },
+      { "O", "Insert AI-generated code before current line" },
+      { "n", "Switch to the next agent" },
+      { "x", "Stop every running stream" },
     }) do
       ai_keys[#ai_keys + 1] = { ai_prefix .. m[1], desc = "[AI] " .. m[2] }
     end
-    -- Every action also binds in visual mode (selection instead of buffer/cwd).
+    -- What acts on a text also binds in visual mode (selection instead of buffer/cwd).
     for _, m in ipairs({
       { "a", "Ask about the selection" },
       { "s", "Quick action: stream selection + a typed task" },
       { "e", "Explain selection (badge, no panel)" },
+      { "c", "Ask about the selection (editable first)" },
+      { "r", "Rewrite selection with AI-generated code" },
+      { "o", "Insert AI-generated code after selection" },
+      { "O", "Insert AI-generated code before selection" },
     }) do
       ai_keys[#ai_keys + 1] = { ai_prefix .. m[1], mode = "v", desc = "[AI] " .. m[2] }
     end

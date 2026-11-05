@@ -16,10 +16,10 @@ return {
   -- the mappings and `:Dap` work as usual -- the first use just also loads the
   -- plugin.
   --
-  -- The keys below MUST mirror wkddap.bindings.keymaps. `dap_prefix` is
-  -- shared with opts so the two cannot drift apart; the suffixes are the ones
-  -- that module maps (see its `keymap.register` actions). A binding missing
-  -- here would simply never load the plugin and silently do nothing.
+  -- The keys below mirror wkddap.bindings.keymaps (TESTS/plugins_keys_mirror_spec.lua
+  -- asks the plugin and fails when they differ). `dap_prefix` is shared with opts;
+  -- the suffixes are the ones that module maps. A binding missing here would
+  -- simply never load the plugin and silently do nothing.
   (function()
     -- "<leader>d" alone collides with existing git/fzf mappings (dc, di, do),
     -- so the DAP keys live under "<leader>da".
@@ -41,6 +41,8 @@ return {
       { "u", "Toggle UI" },
       { "e", "Evaluate" },
       { "R", "Open REPL" },
+      { "m", "Memory View" },
+      { "M", "Memory View in a companion window" },
     }) do
       dap_keys[#dap_keys + 1] = { dap_prefix .. m[1], desc = "[DAP] " .. m[2] }
     end

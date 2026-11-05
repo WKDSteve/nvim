@@ -56,6 +56,15 @@ jobs:
           repository: WKDSteve/lib.nvim
           path: .deps/lib.nvim
           ref: ci-verified
+      # TESTS/plugins_keys_mirror_spec.lua asks these two which keys they map.
+      - uses: actions/checkout@v5
+        with:
+          repository: WKDSteve/dap.nvim
+          path: .deps/dap.nvim
+      - uses: actions/checkout@v5
+        with:
+          repository: WKDSteve/ai.nvim
+          path: .deps/ai.nvim
       - uses: rhysd/action-setup-vim@v1
         with:
           neovim: true
