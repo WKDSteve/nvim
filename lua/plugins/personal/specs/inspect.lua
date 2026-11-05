@@ -1481,6 +1481,9 @@ return {
       -- Default: { roots = {}, include = {}, exclude = {} }.
       ci = {
         repos = { roots = { "$REPOS_DIR" } },
+        -- The folder `:Testing export` writes without an argument: the one testing-web reads
+        -- (the data repository testing-results, committed and pushed by its export.sh).
+        export_dir = "$REPOS_DIR/testing-results/export",
         -- Whether `:Testing ci repos --export=<dir>` also asks the CI adapter (GitHub) and writes
         -- `ci_remote` into the export: "always" (default; only released repositories, a GitHub
         -- failure is a note, never an exit code), "never" (ci_remote stays null) or "ask" (a
