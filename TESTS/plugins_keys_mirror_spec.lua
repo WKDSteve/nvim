@@ -19,12 +19,16 @@ return function(H)
     return nil
   end
 
-  ---The one spec of `specs` for this plugin.
-  ---@param specs table[]
+  -- The specs of this checkout, by file: a `require` here would meet what an earlier spec of the run did to that module.
+  local here = vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p")
+  local root = vim.fn.fnamemodify(here, ":h:h"):gsub("\\", "/")
+
+  ---The one spec of a category for this plugin.
+  ---@param category string
   ---@param repo string
   ---@return table|nil
-  local function spec_of(specs, repo)
-    for _, spec in ipairs(specs) do
+  local function spec_of(category, repo)
+    for _, spec in ipairs(dofile(("%s/lua/plugins/personal/specs/%s.lua"):format(root, category))) do
       if type(spec) == "table" and spec[1] == repo then
         return spec
       end
@@ -101,7 +105,7 @@ return function(H)
     end,
   }
   package.loaded["dap"] = setmetatable({ repl = setmetatable({}, functions) }, functions)
-  local dap_spec = spec_of(require("plugins.personal.specs.inspect"), "WKDSteve/dap.nvim")
+  local dap_spec = spec_of("inspect", "WKDSteve/dap.nvim")
   ok(dap_spec and dap_spec.keys, "the spec of dap.nvim has keys")
   ok(
     dap_spec.opts and dap_spec.opts.keymaps and dap_spec.opts.keymaps.prefix,
@@ -123,7 +127,7 @@ return function(H)
     "ai.nvim is there (CI: .deps/ai.nvim; here: $REPOS_DIR): this spec cannot say anything without it"
   )
   vim.opt.rtp:prepend(ai_dir)
-  local ai_spec = spec_of(require("plugins.personal.specs.ai"), "WKDSteve/ai.nvim")
+  local ai_spec = spec_of("ai", "WKDSteve/ai.nvim")
   ok(ai_spec and ai_spec.keys, "the spec of ai.nvim has keys")
   ok(
     ai_spec.opts and ai_spec.opts.keymaps and ai_spec.opts.keymaps.prefix,
