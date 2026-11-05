@@ -108,6 +108,13 @@ hier nur die Stichworte:
   ≈ 0,1 s)? Hinweis: Ein `last_check` in der Zukunft wird bewusst als „nicht
   fällig" behandelt (lazy plant davon aus; ein Anschalten würde bei jedem Start
   den `git log`-Durchgang laufen lassen, ohne je zu fetchen).
+> **Stand 2026-11-05:** Diese Liste ist nicht mehr die Quelle der offenen Punkte, sie stehen als Tasks im
+> `tasks-vault`. Verworfen: `filetree` ohne `neo-tree` (Entscheidung 2026-10-04, siehe die Task
+> `filetree.nvim/startup-without-neo-tree`). Erledigt: `gopath.nvim/cache-load-from-disk-lazy`,
+> `nvim-config/startup-lazy-checker-trigger`, `nvim-config/which-key-first-leader-press`,
+> `nvim-config/sandbox-hover-triggers`. Offen: `nvim-config/startup-small-leftovers` (gitsigns, PATH-Suchen),
+> `nvim-config/ohana-startup-remeasure`; geparkt: `nvim-config/startup-wave-slicing`.
+
 - **`filetree.nvim` ohne `neo-tree` beim Laden:** lohnt der Umbau für
   ≈ 50–70 ms? Der Adapter (`adapter/neotree.lua`, 1600+ Zeilen) hängt sich mit
   Reihenfolge-Annahmen in neo-tree-Interna.

@@ -210,12 +210,12 @@ $REPOS_DIR/tasks-vault/ALL/Zentral-App-Report-Inventur-2026-10-08.md
 
 ### Live-Testing (braucht laufende, interaktive nvim-Session)
 
-  - [ ] $NVIM_CONFIG_DIR/docs\ROADMAP\personal\All\FINISH
-  - [ ] vim.fn.stdpath('config') .. /docs/ROADMAP/personal/All/PLUGIN_ROADMAPS_TESTPLAN.md
+  - [ ] [Final_Checks/](./Final_Checks/) (ersetzt `personal/All/FINISH`)
+  - [ ] [Final_Checks/PLUGIN_ROADMAPS_TESTPLAN.md](./Final_Checks/PLUGIN_ROADMAPS_TESTPLAN.md)
   - [loom.ai + ai.nvim](./Final_Checks/ai/live-testing-plan.md)
   - [media.nvim](./Final_Checks/media/live-testing-plan.md)
 
-  Die zwei Pfade oben (`personal/All/FINISH`, `.../PLUGIN_ROADMAPS_TESTPLAN.md`) gibt es seit `729a2ff5` nicht mehr; die Listen liegen in `Final_Checks/`. Tasks dazu:
+  Die alten Pfade (`personal/All/FINISH`, `personal/All/PLUGIN_ROADMAPS_TESTPLAN.md`) gab es seit `729a2ff5` nicht mehr und sind oben ersetzt; die Listen liegen in `Final_Checks/`. Tasks dazu:
   - `Final_Checks/Running-Tasks_Checklist.md` -> `ALL/ux-backlog-live-checklist-run`
   - `Final_Checks/PLUGIN_ROADMAPS_TESTPLAN.md` -> `ALL/plugin-roadmaps-testplan-run` (Config-Teil: `nvim-config/live-check-structure-jump-and-bindings-check`)
   - `Final_Checks/BINDINGS-RUNTIME-CHECKLIST.md` -> `nvim-config/bindings-checklist-update`, `nvim-config/bindings-checklist-run`

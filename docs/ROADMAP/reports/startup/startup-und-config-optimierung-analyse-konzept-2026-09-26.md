@@ -118,6 +118,11 @@ Nach erwartetem Gewinn, Schätzungen für `STEVESPC`.
 | 7 | `Keymaps-Collisions.md` (WKDBooks, `tasks-vault/ALL/`) gegen die richtige Reihenfolge prüfen: ein Plugin auf `VeryLazy` überschreibt ein Mapping der `mappings`-Phase | Korrektheit | klein |
 | 8 | `OHANA` mit `bench.lua 5 tui` neu messen; erst danach dort über F2 (`runtimepath`-Neuberechnung) entscheiden | Vergleichbarkeit | nur du |
 
+> **Stand 2026-11-05:** Punkt 1 ist verworfen (Entscheidung 2026-10-04, Task
+> `filetree.nvim/startup-without-neo-tree`). Punkt 2 ist erledigt (`gopath.nvim/cache-load-from-disk-lazy`).
+> Die übrigen Punkte führen die Tasks `nvim-config/startup-small-leftovers` (3, 6), `startup-wave-slicing` (4,
+> geparkt) und `ohana-startup-remeasure` (8). Die Tabelle gibt den Stand vom 2026-09-26 wieder.
+
 Der frühere Punkt 8 (Source-Switcher in `filetree.nvim` prüfte ein Modul, das
 es nicht gibt) ist erledigt: `08708b0`, `30d338b`, `c445079` in `filetree.nvim`,
 aus einer eigenen Session.
