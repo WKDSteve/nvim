@@ -1174,6 +1174,14 @@ function M.enable()
     notify.warn(":MyPlugins runner is unavailable: " .. tostring(runner))
   end
 
+  -- `binaries` (download the binaries of own plugins by hand: the workstation never does it unasked).
+  local ok_binaries, binaries = pcall(require, "bindings.usrcmds.plugin_repos.binaries")
+  if ok_binaries then
+    binaries.register_types()
+  else
+    notify.warn(":MyPlugins binaries is unavailable: " .. tostring(binaries))
+  end
+
   composer.verb("MyPlugins", {
     desc = "Manage the personal plugin checkouts, their source mode and the wkdbook tasks",
     -- The task routes (tasks / task / open) are declared in tasks_nvim.ui.routes (nested grammar).
@@ -1363,7 +1371,10 @@ function M.enable()
           ok_machine and machine.routes() or {},
           vim.list_extend(
             ok_runner and runner.routes() or {},
-            ok_tasks and tasks_routes.routes() or {}
+            vim.list_extend(
+              ok_binaries and binaries.routes() or {},
+              ok_tasks and tasks_routes.routes() or {}
+            )
           )
         )
       )

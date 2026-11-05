@@ -66,6 +66,14 @@ package.path = table.concat({
   package.path,
 }, ";")
 
+-- Binaries of own plugins (mdview's relay server, ...): downloaded on first use, except on the workstation, where
+-- an unsigned download is what the EDR reports. There nothing is fetched unasked; `:MyPlugins binaries fetch`
+-- (or scripts/binaries.ps1) does it by hand. A value set before this line wins. After the lib.nvim lines above:
+-- `machine` logs through lib.nvim.
+if vim.g.lib_binaries == nil and require("machine").is("workstation") then
+  vim.g.lib_binaries = "manual"
+end
+
 -- Opt-in keymap audit (`NVIM_KEYMAP_TAP=1 nvim`): records every keymap set/del with its source from
 -- here on, before any plugin binds one, so `:LibKeymapConflicts!` can name a binding that a later
 -- one overwrote (the live table only shows the winner). Off by default; costs one wrapper call per

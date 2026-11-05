@@ -58,6 +58,7 @@ local specs = {
   "plugin_repos/jump_spec.lua",
   "plugin_repos/machine_spec.lua",
   "plugin_repos/runner_spec.lua",
+  "plugin_repos/binaries_spec.lua",
   "plugin_repos/runner_env_spec.lua",
   "plugin_repos/list_vaults_spec.lua",
   "native_repos/native_repos_spec.lua",

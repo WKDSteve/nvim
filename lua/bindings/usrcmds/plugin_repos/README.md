@@ -332,6 +332,22 @@ it waits for a CI result of a private repo; see `docs/NOTES/CDX/templates/PROMPT
 `pwsh scripts/runners.ps1 check` looks at the tools the workflows rely on (`ensure`/`start` warn before starting).
 Code: `runner.lua`; spec: `TESTS/plugin_repos/runner_spec.lua`.
 
+### `:MyPlugins binaries status|fetch [plugin]`
+
+Own plugins download binaries on first use (mdview.nvim: the relay server and the client bundle). Whether they may do
+that unasked is the one setting `vim.g.lib_binaries` of `lib.nvim.binaries`: `"auto"` (default), `"manual"`, `"never"`.
+`init.lua` sets `"manual"` when `NVIM_MACHINE_ROLE=workstation` (an unsigned download is what the EDR reports there);
+the private machine stays on `"auto"`. A value set before that line wins.
+
+- `binaries status [plugin]`: the setting and what each plugin has (`server installed, client bundle missing`).
+- `binaries fetch [plugin]`: downloads now, also in `"manual"`; the editor waits for the download. `"never"` refuses.
+- Without Neovim open: `pwsh scripts/binaries.ps1 status|fetch [plugin]` (exit 0 fine, 1 a plugin failed, 2 unknown
+  action).
+- The plugins that download are listed in `binaries.lua` (`PLUGINS`); a plugin is loaded first so that it has registered
+  its fetcher. A new one needs an entry there and a `lib.nvim.binaries.register` in the plugin.
+
+Code: `binaries.lua`; spec: `TESTS/plugin_repos/binaries_spec.lua`.
+
 ### `:MyPlugins reclone [dir] [--only=<name>]`
 
 For present repos: runs the exact same `git status --porcelain --branch`
