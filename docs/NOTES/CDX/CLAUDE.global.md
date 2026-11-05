@@ -54,6 +54,10 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   testing.nvim gibt Push-Läufe öffentlicher Repos ohne `testing ci trust` frei,
   wenn alle neuen Commits von einem dieser Keys signiert sind. Commits daher nie
   unsigniert machen (kein `-c commit.gpgsign=false`, kein `--no-gpg-sign`).
+- `PATH` += `$REPOS_DIR/testing.nvim/bin` - der Befehl `testing` (`testing ci
+  trust ...` usw.), den Meldungen und Doku von testing.nvim nennen. Fehlt er,
+  gibt es den Befehl nicht; dann `nvim -n -i NONE --headless -u NONE -l
+  "$REPOS_DIR/testing.nvim/scripts/testing.lua" ...`.
 - `$NVIM_MACHINE_ROLE` - `workstation` auf der Tricentis-Workstation, sonst
   nicht gesetzt (= privater Rechner). Dieselbe Variable liest `lua/machine.lua`
   der nvim-Config. Das Setup-Skript setzt sie nie, es zeigt sie nur an: auf einer

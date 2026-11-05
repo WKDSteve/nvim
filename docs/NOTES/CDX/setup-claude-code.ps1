@@ -71,6 +71,27 @@ if (-not $trustRoots) {
     Write-Host "  TESTING_TRUST_ROOTS bereits gesetzt: $trustRoots"
 }
 
+# PATH: der Befehl `testing` (testing.nvim/bin, bin/testing.cmd), den Meldungen und Doku nennen
+# (z.B. "after a review: testing ci trust ..."). Ohne ihn gibt es den Befehl nicht. Roh ueber die Registry
+# gelesen und als REG_EXPAND_SZ geschrieben: [Environment]::SetEnvironmentVariable wuerde %VAR%-Eintraege aufloesen.
+$testingBin = Join-Path $reposDir 'testing.nvim\bin'
+if (Test-Path (Join-Path $testingBin 'testing.cmd')) {
+    $envKey = Get-Item 'HKCU:\Environment'
+    $userPath = $envKey.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+    $entries = @($userPath -split ';' | Where-Object { $_ })
+    if ($entries | Where-Object { $_.TrimEnd('\') -ieq $testingBin }) {
+        Write-Host "  PATH enthaelt bereits $testingBin"
+    } else {
+        Set-ItemProperty -Path 'HKCU:\Environment' -Name 'Path' -Value (($entries + $testingBin) -join ';') -Type ExpandString
+        # Set-ItemProperty sendet kein WM_SETTINGCHANGE; das unveraenderte Neusetzen einer anderen Variable ueber .NET
+        # tut es, damit neu gestartete Shells den PATH sehen.
+        [Environment]::SetEnvironmentVariable('REPOS_DIR', $reposDir, 'User')
+        Write-Host "  PATH ergaenzt: $testingBin (neue Shells; die App erst nach einem Neustart)"
+    }
+} else {
+    Write-Host "  $testingBin fehlt: Befehl testing nicht auf dem PATH (testing.nvim klonen/pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
+}
+
 # TASKS_VAULT: Wurzel des Repos tasks-vault (Task-Vault: Areas mit ROADMAP/tasks, Backlog, Notizen, TOOLS). Der Hub
 # von tasks-desktop und die CLI von tasks.nvim lesen sie; der Vault ist seit 2026-10-12 ein eigenes Repo, nicht
 # mehr ein Ordner in WKDBooks. Auf jeder Maschine liegt er unter $REPOS_DIR/tasks-vault.
