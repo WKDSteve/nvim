@@ -95,6 +95,14 @@ nvim --headless -l scripts/startup-probe/bench.lua 5 tui --cmd "lua vim.g.schalt
 nvim --headless --cmd "luafile scripts/startup-probe/probe.lua"
 ```
 
+Eine ganze Maschine in einem Zug messen (Bench `5 tui` plus ein Lauf mit
+`stall,where,lazy,marks`, Ergebnisse in einen Ordner unter `%TEMP%`; Windows
+PowerShell 5.1 genügt, nichts anderes laufen lassen):
+
+```powershell
+powershell -NoProfile -File scripts\startup-probe\measure-machine.ps1
+```
+
 | Variable | Bedeutung | Vorgabe |
 | --- | --- | --- |
 | `PROBE` | Sonden, kommagetrennt | alle außer `where` |
