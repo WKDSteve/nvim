@@ -1275,10 +1275,10 @@ return {
             -- keymap_right = "<M-r>",
             -- use_root_providers = true, -- inside a case (casedesk.nvim) the tree roots at the case folder
           },
-          -- The tree closes after a file was opened from it; <M-CR> opens and keeps it open.
+          -- The tree closes after a file was opened from it; <C-CR> opens and keeps it open.
           close_on_open = {
             enabled = true,
-            -- keymap_keep = "<M-CR>", -- string | string[] | false
+            -- keymap_keep = "<C-CR>", -- string | string[] | false
           },
           -- Collapse every folder back to the root (`:Filetree collapse`). Its default key `W`
           -- is this config's neo-tree window-picker key, and neo-tree's own `z` does the same.
@@ -1455,8 +1455,8 @@ return {
           -- open_replace = {
           --   enabled = true,
           --   keymap = "O", -- open over the editor window, the old buffer stays listed
-          --   keymap_swap = "<C-M-CR>", -- same, and close the old buffer (<M-CR> is close_on_open's keep-open key)
-          --   keymap_swap_alt = "<C-CR>", -- for terminals that send <C-CR> distinctly
+          --   keymap_swap = "<C-M-CR>", -- same, and close the old buffer
+          --   keymap_swap_alt = false, -- optional second swap key
           --   close_tree = true, -- close the tree after `keymap`
           --   swap_close_tree = false, -- ... and after a swap
           --   keep_position = true, -- new buffer takes the replaced one's bufferline slot
