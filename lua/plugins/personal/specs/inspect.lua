@@ -1442,7 +1442,7 @@ return {
       -- still in the legacy table format are silently skipped rather than
       -- needing a narrower path per migrated family.
       -- Default: {}.
-      rulesets = { vim.env.REPOS_DIR .. "/rules-vault/rulesets/lua" },
+      rulesets = vim.env.REPOS_DIR and { vim.env.REPOS_DIR .. "/rules-vault/rulesets/lua" } or {},
       -- Named groups of family prefixes for `:Rules gate`. The gate-to-family
       -- mapping is config, not a rules.nvim opinion -- see docs/BINDINGS.md in
       -- the plugin repo. `review` mirrors exactly the families REVIEW.md's own
