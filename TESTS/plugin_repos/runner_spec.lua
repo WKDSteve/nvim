@@ -41,29 +41,37 @@ local function spec(H)
 
   eq(#runner.REPOS, 11, "eleven runners are registered")
 
-  -- autostart: the schtasks calls (built, not run: running them would change the real scheduled tasks)
-  local on = assert(runner.autostart_argv("on"))
-  ok(on ~= nil, "autostart on builds a call")
-  eq(on[1], "schtasks", "autostart goes through schtasks")
-  eq(on[2], "/Create", "on creates the task")
-  eq(on[4], "ONLOGON", "the task runs at logon")
-  eq(on[6], runner.AUTOSTART_TASK, "the task has the fixed name")
-  H.has(on[8], "runners.ps1 ensure all", "the task runs runners.ps1 ensure all")
+  -- autostart: the calls are built, not run (running them would change the real scheduled tasks)
+  local script = runner.autostart_script("Task X", "C:\\cfg\\scripts\\runners.ps1")
+  H.has(script, 'runners.ps1" ensure all', "the task runs runners.ps1 ensure all")
+  H.has(script, "-AtLogOn", "one trigger is the logon")
+  H.has(script, "-RepetitionInterval (New-TimeSpan -Hours 1)", "the other repeats every hour")
+  H.has(script, "-MultipleInstances IgnoreNew", "two runs never overlap")
+  H.has(script, "-Hidden", "the task stays hidden")
+  H.has(script, "--headless", "no console window opens (conhost --headless)")
+  H.has(script, "Register-ScheduledTask -TaskName 'Task X'", "the task has the given name")
+  H.has(script, "-Force", "an existing task is replaced, not an error")
+
+  local status_script = runner.autostart_status_script("Task X")
+  H.has(status_script, "Get-ScheduledTask -TaskName 'Task X'", "status reads the task")
+  H.has(status_script, "$t.Triggers", "status lists every trigger")
+
+  for _, action in ipairs({ "on", "status" }) do
+    local argv = assert(runner.autostart_argv(action))
+    ok(argv[1] == "pwsh" or argv[1] == "powershell", action .. " goes through PowerShell")
+    eq(argv[4], "-EncodedCommand", action .. " hands the script over encoded (no quoting)")
+    local decoded = vim.iconv(vim.base64.decode(argv[5]), "utf-16le", "utf-8")
+    H.has(decoded, runner.AUTOSTART_TASK, action .. " names the fixed task")
+  end
   H.has(
-    on[8],
+    vim.iconv(vim.base64.decode(runner.autostart_argv("on")[5]), "utf-16le", "utf-8"),
     "scripts\\runners.ps1",
-    "the script path has backslashes (schtasks takes a Windows path)"
+    "the script path has backslashes (a Windows path)"
   )
-  eq(on[#on], "/F", "an existing task is replaced, not an error")
   eq(
     runner.autostart_argv("off"),
     { "schtasks", "/Delete", "/TN", "GitHub Runners", "/F" },
     "off deletes the task"
-  )
-  eq(
-    runner.autostart_argv("status"),
-    { "schtasks", "/Query", "/TN", "GitHub Runners", "/FO", "LIST" },
-    "status queries the task"
   )
   ---@diagnostic disable-next-line: param-type-mismatch -- an invalid action is the case under test
   local argv, why = runner.autostart_argv("nonsense")

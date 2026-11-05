@@ -310,11 +310,14 @@ that process automatically — without it, a push to one of these repos sits "Qu
 - `runner status [repo]`: asks GitHub (`gh api repos/<owner>/<repo>/actions/runners`) whether the runner is
   online/offline, and whether it is currently busy.
 - `runner autostart on|off|status`: a scheduled task "GitHub Runners" of this user that runs
-  `scripts/runners.ps1 ensure all` at every logon (hidden window), so the runners are back after a restart. `off`
-  removes it, `status` says whether it exists. It is `schtasks`, not a Windows service: a service runs as another
-  account without this user's PATH (scoop shims, cargo, ...). Normally no elevated shell is needed; on a machine
-  that insists, run the same `schtasks /Create /SC ONLOGON ...` line (see `autostart_argv` in `runner.lua`) from an
-  administrator PowerShell.
+  `scripts/runners.ps1 ensure all` at every logon **and every hour**, so the runners are back after a restart and a
+  runner that died on its own (network error, killed process) comes back within the hour. With all runners running
+  an hourly run changes nothing; it runs through `conhost --headless` (no console window) and a second run never
+  overlaps the first (`MultipleInstances` = `IgnoreNew`). `off` removes the task, `status` lists its triggers. It is
+  a user task, not a Windows service: a service runs as another account without this user's PATH (scoop shims,
+  cargo, ...). `on` registers it with `Register-ScheduledTask` (see `autostart_script` in `runner.lua`) and replaces
+  an older logon-only task of the same name; normally no elevated shell is needed, on a machine that insists, run
+  that PowerShell from an administrator one.
 - **Blocked on the workstation** (`NVIM_MACHINE_ROLE=workstation`, `lua/machine_guard.lua`): `runner start` and
   `runner autostart on` stop with an error message. A runner takes the CI jobs that build and start the native apps,
   and the logon task is a hidden PowerShell; both are what CrowdStrike Falcon reports there. `stop`, `status` and

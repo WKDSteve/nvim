@@ -159,7 +159,7 @@ return function(H)
     -- a fake vim.system: the schtasks call must never reach the real task scheduler here
     local system_calls = {}
     vim.system = function(argv)
-      system_calls[#system_calls + 1] = argv[2]
+      system_calls[#system_calls + 1] = argv[1] == "schtasks" and argv[2] or "status-script"
       ---@diagnostic disable-next-line: return-type-mismatch -- minimal fake of vim.SystemObj (only wait is used)
       return {
         wait = function()
@@ -176,7 +176,7 @@ return function(H)
     ok(blocked_message(":MyPlugins runner autostart on"), "...and says why")
     runner.autostart("off")
     runner.autostart("status")
-    eq(system_calls, { "/Delete", "/Query" }, "autostart off and status still go on")
+    eq(system_calls, { "/Delete", "status-script" }, "autostart off and status still go on")
     vim.system = saved.system
 
     -- the lazy.nvim build hooks: lazy runs them on every install/update of the plugin. `false`, not

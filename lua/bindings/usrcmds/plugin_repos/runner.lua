@@ -14,8 +14,9 @@
 ---  - `runner status [repo]`   ask GitHub whether the runner is online/offline/busy (`gh api`)
 ---
 ---  - `runner autostart on|off|status`  a scheduled task "GitHub Runners" of this user that runs
----                             `scripts/runners.ps1 ensure all` at every logon (no elevated shell needed on most
----                             machines); `off` removes it
+---                             `scripts/runners.ps1 ensure all` at every logon and every hour (a runner that died
+---                             comes back; with all running it changes nothing, windowless, runs never overlap; no
+---                             elevated shell needed on most machines); `off` removes it, `status` lists the triggers
 ---
 --- On the workstation (`lua/machine_guard.lua`) `start` and `autostart on` refuse: a runner takes CI jobs that
 --- build and start the native apps, and the logon task is a hidden PowerShell, both what the EDR reports there.
@@ -276,9 +277,58 @@ function M.status(repo)
   end
 end
 
----The schtasks call for `runner autostart on|off|status`: a task of the current user that runs
----`runners.ps1 ensure all` at logon (hidden window). Not a Windows service: that runs as another account without
----this user's PATH (scoop shims, cargo, ...) and needs an elevated shell. Returns the argv, or nil and why.
+---How often the task runs `runners.ps1 ensure all` besides the logon (hours).
+M.AUTOSTART_EVERY_HOURS = 1
+
+---PowerShell that registers the task: two triggers (at logon, then every `AUTOSTART_EVERY_HOURS` hours), the
+---logon one so that a reboot brings the runners back, the repeating one so that a runner that died comes back on its
+---own. `conhost --headless` runs it without a console window (a hidden PowerShell would flash one every hour), a
+---second run never overlaps the first (`IgnoreNew`). Runs as the current user, not as a service: a service runs as
+---another account without this user's PATH (scoop shims, cargo, ...) and needs an elevated shell.
+---@param task string Name of the scheduled task
+---@param script string Windows path of runners.ps1
+---@return string
+function M.autostart_script(task, script)
+  return table.concat({
+    "$ErrorActionPreference = 'Stop'",
+    ("$run = '--headless pwsh -NoProfile -File \"%s\" ensure all'"):format(script),
+    "$action = New-ScheduledTaskAction -Execute 'conhost.exe' -Argument $run",
+    "$logon = New-ScheduledTaskTrigger -AtLogOn -User $env:USERNAME",
+    ("$hourly = New-ScheduledTaskTrigger -Once -At (Get-Date) -RepetitionInterval (New-TimeSpan -Hours %d) -RepetitionDuration (New-TimeSpan -Days 3650)"):format(
+      M.AUTOSTART_EVERY_HOURS
+    ),
+    "$settings = New-ScheduledTaskSettingsSet -MultipleInstances IgnoreNew -Hidden -StartWhenAvailable -AllowStartIfOnBatteries -DontStopIfGoingOnBatteries -ExecutionTimeLimit (New-TimeSpan -Minutes 30)",
+    ("Register-ScheduledTask -TaskName '%s' -Action $action -Trigger $logon,$hourly -Settings $settings -Force | Out-Null"):format(
+      task
+    ),
+    ("'registered: %s (at logon, every %d h)'"):format(task, M.AUTOSTART_EVERY_HOURS),
+  }, "\n")
+end
+
+---PowerShell that lists the triggers of the task (fails when there is no such task).
+---@param task string
+---@return string
+function M.autostart_status_script(task)
+  return table.concat({
+    "$ErrorActionPreference = 'Stop'",
+    ("$t = Get-ScheduledTask -TaskName '%s'"):format(task),
+    "$t.Triggers | ForEach-Object { 'trigger: ' + $_.CimClass.CimClassName + $(if ($_.Repetition.Interval) { ' every ' + $_.Repetition.Interval } else { '' }) }",
+    "'overlap: ' + $t.Settings.MultipleInstances",
+    "'state: ' + $t.State",
+  }, "\n")
+end
+
+---argv of `pwsh -EncodedCommand` for a script (no quoting of the script through the command line)
+---@param code string
+---@return string[]
+local function pwsh_argv(code)
+  local shell = vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell"
+  local utf16 = vim.iconv(code, "utf-8", "utf-16le")
+  return { shell, "-NoProfile", "-NonInteractive", "-EncodedCommand", vim.base64.encode(utf16) }
+end
+
+---The call for `runner autostart on|off|status`: a scheduled task of the current user that runs
+---`runners.ps1 ensure all` at logon and every hour (see `autostart_script`). Returns the argv, or nil and why.
 ---@param action "on"|"off"|"status"
 ---@return string[]|nil argv
 ---@return string|nil err
@@ -287,16 +337,14 @@ function M.autostart_argv(action)
   if action == "off" then
     return { "schtasks", "/Delete", "/TN", task, "/F" }
   elseif action == "status" then
-    return { "schtasks", "/Query", "/TN", task, "/FO", "LIST" }
+    return pwsh_argv(M.autostart_status_script(task))
   elseif action == "on" then
     local path = vim.fs.normalize(vim.fn.stdpath("config") .. "/scripts/runners.ps1")
     local script = path:gsub("/", "\\")
-    -- /TR is one string that schtasks splits itself; a space in the path would need quotes inside the quotes
-    if script:find("%s") then
-      return nil, "the path of runners.ps1 has a space (" .. script .. "): create the task by hand"
+    if script:find("[\"']") then
+      return nil, "the path of runners.ps1 has a quote (" .. script .. "): create the task by hand"
     end
-    local run = ("pwsh -NoProfile -WindowStyle Hidden -File %s ensure all"):format(script)
-    return { "schtasks", "/Create", "/SC", "ONLOGON", "/TN", task, "/TR", run, "/F" }
+    return pwsh_argv(M.autostart_script(task, script))
   end
   return nil, "unknown action '" .. tostring(action) .. "' (on, off, status)"
 end
