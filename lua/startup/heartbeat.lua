@@ -14,10 +14,15 @@
 --- (plugin, stack) needs the wrappers of scripts/startup-probe (`PROBE=…,where`),
 --- which cost too much to run in every session.
 ---
---- The computation (`analyse`) is pure and mirrors the `stall` probe, so the two
---- read the same way: a stall is one gap > 60 ms; busy time counts every gap
---- above the timer's own jitter, minus the tick it would have idled anyway, and
---- is split over the seconds (counted from the first beat) that it covers.
+--- The computation (`analyse`) is pure and shared with the `stall` probe of
+--- scripts/startup-probe, so the two read the same way. A stall is one gap
+--- > 60 ms and counts as busy in full. A smaller gap above the timer's own
+--- jitter counts as `gap - idle`, where `idle` is how long libuv sat in its poll
+--- wait in that gap (`uv.metrics_idle_time`, one reading per beat): the loop was
+--- busy for the rest. That replaces the old "gap minus one tick" guess, which
+--- counted a coarse timer (Windows beats every ~16 ms) as busy. Without idle
+--- readings (`loop_configure` unavailable) it falls back to that guess.
+--- Busy time is split over the seconds (counted from the first beat) it covers.
 ---
 --- Switch off for an A/B run: `--cmd "lua vim.g.startup_heartbeat = false"`
 --- (or `--cmd "let g:startup_heartbeat = 0"`; `false`, `0` and the string `'0'` all switch it off).
@@ -34,6 +39,7 @@ M.WINDOW = 6000 -- ms recorded after the first beat
 ---@field running boolean   the timer is still recording
 ---@field window number     ms recorded after the first beat
 ---@field beats number[]    ms since vim.g.start_time at which each beat arrived
+---@field idles? number[]   cumulative loop idle ms read at each beat; parallel to `beats`
 
 ---@type Startup.Heartbeat.State
 M.state = { started = false, running = false, window = M.WINDOW, beats = {} }
@@ -56,6 +62,7 @@ M.state = { started = false, running = false, window = M.WINDOW, beats = {} }
 ---@field jitter? number
 ---@field stall? number
 ---@field window? number  ms; `busy` lists only the seconds that start inside it
+---@field idle? number[]   cumulative loop idle ms per beat, parallel to `beats`
 
 --- Turn beat arrival times into stalls and busy time per second. Pure.
 ---@param beats number[]  ascending arrival times in ms
@@ -66,6 +73,7 @@ function M.analyse(beats, opts)
   local tick = opts.tick or M.TICK
   local jitter = opts.jitter or M.JITTER
   local stall = opts.stall or M.STALL
+  local idle = opts.idle
 
   ---@type Startup.Heartbeat.Stats
   local res = {
@@ -105,9 +113,19 @@ function M.analyse(beats, opts)
       res.stall_sum = res.stall_sum + gap
       res.stall_max = math.max(res.stall_max, gap)
     end
-    if gap > jitter then
-      -- The timer would have idled for one tick anyway: the rest is busy time.
-      add_busy(prev - first + tick, t - first)
+    if gap > stall then
+      -- A stall: the loop was blocked for all of it.
+      add_busy(prev - first, t - first)
+    elseif gap > jitter then
+      local busy_ms
+      if idle and idle[i] and idle[i - 1] then
+        -- Busy is what the poll wait does not account for.
+        busy_ms = math.max(0, gap - (idle[i] - idle[i - 1]))
+      else
+        -- No idle readings: the timer would have idled for one tick anyway.
+        busy_ms = gap - tick
+      end
+      add_busy(t - first - busy_ms, t - first)
     end
   end
 
@@ -141,13 +159,20 @@ function M.start(opts)
     return false
   end
 
+  -- Idle readings need the loop to collect them; if that fails, analyse()
+  -- falls back to the tick guess.
+  local metrics = pcall(uv.loop_configure, "metrics_idle_time")
+    and type(uv.metrics_idle_time()) == "number"
+
   local t0 = vim.g.start_time or uv.hrtime()
   local beats = {} ---@type number[]
+  local idles = metrics and {} or nil ---@type number[]?
   local state = {
     started = true,
     running = true,
     window = (opts and opts.window) or M.WINDOW,
     beats = beats,
+    idles = idles,
   }
   M.state = state
 
@@ -161,6 +186,9 @@ function M.start(opts)
       end
       local t = (uv.hrtime() - t0) / 1e6
       beats[#beats + 1] = t
+      if idles then
+        idles[#idles + 1] = (uv.metrics_idle_time() or 0) / 1e6
+      end
       if t - beats[1] >= state.window then
         state.running = false
         timer:stop()
@@ -175,7 +203,7 @@ end
 --- plus the recording state.
 ---@return Startup.Heartbeat.Stats stats, Startup.Heartbeat.State state
 function M.snapshot()
-  return M.analyse(M.state.beats, { window = M.state.window }), M.state
+  return M.analyse(M.state.beats, { window = M.state.window, idle = M.state.idles }), M.state
 end
 
 return M

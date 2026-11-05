@@ -160,7 +160,7 @@ Zeile markiert; die nachfolgenden Phasen laufen weiter.
 | Datei | Rolle |
 | --- | --- |
 | [`lua/startup/init.lua`](../../../lua/startup/init.lua) | Runner: `now`, `on`, `marks`, `pending`, `failed`, `total`, `slowest` |
-| [`lua/startup/heartbeat.lua`](../../../lua/startup/heartbeat.lua) | Event-Loop-Herzschlag der ersten 6 s (10-ms-Timer, beendet sich selbst): Stöße > 60 ms, Belegung pro Sekunde; wie die Sonde `stall` |
+| [`lua/startup/heartbeat.lua`](../../../lua/startup/heartbeat.lua) | Event-Loop-Herzschlag der ersten 6 s (10-ms-Timer, beendet sich selbst): Stöße > 60 ms, Belegung pro Sekunde (Stoß ganz, kleine Lücke als `Lücke - libuv-Leerlauf`); dieselbe `analyse()` wie die Sonde `stall` |
 | [`lua/startup/report.lua`](../../../lua/startup/report.lua) | Darstellung: Float via `lib.nvim.ui.kit` mit Abschnitt „Event loop“, `check()` |
 
 Der Abschnitt „Event loop“ in `:StartupReport` zeigt die laufende Sitzung;

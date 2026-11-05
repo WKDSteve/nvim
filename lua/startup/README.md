@@ -8,7 +8,7 @@ this config happens ~2s after `VimEnter`.
 | File | Role |
 | --- | --- |
 | `init.lua` | runner: `now`, `on`, `marks`, `pending`, `failed`, `total`, `slowest`, `:StartupReport` / `:StartupCheck` |
-| `heartbeat.lua` | event-loop heartbeat for the first 6 s (10 ms timer, stops itself): stalls > 60 ms and busy time per second; pure `analyse()` |
+| `heartbeat.lua` | event-loop heartbeat for the first 6 s (10 ms timer, stops itself): stalls > 60 ms and busy time per second (stalls whole, smaller gaps as `gap - libuv idle` via `uv.metrics_idle_time`); pure `analyse()` |
 | `report.lua` | the float behind `:StartupReport` (phases plus an "Event loop" section from `heartbeat`), `check()` |
 
 Policy and rationale: `docs/NOTES/ARCHITECTURE/startup.md`.

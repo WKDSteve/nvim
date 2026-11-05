@@ -891,6 +891,14 @@ function uv.resident_set_memory() end
 ---@return table? metrics
 function uv.metrics_info() end
 
+--- Configures the event loop. `"metrics_idle_time"` makes libuv accumulate the
+--- time it spends waiting in its poll (read it with `uv.metrics_idle_time()`).
+---@param option "sigprof"|"metrics_idle_time"
+---@param ... any
+---@return 0? success
+---@return string? err
+function uv.loop_configure(option, ...) end
+
 --- Returns idle time for the event loop.
 ---@return integer? idle_time
 function uv.metrics_idle_time() end

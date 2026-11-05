@@ -296,22 +296,17 @@ if wanted.stall then
   -- spawn is ~15 ms of main thread on Windows, fifty of them never show up as
   -- a stall): every gap above the timer's own jitter, summed per second. A gap
   -- is split over the seconds it covers, so no second can read more than 1000.
-  local TICK, JITTER = 10, 16
+  --
+  -- Busy time is NOT computed here: every beat is recorded together with libuv's
+  -- cumulative idle time, and the dump hands both to `startup.heartbeat.analyse`,
+  -- the same function :StartupReport uses (a stall counts whole, a smaller gap
+  -- as `gap - idle`), so the probe and the report read the same way.
+  local TICK = 10
   local first = nil ---@type number?
-  local busy = {} ---@type table<integer, number>
-
-  --- Busy time from..to (ms since `first`), spread over the second-long buckets
-  --- it spans.
-  ---@param from number
-  ---@param to number
-  local function add_busy(from, to)
-    while from < to do
-      local sec = math.floor(from / 1000)
-      local upto = math.min(to, (sec + 1) * 1000)
-      busy[sec] = (busy[sec] or 0) + (upto - from)
-      from = upto
-    end
-  end
+  local beats = {} ---@type number[]
+  local idles = {} ---@type number[]
+  local have_idle = pcall(uv.loop_configure, "metrics_idle_time")
+    and type(uv.metrics_idle_time()) == "number"
 
   local timer = assert(uv.new_timer())
   timer:start(
@@ -324,14 +319,14 @@ if wanted.stall then
         if gap > 60 then
           stalls[#stalls + 1] = { at = beat, gap = gap }
         end
-        if gap > JITTER then
-          -- The timer would have idled for TICK anyway: the rest is busy time.
-          add_busy(beat - first + TICK, t - first)
-        end
       else
         first = t
       end
       beat = t
+      beats[#beats + 1] = t
+      if have_idle then
+        idles[#idles + 1] = (uv.metrics_idle_time() or 0) / 1e6
+      end
     end)
   )
   dumps[#dumps + 1] = function(out)
@@ -348,18 +343,19 @@ if wanted.stall then
     for i = 1, math.min(#sorted, 8) do
       add(out, "%8.0f ms  starting at %7.0f", sorted[i].gap, sorted[i].at)
     end
+    local hb = require("startup.heartbeat")
+    local stats = hb.analyse(beats, { idle = have_idle and idles or nil })
     add(
       out,
-      "-- loop busy per second (all gaps > %d ms), from the first heartbeat at %.0f ms",
-      JITTER,
+      "-- loop busy per second (stalls whole, gaps > %d ms as gap - %s), from the first heartbeat at %.0f ms",
+      hb.JITTER,
+      have_idle and "libuv idle" or "one tick",
       first or 0
     )
-    local busy_total, per_second = 0, {}
-    for sec = 0, math.floor(((beat or 0) - (first or 0)) / 1000) do
-      local ms = busy[sec] or 0
-      busy_total = busy_total + ms
+    local busy_total, per_second = stats.busy_total, {}
+    for sec, ms in ipairs(stats.busy) do
       per_second[#per_second + 1] = math.floor(ms + 0.5)
-      add(out, "%8.0f ms  in second %d", ms, sec + 1)
+      add(out, "%8.0f ms  in second %d", ms, sec)
     end
     summary.stall = {
       count = #stalls,

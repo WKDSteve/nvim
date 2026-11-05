@@ -132,7 +132,15 @@ Idle, und sieht weder die `UIReady`-Phasen noch die Stöße danach.
 - **Stoß und Belegung.** Ein Stoß ist *eine* Lücke > 60 ms. Viele kleine
   Blockaden (ein Prozess-Spawn kostet unter Windows ~15 ms Hauptthread)
   erscheinen nie als Stoß, machen den Editor aber genauso zäh: dafür steht
-  „loop busy per second".
+  „loop busy per second". Gerechnet wird als Mischform (seit 2026-11-05, von
+  `startup.heartbeat.analyse` für Sonde und `:StartupReport` gemeinsam): ein
+  Stoß (> 60 ms) zählt ganz, eine kleinere Lücke über dem Timer-Jitter (16 ms)
+  als `Lücke - Leerlauf`, wobei der Leerlauf `vim.uv.metrics_idle_time()` ist
+  (libuv-Wartezeit im Poll, bei jedem Schlag gelesen). Vorher galt
+  `Lücke - ein Tick`; das zählte einen groben Timer (Windows schlägt alle
+  ~16 ms) als belegt. Zahlen vor und nach dem 2026-11-05 sind deshalb nicht
+  vergleichbar: „loop busy" liegt jetzt tendenziell niedriger. Fehlt die
+  Leerlaufmessung (`loop_configure` scheitert), gilt wieder `Lücke - ein Tick`.
 - **`where`.** Ein Zähl-Hook nimmt während eines Stoßes Stichproben des
   Lua-Stacks und rechnet die Zeit seit der vorigen Stichprobe diesem Stack zu.
   Ein blockierender C-Aufruf (`:spellgood`, `exepath`, `nvim_open_win`)

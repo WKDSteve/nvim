@@ -64,8 +64,17 @@ return function(H)
     }, "stalls in order, at = the beat before the gap")
     eq(s.stall_sum, 1130, "stall sum")
     eq(s.stall_max, 790, "longest stall")
-    eq(s.busy, { 910, 200 }, "busy per second, a gap split over the seconds it covers")
-    eq(s.busy_total, 1110, "busy total")
+    -- Stalls count in full (100 + 790 + 240) plus the 20 ms gap minus one tick (10): 1140.
+    eq(s.busy, { 940, 200 }, "busy per second, a gap split over the seconds it covers")
+    eq(s.busy_total, 1140, "busy total")
+
+    -- With idle readings a small gap is busy for gap - idle (not gap - tick); a stall stays whole.
+    local with_idle = hb.analyse({ 0, 10, 30, 40, 140 }, { idle = { 0, 9, 25, 34, 36 } })
+    eq(with_idle.busy, { 4 + 100 }, "idle mix: small gaps gap - idle, stalls whole")
+    local mostly_idle = hb.analyse({ 0, 20 }, { idle = { 0, 19 } })
+    eq(mostly_idle.busy, { 1 }, "a coarse timer that idled 19 of 20 ms is busy 1 ms")
+    eq(hb.analyse({ 0, 20 }, { idle = { 0, 30 } }).busy, { 0 }, "idle beyond the gap clamps to 0")
+    eq(hb.analyse({ 0, 20 }, { idle = { 0 } }).busy, { 10 }, "missing reading: tick guess")
 
     local idle = {}
     for t = 0, 2500, 10 do
@@ -91,8 +100,9 @@ return function(H)
     eq(#hb.analyse(past).busy, 7, "without a window: every second up to the last beat")
     local clipped = hb.analyse(past, { window = 6000 })
     eq(#clipped.busy, 6, "with the window: only its six seconds")
-    eq(clipped.busy[6], 0, "busy past the window is not folded into the last second")
-    eq(clipped.busy_total, 0, "the total is the sum of the listed seconds")
+    -- The stall starts at 5990 and counts whole: only its first 10 ms lie inside the window.
+    eq(clipped.busy[6], 10, "busy past the window is not folded into the last second")
+    eq(clipped.busy_total, 10, "the total is the sum of the listed seconds")
     eq(clipped.stall_max, 410, "the stall across the end is still counted as a stall")
     eq(#hb.analyse({ 0, 10, 20 }, { window = 6000 }).busy, 1, "a running window lists what it has")
 
@@ -129,6 +139,9 @@ return function(H)
     )
     local n = #hb.state.beats
     ok(n >= 2, "beats were recorded")
+    ok(hb.state.idles ~= nil, "idle readings are collected")
+    eq(#hb.state.idles, n, "one idle reading per beat")
+    ok(hb.state.idles[n] >= hb.state.idles[1], "the idle reading is cumulative")
     ok(hb.state.beats[n] - hb.state.beats[1] >= 80, "recorded at least the window")
     vim.wait(100)
     eq(#hb.state.beats, n, "no beats after the window")
@@ -185,7 +198,7 @@ return function(H)
     local row_100 = text:find("100 ms  at", 1, true)
     ok(row_790 and row_240 and row_100, "every stall has a row")
     ok(row_790 < row_240 and row_240 < row_100, "stall rows sorted longest first")
-    has(text, "910 · 200 ms  (total 1110 ms)", "busy per second")
+    has(text, "940 · 200 ms  (total 1140 ms)", "busy per second")
     has(text, "startup-probe", "points to the probe for attribution")
     lacks(text, "still recording", "finished window is not marked as running")
 
