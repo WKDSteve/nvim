@@ -106,6 +106,17 @@ return function(H)
     eq(clipped.stall_max, 410, "the stall across the end is still counted as a stall")
     eq(#hb.analyse({ 0, 10, 20 }, { window = 6000 }).busy, 1, "a running window lists what it has")
 
+    -- ── idle readings ──────────────────────────────────────────────────────
+    ok(hb.enable_idle(), "libuv idle readings can be enabled")
+    ok(hb.enable_idle(), "enabling them again is harmless")
+    local real_configure = vim.uv.loop_configure
+    vim.uv.loop_configure = function()
+      return nil, "EINVAL" -- libuv reports failure by return value, not by raising
+    end
+    local failed = hb.enable_idle()
+    vim.uv.loop_configure = real_configure
+    ok(not failed, "a loop_configure that returns nil, err is a failure")
+
     -- ── start ──────────────────────────────────────────────────────────────
     vim.g.startup_heartbeat = false
     hb = fresh()

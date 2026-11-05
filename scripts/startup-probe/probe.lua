@@ -305,8 +305,7 @@ if wanted.stall then
   local first = nil ---@type number?
   local beats = {} ---@type number[]
   local idles = {} ---@type number[]
-  local have_idle = pcall(uv.loop_configure, "metrics_idle_time")
-    and type(uv.metrics_idle_time()) == "number"
+  local have_idle = require("startup.heartbeat").enable_idle()
 
   local timer = assert(uv.new_timer())
   timer:start(

@@ -143,6 +143,19 @@ function M.analyse(beats, opts)
   return res
 end
 
+--- Make libuv accumulate its idle time (`uv.metrics_idle_time`). Idempotent and
+--- process-wide. A failed `loop_configure` returns `nil, err` instead of raising,
+--- and the reading then stays 0 (everything would count as busy): check the code.
+---@return boolean ok  idle readings are available
+function M.enable_idle()
+  local uv = vim.uv
+  if type(uv.loop_configure) ~= "function" or type(uv.metrics_idle_time) ~= "function" then
+    return false
+  end
+  local called, rc = pcall(uv.loop_configure, "metrics_idle_time")
+  return called and rc == 0 and type(uv.metrics_idle_time()) == "number"
+end
+
 --- Start recording. Call once, as early as possible in init.lua; the first beat
 --- arrives when the loop first gets control. No-op when already started or when
 --- `vim.g.startup_heartbeat` is `false`, `0` or `'0'` (Vimscript `let g:startup_heartbeat = 0`; a string `'0'` is falsy in a Vimscript `if`).
@@ -161,8 +174,7 @@ function M.start(opts)
 
   -- Idle readings need the loop to collect them; if that fails, analyse()
   -- falls back to the tick guess.
-  local metrics = pcall(uv.loop_configure, "metrics_idle_time")
-    and type(uv.metrics_idle_time()) == "number"
+  local metrics = M.enable_idle()
 
   local t0 = vim.g.start_time or uv.hrtime()
   local beats = {} ---@type number[]
