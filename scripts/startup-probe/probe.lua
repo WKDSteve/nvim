@@ -737,8 +737,15 @@ if wanted.maps then
   ---@param modes string|string[]
   ---@param lhs string
   ---@param rhs any
-  ---@param buf integer
+  ---@param buf? integer|boolean  # nil/false: global; true or 0: the current buffer.
   local function record(modes, lhs, rhs, buf)
+    ---@type integer
+    local scope = 0
+    if buf == true or buf == 0 then
+      scope = vim.api.nvim_get_current_buf()
+    elseif type(buf) == "number" then
+      scope = buf
+    end
     local norm = lhs
     local ok, term = pcall(vim.api.nvim_replace_termcodes, lhs, true, true, true)
     if ok then
@@ -751,7 +758,7 @@ if wanted.maps then
         mode = mode,
         lhs = lhs,
         norm = norm,
-        buf = buf,
+        buf = scope,
         at = now(),
         src = caller(),
         rhs = type(rhs) == "string" and rhs or "<function>",
@@ -769,13 +776,12 @@ if wanted.maps then
     if not ok then
       error(err, 0)
     end
-    local buf = type(opts) == "table" and opts.buffer or 0
-    record(modes, lhs, rhs, buf == true and vim.api.nvim_get_current_buf() or buf or 0)
+    record(modes, lhs, rhs, type(opts) == "table" and opts.buffer or nil)
     return err
   end)
   wrap(vim.api, "nvim_set_keymap", function(orig, mode, lhs, rhs, opts)
     if not inside then
-      record(mode, lhs, rhs, 0)
+      record(mode, lhs, rhs, nil)
     end
     return orig(mode, lhs, rhs, opts)
   end)
