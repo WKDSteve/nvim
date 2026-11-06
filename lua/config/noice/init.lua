@@ -18,7 +18,9 @@ local M = {
 M.presets = {
   bottom_search = true, -- use a classic bottom cmdline (also affects / and ?)
   -- command_palette = true,     -- keep disabled unless both cmdline & popupmenu should be stacked
-  long_message_to_split = true, -- long messages go to a split
+  -- Off on purpose: the preset's own `min_height` route is appended behind the msg_show
+  -- catch-all of `M.routes` and never matched. The same rule sits in `M.routes` instead.
+  long_message_to_split = false,
   inc_rename = true,
   lsp_doc_border = false,
 }
@@ -178,8 +180,9 @@ M.routes = {
     opts = { skip = true },
   },
 
-  -- Keep LSP hover minimal (avoid empty popups)
-  { filter = { event = "lsp", kind = "hover" }, opts = { skip_empty = true } },
+  -- No LSP hover route: hover.nvim shows hovers. A route without `view` is a skip
+  -- route for noice (Router.add sets `opts.skip`), so it would swallow every hover that
+  -- reaches noice's `vim.lsp.buf.hover`.
 
   -- Reduce LSP progress noise
   { filter = { event = "lsp", kind = "progress" }, opts = { skip = true } },
@@ -205,6 +208,10 @@ M.routes = {
     filter = { event = "notify" },
     view = "mini",
   },
+
+  -- Long messages go to a split (what the `long_message_to_split` preset would do, see
+  -- `M.presets`). MUST stay in front of the msg_show catch-all below, or it never matches.
+  { filter = { event = "msg_show", min_height = 20 }, view = "split" },
 
   -- Catch-all: anything else on `msg_show` goes to the compact view. MUST stay
   -- last -- noice's router stops at the first match (opts.stop defaults true),

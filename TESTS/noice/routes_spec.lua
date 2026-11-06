@@ -8,10 +8,10 @@ return function(H)
   local routes = require("config.noice").routes
 
   -- Minimal model of noice's filter: event / kind equality, `find` as a Lua pattern, `any`
-  -- as an OR of sub-filters. Only these keys are modelled; any other key (`not`, `cond`,
-  -- `min_height`, ...) errors so the model can never silently disagree with noice -- extend
-  -- it when a route needs one.
-  local modelled = { event = true, kind = true, find = true, any = true }
+  -- as an OR of sub-filters, `min_height` against the message's line count (`msg.height`).
+  -- Only these keys are modelled; any other key (`not`, `cond`, ...) errors so the model
+  -- can never silently disagree with noice -- extend it when a route needs one.
+  local modelled = { event = true, kind = true, find = true, any = true, min_height = true }
   local matches
   function matches(filter, msg)
     for k in pairs(filter) do
@@ -30,6 +30,9 @@ return function(H)
       return false
     end
     if filter.find and not msg.text:find(filter.find) then
+      return false
+    end
+    if filter.min_height and (msg.height or 1) < filter.min_height then
       return false
     end
     if filter.any then
@@ -80,6 +83,30 @@ return function(H)
     route({ event = "msg_show", kind = "", text = "file written" }),
     "mini",
     "an `any` route is modelled (msg_show 'written' -> mini)"
+  )
+
+  -- Long messages reach the split route in front of the msg_show catch-all; short ones do not.
+  eq(
+    route({ event = "msg_show", kind = "", text = "long", height = 25 }),
+    "split",
+    "a msg_show of 20+ lines goes to the split"
+  )
+  eq(
+    route({ event = "msg_show", kind = "", text = "short", height = 3 }),
+    "mini",
+    "a short msg_show still goes to mini"
+  )
+  eq(
+    route({ event = "notify", kind = "info", text = "long", height = 25 }),
+    "mini",
+    "min_height does not move a notify to the split"
+  )
+  -- No hover route: a route without a view would skip every hover that reaches noice.
+  eq(route({ event = "lsp", kind = "hover", text = "doc" }), nil, "LSP hover has no noice route")
+  eq(
+    require("config.noice").presets.long_message_to_split,
+    false,
+    "the preset stays off (its route would sit behind the catch-all)"
   )
 
   -- The BufReadPost text is still skipped as a message and as a notify ...
