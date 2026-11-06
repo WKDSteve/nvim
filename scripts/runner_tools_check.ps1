@@ -57,6 +57,7 @@ $tools = @(
   @('cargo-deny', 'cargo', @('deny', '--version'), 'supply-chain job', 'cargo install --locked cargo-deny'),
   @('jq', 'jq', @('--version'), 'docmap-desktop, release workflows', 'scoop install jq'),
   @('shellcheck', 'shellcheck', @('--version'), 'hygiene jobs (shell scripts)', 'scoop install shellcheck'),
+  @('actionlint', 'actionlint', @('-version'), 'streamtap hygiene job', 'winget install rhysd.actionlint'),
   @('7z', '7z', @('-h'), 'release packaging (zip)', 'scoop install 7zip'),
   @('cmake', 'cmake', @('--version'), 'ai-desktop', 'winget install Kitware.CMake'),
   @('ctest', 'ctest', @('--version'), 'ai-desktop', 'comes with cmake'),
