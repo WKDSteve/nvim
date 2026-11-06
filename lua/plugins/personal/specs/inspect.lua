@@ -155,6 +155,13 @@ return {
         -- Level of nvim-dap's own log file: a vim.log.levels value or a name
         -- ("trace" .. "error").
         -- log_level = vim.log.levels.WARN,
+        -- Memory view (`:Dap memory`, wkddap.memory). `context_rows`: how many
+        -- 16-byte rows above the target are shown when the view opens or jumps
+        -- (like Visual Studio's memory window); 0 = the target is the first row.
+        -- 0..15 (a page has 16 rows of 16 bytes).
+        -- memory = {
+        --   context_rows = 4,
+        -- },
       },
       -- dap.nvim's own Lua module is "wkddap", not "dap" -- it depends on
       -- nvim-dap, which itself owns the top-level `dap` module (lua/dap.lua)
@@ -257,6 +264,8 @@ return {
       --   -- lib.nvim.output.viewer dump otherwise.
       --   recent = {
       --     window_s = 10, -- seconds of history shown on open; <C-j> extends by the same amount
+      --     -- ...but never fewer than this many entries on open, however old (0 = strictly window_s).
+      --     min_entries = 5,
       --     order = "newest_last", -- or "newest_first"
       --     collapsed_default = false,
       --   },
@@ -650,6 +659,11 @@ return {
     --     scratch_filetype = "markdown",
     --     auto_open_scratch = true,
     --     scratch_threshold = 20,
+    --     -- Sections of `:LspDoctor`'s reports; each can be left out.
+    --     show_capabilities = true,
+    --     show_workspace = true,
+    --     show_tools = true,
+    --     show_conflicts = true, -- the potential provider conflicts (formatting, diagnostics)
     --   },
     --
     --   -- Extra tools, each with its own switch.
@@ -660,7 +674,9 @@ return {
     --     },
     --     lsp_signature = { enable = true },
     --     ts_type_lookup = { enable = true },
-    --     deprecated_help = { enable = true },
+    --     -- How the help for a deprecated symbol is shown: "hover" (a float, focus
+    --     -- stays) | "help" (`:help`).
+    --     deprecated_help = { enable = true, display = "hover" },
     --   },
     --
     --   -- Filetype-specific quality-of-life setup under lsp/languages/**.
@@ -1052,6 +1068,13 @@ return {
       -- opts.deps_popup = true
       -- How many past requests `:RA history` keeps (a ring, per project).
       -- opts.history_max_entries = 200
+      -- Query/fragment parameter names (case-insensitive) whose value `:RA history`
+      -- stores as a placeholder instead of verbatim; `{{var}}` values are left alone
+      -- and `{}` switches redaction off. Replaces the list, so give it in full.
+      -- opts.history_secret_keys = {
+      --   "api_key", "apikey", "key", "token", "access_token",
+      --   "auth", "secret", "password", "sig", "signature",
+      -- }
 
       -- Auto-instrumentation has no default: the absent key means "do not
       -- instrument". Here it is built from this config's policy (see
@@ -1454,14 +1477,57 @@ return {
         release = { "REL" },
         review = { "ERR", "LUA", "UI", "CMT", "SEC", "PRIN", "PERF" },
       },
+      -- The folder of the rules-vault (rulesets under `rulesets/`); nil = $RULES_VAULT,
+      -- then the `vault` of a project `.rules.json`. rules.nvim never guesses a path.
+      -- vault = nil, -- string
+      -- Whether `lua_predicate` checks may run. true = your own rulesets in your own
+      -- Neovim; false runs a ruleset you do not trust (its predicates then report
+      -- `error`). A ruleset that a project `.rules.json` names is not trusted either
+      -- way (see `trust`).
+      -- lua_predicates = true,
+      -- Folders (or single files) whose rulesets may run `lua_predicate` checks although
+      -- a project `.rules.json` named them; compared by real path. Rulesets of `rulesets`
+      -- and of the vault are trusted without an entry here.
+      -- trust = {},
+      -- `<RightMouse>` on `:Rules review` opens a menu of the same a/w/x/<CR> keys
+      -- (`setup()` only: a file must not control your editor's UI).
+      -- review_context_menu = true,
+      -- How an agent run is planned (the same block as in `.rules.json`).
+      -- agent = {
+      --   -- Allow-list of backends; empty = local only (nothing goes to a cloud provider).
+      --   backends = {},
+      --   -- The models the run dialog offers (free text stays possible).
+      --   models = {},
+      --   -- Rules per request.
+      --   batch_size = 8,
+      --   -- The most file content one request carries, in bytes.
+      --   max_context_bytes = 60000,
+      --   -- Globs of paths that are never put into a request.
+      --   deny = {},
+      --   -- Per family: where its rules look, `{ <family> = { include = { globs } } }`;
+      --   -- no scope means not sent.
+      --   scopes = {},
+      -- },
+      -- Keys of the `:Rules new` form (`setup()` only: a file must not bind your keys).
+      -- keys = {
+      --   form = {
+      --     toggle = "<Space>",
+      --     accept = "<CR>",
+      --     submit = "<C-s>",
+      --     close = "q",
+      --     cancel = "<C-q>",
+      --     help = "g?",
+      --   },
+      -- },
     },
   },
   {
     -- testing.nvim: the `:Testing` test runner (specs, conformance, surface).
     -- On demand only: `cmd` is the whole trigger, nothing registers at startup.
-    -- setup() options are listed below (plus `hover` and `surface_view`, left at their defaults,
-    -- testing.nvim's lua/testing/config/DEFAULTS.lua). The per-project settings (roots, guards, jobs, the `ci`
-    -- pipeline, ...) live in `.testing.lua` in the project root (docs/CONFIG.md), not here.
+    -- Every setup() option is listed below (testing.nvim's lua/testing/config/DEFAULTS.lua).
+    -- The per-project settings (roots, guards, jobs, the `ci` pipeline, ...) are the `project`
+    -- table of that file: setup() does not take them, they live in `.testing.lua` in the
+    -- project root (docs/CONFIG.md), so they are not listed here.
     -- `:Testing terminal` repeats the last run (otherwise the project) as a job in the
     -- terminal.nvim terminal `testing`, showing the reporter output (to scroll and copy,
     -- no quickfix list). Needs terminal.nvim, no option here.
@@ -1475,6 +1541,27 @@ return {
       -- notify_prefix = "[testing]",
       -- Moves or drops named keymap actions; false binds no key (docs/BINDINGS.md).
       -- keymaps = {},
+      -- Size of the hover over a test (hover.nvim `:Hover show` and `:Testing hover`). Bind
+      -- `keymaps = { hover = "<lhs>" }` for a key (none by default).
+      -- hover = {
+      --   max_width = 80, -- longest line, in display columns
+      --   max_height = 20, -- most lines
+      --   max_diff_lines = 12, -- lines of a failure diff
+      -- },
+      -- Keys of the matrix view of `:Testing surface --matrix` (buffer-local, only in that
+      -- view): an lhs, or false to leave the key out. The winbar legend and the `?`
+      -- cheatsheet are built from the same table.
+      -- surface_view = {
+      --   keys = {
+      --     jump = "<CR>",
+      --     status = "s",
+      --     kind = "t",
+      --     export = "e",
+      --   },
+      -- },
+      -- `:Testing lint`. `on_save = true`: a written file is linted in the background (only
+      -- the checks that may run on save, never luals) and its diagnostics are updated.
+      -- lint = { on_save = false },
       -- The repositories `:Testing ci repos` runs one after the other: every sub-directory of a root
       -- whose `.testing.lua` has a `ci` section ("$VAR" is expanded by testing.nvim); `include` /
       -- `exclude` narrow them by directory name.
