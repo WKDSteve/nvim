@@ -285,14 +285,14 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### fileops
 
-- [ ] `<leader>nF` -- fileops: Next file (background)
-- [ ] `<leader>nfn` -- fileops: Next file (stay listed)
-- [ ] `<leader>nf` -- fileops: Next file (replace)
-- [ ] `<leader>NF` -- fileops: Next file (vsplit)
-- [ ] `<leader>pF` -- fileops: Previous file (background)
-- [ ] `<leader>pfn` -- fileops: Previous file (stay listed)
-- [ ] `<leader>pf` -- fileops: Previous file (replace)
-- [ ] `<leader>PF` -- fileops: Previous file (vsplit)
+- [x] `<leader>nF` -- fileops: Next file (background) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>nfn` -- fileops: Next file (stay listed) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>nf` -- fileops: Next file (replace) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>NF` -- fileops: Next file (vsplit) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>pF` -- fileops: Previous file (background) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>pfn` -- fileops: Previous file (stay listed) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>pf` -- fileops: Previous file (replace) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
+- [x] `<leader>PF` -- fileops: Previous file (vsplit) _(auto 2026-11-06: TESTS/sheets/fileops-cycle-keys.sheet.lua)_
 
 ### filetree/source_switcher/global
 
@@ -914,27 +914,27 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :File
 
-- [ ] `:File rename` -- Rename the file on disk and update the buffer (reloads)
-- [ ] `:File copy` -- Copy the file to a new path without opening it
-- [ ] `:File move` -- Move the file on disk and update the buffer (no reload)
-- [ ] `:File duplicate` -- Copy the file to a new path and open the copy
-- [ ] `:File touch` -- Create an empty file if it does not exist yet
-- [ ] `:File writeto` -- Write a copy, the buffer name stays
-- [ ] `:File mkdir` -- Create the parent dirs of the current buffer
-- [ ] `:File write` -- Set the buffer name and write it to disk
-- [ ] `:File saveas` -- Save as: the buffer name changes
-- [ ] `:File new` -- Set the buffer name (creates parent dirs, no write)
-- [ ] `:File next` -- Next file in the directory (optionally filtered, e.g. *.lua)
-- [ ] `:File path` -- Copy the current file's path to the clipboard (abs/rel/name/dir)
-- [ ] `:File info` -- Show size, mtime and permissions of the current file
+- [x] `:File rename` -- Rename the file on disk and update the buffer (reloads) _(auto 2026-11-06: TESTS/sheets/fileops-rename-move.sheet.lua)_
+- [x] `:File copy` -- Copy the file to a new path without opening it _(auto 2026-11-06: TESTS/sheets/fileops-overwrite.sheet.lua)_
+- [x] `:File move` -- Move the file on disk and update the buffer (no reload) _(auto 2026-11-06: TESTS/sheets/fileops-rename-move.sheet.lua)_
+- [x] `:File duplicate` -- Copy the file to a new path and open the copy _(auto 2026-11-06: TESTS/sheets/fileops-overwrite.sheet.lua)_
+- [x] `:File touch` -- Create an empty file if it does not exist yet _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File writeto` -- Write a copy, the buffer name stays _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File mkdir` -- Create the parent dirs of the current buffer _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File write` -- Set the buffer name and write it to disk _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File saveas` -- Save as: the buffer name changes _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File new` -- Set the buffer name (creates parent dirs, no write) _(auto 2026-11-06: TESTS/sheets/fileops-create.sheet.lua)_
+- [x] `:File next` -- Next file in the directory (optionally filtered, e.g. *.lua) _(auto 2026-11-06: TESTS/sheets/fileops-cycle.sheet.lua)_
+- [x] `:File path` -- Copy the current file's path to the clipboard (abs/rel/name/dir) _(auto 2026-11-06: TESTS/sheets/fileops-info.sheet.lua)_
+- [x] `:File info` -- Show size, mtime and permissions of the current file _(auto 2026-11-06: TESTS/sheets/fileops-info.sheet.lua)_
 - [ ] `:File lockinfo` -- Diagnose which process locks the file
-- [ ] `:File cd` -- Set the cwd to the buffer's directory and refresh the explorer
-- [ ] `:File open` -- Reopen the current file in a different window target
-- [ ] `:File first` -- Jump to the first file in the directory
-- [ ] `:File last` -- Jump to the last file in the directory
-- [ ] `:File bulk rename` -- Batch-rename files in the directory via a Lua pattern (preview + confirm)
-- [ ] `:File help` -- Show the :File sub-commands
-- [ ] `:File prev` -- Previous file in the directory (optionally filtered)
+- [x] `:File cd` -- Set the cwd to the buffer's directory and refresh the explorer _(auto 2026-11-06: TESTS/sheets/fileops-info.sheet.lua)_
+- [x] `:File open` -- Reopen the current file in a different window target _(auto 2026-11-06: TESTS/sheets/fileops-cycle.sheet.lua)_
+- [x] `:File first` -- Jump to the first file in the directory _(auto 2026-11-06: TESTS/sheets/fileops-cycle.sheet.lua)_
+- [x] `:File last` -- Jump to the last file in the directory _(auto 2026-11-06: TESTS/sheets/fileops-cycle.sheet.lua)_
+- [x] `:File bulk rename` -- Batch-rename files in the directory via a Lua pattern (preview + confirm) _(auto 2026-11-06: TESTS/sheets/fileops-bulk.sheet.lua)_
+- [x] `:File help` -- Show the :File sub-commands _(auto 2026-11-06: TESTS/sheets/fileops-info.sheet.lua)_
+- [x] `:File prev` -- Previous file in the directory (optionally filtered) _(auto 2026-11-06: TESTS/sheets/fileops-cycle.sheet.lua)_
 
 ### :FileGrep
 
@@ -2481,7 +2481,7 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `dw` (bindings) -- [Edit] Delete word backwards without yanking
 - [ ] `x` (bindings) -- [Edit] Delete char without yanking
 - [ ] `<leader>ntS` (config) -- Stop test
-- [ ] `<leader>dcf` (fileops) -- fileops: Delete current file
+- [x] `<leader>dcf` (fileops) -- fileops: Delete current file _(auto 2026-11-06: TESTS/sheets/fileops-delete.sheet.lua)_
 - [ ] `<leader>fa` (pickers) -- pickers: Find all files in CWD (forces hidden+no_ignore+follow)
 - [ ] `:Ai stop` -- Stop every running stream (one-shot asks and edits cannot be stopped)
 - [ ] `:Ai key` -- Choose the API-key profile for this session (reset = back to the configured one)
