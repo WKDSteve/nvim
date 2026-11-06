@@ -221,6 +221,9 @@ return {
     --   -- (config/ui_statusline/variant.lua, registered just before).
     --   -- (ui.config.DEFAULTS: statusline.variant.)
     --   variant = "personal",
+    --   -- The shipped value in ui.config.DEFAULTS is
+    --   --   statusline = { variant = "default" }
+    --   -- and `variant` above is what `ui.config.setup` reads for it.
     --
     --   -- Theme toggling (`:UI toggle`, `:UI transparency`). Merged per key.
     --   -- theme = {
@@ -240,6 +243,10 @@ return {
     --   --   context_menu = true, -- right-click on a chip opens its tab menu
     --   --   drag = true, -- press-and-drag a chip to reorder it
     --   --   middle_click_close = true, -- middle-click on a chip closes it
+    --   --   -- Minimum WCAG contrast of the inactive chips' text against their ground; a
+    --   --   -- colorscheme whose `TabLine` colors sit too close together gets its foreground
+    --   --   -- lifted toward `Normal.fg` until it reads. `false` takes the scheme's colors as they are.
+    --   --   min_contrast = 4.5,
     --   -- },
     -- }
   },
@@ -312,6 +319,15 @@ return {
         -- Treesitter syntax highlighting inside fenced blocks.
         -- syntax_highlight = true,
       },
+
+      -- Very large buffers: paint only the rows around the window(s) and follow
+      -- the view on scroll. Off by default; buffers up to `min_lines` lines are
+      -- always painted in full.
+      -- visible_range = {
+      --   enable = false,
+      --   margin = 200, -- rows painted above and below the visible window
+      --   min_lines = 2000, -- buffers up to this many lines are painted in full
+      -- },
 
       -- ASCII blocks marked inside code comments of non-markdown files
       -- (`-- ascii` ... `-- /ascii`). Highlighting only; enabling it activates
@@ -489,7 +505,19 @@ return {
       -- ImageMagick; WezTerm cannot decode SVG itself). Replaces the list.
       -- extensions = { "png", "jpg", "jpeg", "gif", "webp", "bmp", "svg" },
 
+      -- The disk caches (svg, pdf, remote) are swept once per session: files older than
+      -- `max_age_days` go, then the oldest of a cache until it fits `max_size_mb`.
+      -- cache = {
+      --   max_age_days = 30,
+      --   max_size_mb = 200,
+      -- },
+
       display = {
+        -- Ask the terminal its name with XTVERSION (`CSI > q`) once at startup. The
+        -- reply refines the environment heuristic (it holds over SSH and outlives
+        -- inherited variables); `:Image check` shows which of the two decided. Under
+        -- tmux the outer terminal's reply is asked for instead.
+        -- terminal_probe = true,
         -- Maximum image size in terminal cells (OSC 1337 scales by itself, so
         -- no cell measurement is needed).
         -- max_cols = 60,
@@ -527,11 +555,64 @@ return {
         -- Upper bound on entries that scan visits; found results are still shown.
         -- browse_max_entries = 20000,
         -- `:Image zen` window size, as a fraction of the editor.
-        -- zen = { width = 0.9, height = 0.85 },
+        -- zen = {
+        --   width = 0.9,
+        --   height = 0.85,
+        --   -- `legend = false` keeps the frame to the file name (no zoom factor in the
+        --   -- title, no "? help" footer).
+        --   legend = true,
+        --   -- The steps `keys.grow` / `keys.shrink` cycle through, as fractions of the editor.
+        --   sizes = {
+        --     { width = 0.66, height = 0.66 },
+        --     { width = 0.9, height = 0.85 },
+        --     { width = 1, height = 1 },
+        --   },
+        --   -- Where `gs` writes: next to the original unless `dir` is set; `ask` offers
+        --   -- the name first (default `<stem>.crop-<x>-<y>-<w>x<h>.png`, never overwriting).
+        --   save = { dir = nil, ask = false },
+        --   -- Every key may be a list of keys; false leaves it unmapped. Zoom shows part
+        --   -- of the picture (needs ImageMagick); grow/shrink change the window.
+        --   keys = {
+        --     grow = "<S-Up>",
+        --     shrink = "<S-Down>",
+        --     zoom_in = "+",
+        --     zoom_out = "-",
+        --     zoom_reset = { "0", "=" },
+        --     -- pan_* move the visible part by a quarter of it, edge_* all the way to that
+        --     -- edge; a count multiplies both.
+        --     pan_left = { "h", "<Left>" },
+        --     pan_right = { "l", "<Right>" },
+        --     pan_up = { "k", "<Up>" },
+        --     pan_down = { "j", "<Down>" },
+        --     edge_left = "H",
+        --     edge_right = "L",
+        --     edge_up = "K",
+        --     edge_down = "J",
+        --     help = "?", -- lists the keys actually bound
+        --     -- The mouse (needs 'mouse' to include normal mode). Alt rather than Ctrl:
+        --     -- <C-ScrollWheel> is the terminal's own font zoom nearly everywhere.
+        --     wheel_in = "<M-ScrollWheelUp>",
+        --     wheel_out = "<M-ScrollWheelDown>",
+        --     drag = "<MiddleMouse>", -- the press; its drag and release events are derived from it
+        --     -- Selecting a part: drag with `select_drag`, or `select` and then hjkl/HJKL,
+        --     -- <CR> opens, <Esc> drops. The part opens in a zen window stacked on this
+        --     -- one; `back` returns to it, q closes the whole stack.
+        --     select_drag = "<LeftMouse>",
+        --     select = "v",
+        --     back = "<BS>",
+        --     -- Save what is shown to a PNG (`gs`) or copy it as an image (`gy`), cut
+        --     -- from the original at full resolution.
+        --     save = "gs",
+        --     yank = "gy",
+        --   },
+        -- },
         -- Remote images (`:Image show <url>`/hover only). Off so hovering a
         -- link never fires a network request unasked.
         -- remote = {
         --   enabled = false,
+        --   -- SSRF-style guard: a document must not make the editor request localhost, a
+        --   -- router or a cloud metadata endpoint (literal hosts only).
+        --   allow_private_hosts = false,
         --   timeout_ms = 10000,
         --   max_bytes = 20 * 1024 * 1024,
         --   cache_ttl_s = 24 * 60 * 60, -- how long a cached download is served
@@ -571,6 +652,11 @@ return {
         -- Link used when alt text was asked for, args: (alt, path).
         -- alt_link_template = "![%s](%s)",
         -- ask_filename = false,
+        -- When more than one level of the target directory is missing, ask before
+        -- creating it (Create / Open in filetree / Cancel; anything but Create saves
+        -- nothing and inserts no link). One missing level (`assets/`) is created
+        -- without a question; false creates everything silently.
+        -- confirm_create_dir = true,
         -- How the link's path is spelled: "relative" | "absolute" | "repos"
         -- ($REPOS_DIR-rooted) | "env" | a custom prefix such as "/static/img" |
         -- false (ask every time). Never changes where the file is written.
@@ -613,6 +699,11 @@ return {
         -- Absolute path to the tesseract binary; nil = PATH, then the usual
         -- Windows install directories.
         -- bin = nil, -- string
+        -- Enlarge the image with ImageMagick before tesseract reads it: false = off,
+        -- true = 2x, a number > 1 = that factor. Pays off on screenshots of small text;
+        -- costs an extra `magick` run and a slower recognition. Without `magick` the
+        -- image is read as it is, with a warning.
+        -- upscale = false,
       },
 
       -- One-off popup listing the CLI tools the plugin wants, on the first
@@ -791,7 +882,54 @@ return {
           -- Mirror the visual selection into the preview while presenting
           -- (`:MDView selection` toggles it).
           -- selection_sync = false,
+          -- Steady block marker by default; true or { ms = 530 } makes it blink
+          -- (never under the browser's prefers-reduced-motion).
+          -- cursor_blink = false,
+          -- A second, block-sized tint over the paragraph of the cursor (`:MDView
+          -- paragraph`); off because the cursor line band already shows where it is.
+          -- Colour: highlight group MdviewCursorParagraph, else the theme's tint.
+          -- cursor_paragraph = false,
+          -- When a changed document is translated again (needs `display_lang`):
+          -- "idle" (after display_lang_debounce_ms without typing) | "save" (on
+          -- :write) | "manual" (only `:MDView lang refresh`). Never per keystroke.
+          -- display_lang_trigger = "idle",
+          -- The pause after the last edit before "idle" translates, in ms.
+          -- display_lang_debounce_ms = 800,
+          -- How many tabs of other display languages `:MDView lang open` allows at
+          -- once; each is one more request to the engine per document.
+          -- display_lang_max_tabs = 3,
+          -- Mirror spotlight.nvim's whole-file highlights into the preview (a no-op
+          -- without spotlight.nvim). Sends the spotlight texts and colours to the
+          -- loopback relay and this session's tabs only; false keeps them out.
+          -- spotlight_sync = true,
+          -- Most matches painted per spotlight in the preview, so a token that
+          -- occurs thousands of times stays cheap to render.
+          -- spotlight_max_matches = 500,
+          -- Save a buffer this long after the last write-back from the preview
+          -- (checkbox, text field, block edit), in ms. 0 or false: only the buffer changes.
+          -- write_back_save_debounce_ms = 2500,
         },
+
+        -- Block editing in the preview: a click on a heading, paragraph, list item,
+        -- code block, table or quote swaps it for a text field holding its source
+        -- lines; committing (blur / Ctrl+Enter) writes them back (one undo step).
+        -- An edit against lines that changed since the render is refused.
+        -- `:MDView edit` switches it live.
+        -- edit_blocks = false,
+
+        -- Opt-in keymaps: mdview maps nothing unless a lhs is set here (see
+        -- docs/BINDINGS.md#keymaps); `write` = `:MDView write toggle`.
+        -- keymaps = {},
+
+        -- One relay + one preview tab for all Neovim instances; off = each instance
+        -- runs its own relay and tab (docs/FEATURES/SHARED_RELAY.md).
+        -- shared_relay = {
+        --   enabled = false,
+        --   -- How often an attached instance reports to the shared relay, in ms.
+        --   heartbeat_ms = 2000,
+        --   -- How long the relay waits for a silent instance before it counts as gone, in s.
+        --   idle_timeout_s = 30,
+        -- },
 
         -- Initial-push strategy of `:MDView start`.
         -- start = {
@@ -969,6 +1107,12 @@ return {
       -- cache = {
       --   enabled = true,
       --   dir = nil, -- string; default stdpath("cache") .. "/media.nvim"
+      --   -- Files older than this many days are removed (once per session, in the
+      --   -- background, never while a render runs). `0` (or `false`) keeps them forever.
+      --   max_age_days = 30,
+      --   -- When the cache is larger than this many MB the oldest files go first.
+      --   -- One hour of audio is a ~115 MB WAV. `0` (or `false`) means no size limit.
+      --   max_mb = 2048,
       -- },
 
       -- How many ffmpeg renders may run at once. A bound on a storm (a held
