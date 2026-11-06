@@ -164,7 +164,10 @@ plugins.modes({
   ["ui.nvim"] = "dir",
   ["color_my_ascii.nvim"] = "dir",
   ["images.nvim"] = "dir",
-  ["mdview.nvim"] = "dir",
+  -- "local": the relay and client bundle are built inside the checkout
+  -- (npm run build / build:go); the lazy clone under SOURCE "remote" has no
+  -- build, so the workstation fell back to the old release (no block editing).
+  ["mdview.nvim"] = "local",
   ["media.nvim"] = "dir",
   ["pdfport.nvim"] = "dir",
 })
