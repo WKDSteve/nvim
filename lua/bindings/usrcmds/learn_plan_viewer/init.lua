@@ -24,6 +24,7 @@ local config = require("bindings.usrcmds.learn_plan_viewer.config")
 local usercmd = require("lib.nvim.bindings.usercmd")
 local json = require("lib.nvim.fs.json")
 local notify = require("lib.nvim.notify").create("[learn_plan_viewer]")
+local statusline = require("bindings.usrcmds.learn_plan_viewer.statusline")
 
 local M = {}
 
@@ -45,6 +46,7 @@ end
 
 ---@param n integer
 local function remember_week(n)
+  statusline.set_week(n)
   local ok, err = json.write(config.state_file(), { last_week = n })
   if not ok then
     notify.warn("Fortschritt konnte nicht gespeichert werden: " .. tostring(err))
@@ -127,6 +129,10 @@ local function open_week(n)
     { desc = "Lernplan: Woche im Browser öffnen (mdview.nvim)" }
   ))
 
+  vim.api.nvim_create_autocmd("BufWritePost", {
+    buffer = bufnr,
+    callback = statusline.invalidate,
+  })
   vim.api.nvim_create_autocmd("BufWipeout", {
     buffer = bufnr,
     once = true,

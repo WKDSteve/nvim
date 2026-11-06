@@ -61,6 +61,7 @@ local specs = {
   "plugin_repos/binaries_spec.lua",
   "plugin_repos/runner_env_spec.lua",
   "plugin_repos/list_vaults_spec.lua",
+  "learn_plan_viewer/statusline_spec.lua",
   "native_repos/native_repos_spec.lua",
   "native_repos/workstation_spec.lua",
   "dialogs_spec.lua",
