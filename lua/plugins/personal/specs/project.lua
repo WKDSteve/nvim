@@ -1096,11 +1096,16 @@ return {
     cmd = { "Tasks", "TasksVault" },
     dependencies = { "WKDSteve/lib.nvim" },
     opts = {
-      -- The vault folder (one folder per area). Without it $TASKS_VAULT is read.
+      -- The vault folder (one folder per area), or a name from `vaults`. Without it $TASKS_VAULT is read.
       -- Default: nil.
-      vault = (vim.env.REPOS_DIR and vim.env.REPOS_DIR ~= "")
-          and (vim.env.REPOS_DIR .. "/tasks-vault")
-        or nil,
+      vault = (vim.env.REPOS_DIR and vim.env.REPOS_DIR ~= "") and "main" or nil,
+      -- Named vaults: `:TasksVault switch <name>` changes the one the session works on (status and
+      -- :checkhealth show which). `main` is the shared vault, `tricentis` the work one (never pushed from here).
+      -- Default: {}.
+      vaults = (vim.env.REPOS_DIR and vim.env.REPOS_DIR ~= "") and {
+        main = vim.env.REPOS_DIR .. "/tasks-vault",
+        tricentis = vim.env.REPOS_DIR .. "/tricentis-vault",
+      } or {},
       -- Folders that are areas although they hold neither ROADMAP/ nor Backlog/.
       -- Default: {}.
       extra_areas = { "ALL", "nvim-config", "docmap-desktop", "migrate.nvim" },
