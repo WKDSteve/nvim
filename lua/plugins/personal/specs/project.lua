@@ -162,6 +162,10 @@ return {
         -- api_max_response_bytes = 5242880,
         -- Hours between fetch cycles. Equals the default, set explicitly.
         fetch_interval_hours = 24,
+        -- Repositories a fetch keeps in flight at once (4 curl processes each); the
+        -- rest queue up. Bounds the spawn burst that froze the UI with many tracked
+        -- repositories (e.g. via watch_users) on machines with slow process creation.
+        -- max_parallel_fetches = 4,
         -- Pages followed when listing a watched user's repos (100 per page); past
         -- the cap, later repos are silently not tracked.
         -- max_user_repo_pages = 30,
@@ -693,6 +697,18 @@ return {
         -- Named extra pages, `{ name = string, paths = string[] }`; a path is a
         -- repository or a directory scanned for its git-repository children.
         -- groups = {},
+        -- `<RightMouse>` on the dashboard opens a menu of the same row/whole-page
+        -- actions the keys already run (lib.nvim.contextmenu.bind_buffer),
+        -- instead of ui.nvim's global one. Off disables the binding only --
+        -- every key still works.
+        -- context_menu = true,
+        -- `gf` (fetch the whole page) runs this many fetches at once. Fetch only reads
+        -- the remote; push and pull stay one after another.
+        -- fetch_jobs = 4,
+        -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
+        -- focused default. "behind" = only repositories behind their upstream
+        -- (as of the last fetch); "all" = every repository on the page.
+        -- pull_scope = "behind",
       },
 
       -- `:Git plugins log` (the newest commits of an installed plugin or any clone)
@@ -756,6 +772,34 @@ return {
             end
           end)
         end,
+        -- The report tab draws its state glyphs (↑ ↓ ✗ ↻ •) in plain ASCII
+        -- (^ v x @ *) for a terminal or font without them; the words stay.
+        -- ascii = false,
+        -- The breaking-change heuristic of the report (commit messages only).
+        -- breaking = {
+        --   -- Commits whose subject (without its `type(scope):` prefix) repeats at
+        --   -- least this often are folded into one expandable group.
+        --   collapse_repeats = 5,
+        --   -- `vim.regex` patterns on the subject: a match is never flagged.
+        --   ignore = {},
+        --   -- Per plugin (by name): { ignore = { patterns }, force = { commit hashes
+        --   -- that are always breaking }, style = "none"|"conventional" (the project
+        --   -- does not / does use conventional commits, instead of guessing) }.
+        --   plugins = {},
+        -- },
+        -- The report tab's seen marks (`m`/`M`, in plugins_seen.json): a mark older
+        -- than this many days is dropped on the next write.
+        -- seen_ttl_days = 180,
+        -- `:Git plugins report --mode=pending --fetch` (never without the flag) fetches
+        -- this many clones at once.
+        -- fetch_jobs = 2,
+        -- Timeout of each of those fetches, in milliseconds.
+        -- fetch_timeout_ms = 60000,
+        -- From this many clones on the fetch asks first (`--yes` skips the question).
+        -- fetch_confirm = 5,
+        -- Key in the report buffer that asks for the AI summary of the plugin under the
+        -- cursor (needs the `summarize` hook above).
+        -- summarize_key = "gS",
       },
 
       -- Indicator for `:Git dashboard`/`:Git dashboard update` (both report into
@@ -917,6 +961,8 @@ return {
       --   color = nil, -- string|table
       --   -- One line per entry: "casenumber" | "title" | "company" | "contact"; replaces the list.
       --   content = { "casenumber", "title" },
+      --   -- "center": every line centred on the widest one (display width); "left": flush left.
+      --   align = "center",
       -- },
 
       -- Keymap overrides (pickers.nvim-backed search): `action = lhs | lhs[] | false`,
@@ -936,7 +982,10 @@ return {
       -- Opened by `:Case sla --doc`.
       -- sla_doc_path = "<repo_root>/Workflow/SLA_ServiceLevelAgreement.md",
       -- Business window; `days` uses os.date("*t").wday numbering (1 = Sunday).
-      -- sla_business_hours = { from = 8, to = 18, days = { 2, 3, 4, 5, 6 } },
+      -- `holidays`: the region whose public holidays count as non-business days; only "AT"
+      -- (Austria: fixed days plus the Easter-dependent ones) is known; false or no field
+      -- counts them as business days.
+      -- sla_business_hours = { from = 8, to = 18, days = { 2, 3, 4, 5, 6 }, holidays = "AT" },
       -- Per priority level; merged key by key, so a single field can be overridden.
       -- `window`/`fix_window` are "24x7" or a business-hours table like `sla_business_hours`
       -- (the defaults below reference that very table). `cadence` has one or two
@@ -1082,6 +1131,601 @@ return {
       --   { name = "cases", dir = "Cases" },
       --   { name = "todo", dir = "ToDo-Collection" },
       -- },
+
+      -- Further options, in the order of casedesk.nvim's config/DEFAULTS.lua (the
+      -- list of defaults is the source of truth; descriptions copied from there).
+      -- The controlled vocabulary of root causes a case can be tagged with
+      -- (`:Case tag`, `:Cases tag <tag>`). A closed list on purpose: free-form tags
+      -- drift ("GPO", "gpo-block", "group policy") and the whole point is that two
+      -- cases with the same cause carry the SAME word. Derived from the corpus
+      -- analysis (case-corpus-analyse-2026-09-30.md §2/§5.3); extend it as new
+      -- causes turn up. Lowercase, `-` for spaces.
+      -- root_cause_tags = {
+      --   "gpo-hardening",
+      --   "tua-provisioning",
+      --   "timeout-limit",
+      --   "configuration",
+      --   "customer-knowledge",
+      --   "product-bug",
+      --   "licensing",
+      --   "third-party",
+      --   "workspace-edit",
+      --   "consulting-scope",
+      -- },
+      -- Words that suggest a tag when they occur in a case's title and Summary
+      -- (`:Case tag` pre-fills the form with them). Whole words/phrases,
+      -- case-insensitive. A suggestion, never an automatic tag: the person tagging
+      -- decides. Tags without an entry are simply never suggested.
+      -- root_cause_hints = {
+      --   ["gpo-hardening"] = { "gpo", "group policy", "logon banner", "autologon" },
+      --   ["tua-provisioning"] = { "tua", "provisioning", "jit" },
+      --   ["timeout-limit"] = { "timeout", "timed out" },
+      --   ["licensing"] = { "license", "licence", "activation key", "lizenz" },
+      --   ["third-party"] = { "antivirus", "virus scanner", "backup software" },
+      --   ["workspace-edit"] = { "guid", "migrate to fileshare", "manually moved" },
+      -- },
+      -- Longest text, in characters, that `:Case pdf` keeps in a PDF's sidecar. A long
+      -- PDF is megabytes of text `:Cases grep` would scan on every search; the first
+      -- pages identify the document. The sidecar says when it was cut.
+      -- pdf_text_max_chars = 200000,
+      -- Whether `:Case pdf` reads a PDF without a text layer (scanned) by OCR: its
+      -- pages rendered with poppler's `pdftoppm`, read by `:Case ocr`'s tesseract.
+      -- Without either tool the PDF is reported as before.
+      -- pdf_ocr = true,
+      -- How many pages of a scanned PDF `:Case pdf` reads by OCR: the first pages
+      -- identify the document, and tesseract takes seconds per page.
+      -- pdf_ocr_max_pages = 10,
+      -- The installation prefixes of SAP Resolve links (`.../Incident/<prefix>_<nr>_<year>`):
+      -- `:Case new` proposes a Resolve link with the one used last (the first one at
+      -- the start). Which case gets which is not known yet; the person corrects the
+      -- link where it is wrong, and that prefix is the next proposal.
+      -- resolve_prefixes = { "0020751294", "0020751295" },
+      -- Whether `:Case info` shows a `Git` line: the date, commit count and subject of
+      -- the newest commit that touched the case folder. One `git log` per card, with a
+      -- short timeout; a folder that is not committed or not in a repository shows no
+      -- line. Turn it off if opening a card should never start a process.
+      -- infocard_git_history = true,
+      -- Whether a case folder is its own root in filetree.nvim: inside a case, the
+      -- tree (and with filetree's cwd_sync the cwd) sits at the case folder instead
+      -- of the repository around it (`casedesk.case_root`, registered with
+      -- `filetree.roots`; filetree's tree_toggle keys such as `<M-l>` ask it too when
+      -- they open the tree). Read on every lookup, so switching it off takes effect at
+      -- once. Needs a filetree.nvim with `filetree.roots`; without one nothing happens.
+      -- filetree_case_root = true,
+      -- Where `:Tricentis pto` finds its absence files, relative to `repo_root`: one
+      -- Markdown file per kind of absence (`vacation.md`, `sick.md`), plus `back.md`
+      -- for `:Tricentis pto back`. Checklist and mail texts live there, not here —
+      -- see `casedesk.pto` for the format.
+      -- pto_dir = "Workflow/PTO",
+      -- Where `:Tricentis pto` notes the absences it was given with both days: a
+      -- reminder of a new case task (`:Case task new`, `:Case followup`) that falls
+      -- into one is put on the last working day before it. Under `stdpath("data")`,
+      -- not in `repo_root`: it is this machine's calendar, not case data.
+      -- pto_absences_path = vim.fs.joinpath(vim.fn.stdpath("data"), "casedesk", "absences.json"),
+      -- The reminder of `:Case followup` when no day is given: `+<n>d`, `+<n>w` or a date.
+      -- followup_default = "+3d",
+      -- Literal strings that count as an error fingerprint on top of the built-in
+      -- shapes (`*Exception`, `*Error`, `0x` + 8 hex digits, SCREAMING_SNAKE error
+      -- codes) — report or file names that identify a failure, e.g.
+      -- `"DEX_GPO_Report.html"`. Matched exactly and case-sensitively, anywhere in a
+      -- case's Summary, Notes or Research files.
+      -- fingerprint_extra = {},
+      -- A fingerprint carried by more than this share of all cases says nothing
+      -- (a generic exception name that ends up in most of them) and is ignored by `:Case
+      -- fingerprint` and `:Case similar`. Never fewer than five cases, so a small
+      -- corpus does not discard everything seen twice.
+      -- fingerprint_max_share = 0.2,
+      -- The shared, cross-customer solution collection `:Case promote` writes into,
+      -- relative to `repo_root`: one folder per topic, a `Solution.md` inside.
+      -- shared_solutions_dir = "Cases/Solutions",
+      -- The article collections `:Case known` checks against and `:Case kbindex`
+      -- lists, relative to `repo_root`: the KB and Jira (SWAT/TOSCA/...) articles
+      -- copied in one file each, named `<ID>_<Title>.md` (`KB0013308_...`,
+      -- `SWAT-3630_...`) in topic subfolders. The ID before the first `_` is what
+      -- both commands go by; a file without one is not an article.
+      -- article_dirs = { "MyDomains/KB", "MyDomains/SWAT" },
+      -- The one-line-per-article overview `:Case kbindex` writes, relative to
+      -- `repo_root`. A chat looking for a known problem greps this file first and
+      -- reads only the articles it points to, instead of every article.
+      -- article_index = "MyDomains/INDEX.md",
+      -- Rewrite `article_index` whenever an article under `article_dirs` is saved
+      -- in Neovim (`BufWritePost`, debounced), so `:Case kbindex` is only needed
+      -- for articles written elsewhere -- and the work repo's Claude Code hook
+      -- (`scripts/kbindex.lua`) covers those the chat writes.
+      -- article_index_auto = true,
+      -- `:Case search <portal> [terms]`: the search URL of each portal, opened in
+      -- the system browser, where the login already is. Nothing is fetched from
+      -- Neovim. `{q}` is the terms URL-encoded; `{qstr}` the terms as the inside of
+      -- a double-quoted string (`\` and `"` escaped, for a JSON or JQL literal),
+      -- then URL-encoded. `https://` only. A portal is added with a line here.
+      --
+      -- `sap`: the path of SAP for Me's knowledge search is a URL-encoded JSON
+      -- object, `{"tab":"All","q":"<terms>"}`.
+      -- search_portals = {
+      --   sap = "https://me.sap.com/knowledge/search/%7B%22tab%22%3A%22All%22%2C%22q%22%3A%22{qstr}%22%7D",
+      --   kb = "https://support-hub.tricentis.com/open?id=kb_search&query={q}",
+      --   jira = "https://tricentis.atlassian.net/issues/?jql=text%20~%20%22{qstr}%22%20ORDER%20BY%20updated%20DESC",
+      --   confluence = "https://tricentis.atlassian.net/wiki/search?text={q}",
+      -- },
+      -- How alike (TF-IDF cosine, 0..1) a case's solution and an existing shared one
+      -- must be for `:Case promote` to offer appending to it instead of a new topic.
+      -- Low enough to catch the same root cause told in different words, high enough
+      -- not to pair unrelated ones that merely share product vocabulary. Measured on
+      -- the real corpus against the one shared DEX/GPO solution: the two true DEX
+      -- cases score 0.17 and 0.19, every other case 0.11 or less -- 0.15 sits in that
+      -- gap. Cosines here are small by nature (long, noisy case notes against a
+      -- structured solution), so this is NOT a percentage to be read as "15% alike".
+      -- promote_similarity = 0.15,
+      -- The workflow files `:Case promote` points at after a solution went into the
+      -- shared collection, relative to `repo_root` (an absolute path is used as is):
+      -- a hint with three questions (what would have solved the case sooner, which
+      -- assumption was wrong, does it hold beyond this case) and the solution's
+      -- `Lessons learned`, so a lesson does not stay buried in one solution. Empty
+      -- (the default): no hint at all, so a workspace without such a step is not
+      -- bothered. Example: `{ "Workflow/CDX/CDX_Ressourcen/Workflow_CDX.md" }`.
+      -- promote_workflow_files = {},
+      -- The standard wordings: kind -> file relative to `workflow_templates_dir`. Every
+      -- key is a clipboard field that needs no case (`:Cases clipboard <kind>`,
+      -- `:Case clipboard <kind> [case]`; `:Cases wordings <kind>` opens and copies it).
+      -- A new wording is one more entry here; a key named like a case field (`title`,
+      -- `summary`, `all`, ...) is ignored by the clipboard.
+      --
+      -- A value is a path, or a table `{ file, root?, stop_after? }`: `root = "repo"`
+      -- makes `file` relative to `repo_root` instead of `workflow_templates_dir`
+      -- (for a document that is not a template), and `stop_after` keeps the text only
+      -- up to and including the first line that equals it. `startCdxChat` is the
+      -- prompt of `Workflow/CDX/StartChat.md` up to its `### Activity Stream:`
+      -- headline, so the stream can be pasted right below it.
+      -- wordings = {
+      --   firstResponse = "FirstResponses/FirstResponse.md",
+      --   firstResponseDelay = "FirstResponses/FirstResponse_Delay.md",
+      --   germanSpeaker = "GermanSpeaker.md",
+      --   startCdxChat = {
+      --     file = "Workflow/CDX/StartChat.md",
+      --     root = "repo",
+      --     stop_after = "### Activity Stream:",
+      --   },
+      -- },
+      -- The first-reply checklist (`:Case checklist`, the `ask` clipboard field):
+      -- `max_questions` caps how many open questions `:Case clipboard ask` and
+      -- `:Case checklist draft` put into one message, `lang = "de"` takes the `_DE`
+      -- wording of a question when there is one, `skip` is a list of item ids to leave
+      -- out, and `extra` a list of your own items, each `{ id, block, text,
+      -- stage?, snippet?, keywords?, files? }` (`block`: pre|ask|cond|send, `keywords`
+      -- make it conditional, `files` are Lua patterns for the evidence, matched
+      -- against the lower-cased file name). A wrong value degrades to the default
+      -- and is reported by `:checkhealth`.
+      -- checklist = { max_questions = 4, lang = "en", skip = {}, extra = {} },
+      -- Folders under `workflow_templates_dir` whose `*.md` files are ALL wordings,
+      -- keyed by the file name without the extension — adding a wording is dropping
+      -- a file there, no entry in `wordings` needed. `Wordings/Logs` holds the
+      -- "how do I get this log" texts for customers (`TCSupportInfo`,
+      -- `CommanderLog`, `TBoxLog`, ...; a `_DE` file is the German one), and
+      -- `Wordings/Ask` the questions of the first-reply checklist. A key two folders
+      -- both supply is registered as `<folder>-<key>` instead (and warned about); a
+      -- `wordings` entry of the same name wins. A folder that does not exist is
+      -- skipped.
+      -- wording_dirs = { "Wordings/Logs", "Wordings/Ask" },
+      -- How `:Case new` asks for what it needs.
+      --
+      -- `"steps"` (the default) asks one question at a time: the number, the area
+      -- (only when several are configured), then the fields -- one prompt each, with a
+      -- way back to correct an earlier answer. `"form"` shows everything at once in
+      -- one float (`ui.kit.sheet`): the number, the area and the fields as labelled
+      -- rows, the number checked while it is typed, Submit/Cancel buttons. Both end in
+      -- the same dry-run, confirmation and scaffolding. `:Case new --steps` /
+      -- `--form` picks one for a single call and wins over this option.
+      -- new_mode = "steps",
+      -- Spotlight markings per case (`casedesk.case_spotlights`, docs/FEATURES.md).
+      -- spotlight.nvim is an OPTIONAL dependency: without it nothing here does
+      -- anything and `:Case spotlight save|load|...` say so.
+      --
+      -- - `enabled`: master switch. `false` switches the whole feature off: no
+      -- automatic save/restore, and the explicit commands refuse.
+      -- - `follow`: while a case is "bound" to the active spotlights, they are
+      -- written to its folder as they change; entering another case saves the
+      -- old one and restores the new one's (an empty set clears), so markings of
+      -- two cases never mix. Markings that belong to no case (made before any
+      -- case was opened, or restored by spotlight.nvim's own session persistence)
+      -- are never replaced unasked: casedesk says so, and `:Case spotlight load`
+      -- replaces them on purpose. `false` leaves only the explicit commands.
+      -- - `filename`: the file in the case folder. A plain name ending in `.json`,
+      -- which `detect.last_touched` skips (as it does `.case.json`), so saving
+      -- markings does not reset the stale clock; only a real change is written,
+      -- and `:Case timeline` counts it as a touch like any other file. The texts can be
+      -- customer data (error strings, ids, names) and the case folder may live in
+      -- a git repository -- ignore `<filename>*` (one line covers the file, the
+      -- temporary `.tmp` copy written next to it and the `.corrupt` copy of an
+      -- unreadable one, all with the same texts); `:checkhealth casedesk` names
+      -- whichever of the three is not ignored. Nothing here is ever part of an
+      -- export, an anonymization or an AI request.
+      -- The markings belong to the last case entered, not to the focused buffer:
+      -- what is marked in a buffer outside any case is saved to that case. When
+      -- the file of a case that is entered cannot be read, the list is let go of
+      -- (a warning says so) instead of writing into the case that was left.
+      -- - `origin_filter`: while bound, only markings that plausibly belong to the
+      -- case are WRITTEN to its folder: those without a file origin, those made
+      -- in a file inside the case folder, and those already part of the case's
+      -- file. Markings from files outside the case stay active but are not
+      -- saved (an info says so once per case); `:Case spotlight save` keeps them
+      -- on purpose. Entering another case never drops them unasked: the list
+      -- stays as it is and is unbound (an info says so; `:Case spotlight load`
+      -- asks before replacing it). Needs `spotlight.origin_path` (spotlight.nvim);
+      -- without it everything is saved. `false` saves every marking, as before.
+      -- - `warn_unignored`: `:checkhealth casedesk` warns when the markings file (or
+      -- its `.tmp`/`.corrupt` copy) is not git-ignored. Set `false` when the
+      -- file is MEANT to travel through git: a conflict of goals, since the file
+      -- is what syncs the markings between machines, while its texts can be
+      -- customer data in the git history. Only the warning goes away; nothing is
+      -- ignored or committed for you.
+      -- - `debounce_ms`: a burst of toggles is one write, this long after the last.
+      -- spotlight = {
+      --   enabled = true,
+      --   follow = true,
+      --   origin_filter = true,
+      --   warn_unignored = true,
+      --   filename = ".spotlight.json",
+      --   debounce_ms = 1000,
+      -- },
+      -- AI provider choice and the safety net around sending (`casedesk.ai`,
+      -- docs/KI.md). One provider is used by EVERY casedesk AI action; nothing
+      -- ever resolves `"auto"`, so a stray key in the environment cannot pick a
+      -- provider for you.
+      --
+      -- - `provider`: the one provider (an `ai.nvim` provider id). Switched for the
+      -- session with `:Case ai provider <name>`, or for one call with
+      -- `--provider=<name>`.
+      -- - `allowed`: this machine's allow-list, narrowing whatever `ai.nvim`'s own
+      -- `policy.allowed` and the environment variable `CASEDESK_AI_ALLOWED`
+      -- (comma separated, set per machine like `$REPOS_DIR`) already say -- it
+      -- can only make the list smaller. Empty (the default): no extra narrowing.
+      -- A provider outside the effective list is reachable only through the test
+      -- mode (confirmation, session only, every send asked again).
+      -- - `fallback`: providers tried in order when `provider` is unavailable. Empty
+      -- (the default): never switch silently. Entries must be on the allow-list.
+      -- - `confirm_send`: ask before every automatic send. Customer data and
+      -- attachments are always asked about, whatever this says.
+      -- - `require_anonymize`: refuse to send customer data that was not run
+      -- through `:Case anonymize`. Off by default since the IT release of
+      -- 2026-10-10 (the warning popup guards the send); always on in test mode.
+      -- - `audit`: write one metadata line per send (no content) to
+      -- `stdpath("state")/casedesk/ai-audit.jsonl`.
+      -- - `statusline`: show `AI:<provider>` in the statusline segment.
+      -- - `log_budget_bytes`: the most log text one `:Case ki logs` request carries
+      -- (all selected files together, after anonymizing and condensing). A log
+      -- longer than its share is cut to its head, its tail and the lines around
+      -- errors, with the omissions marked -- never silently.
+      -- ai = {
+      --   provider = "claude",
+      --   allowed = {},
+      --   fallback = {},
+      --   confirm_send = true,
+      --   require_anonymize = false,
+      --   audit = true,
+      --   statusline = true,
+      --   log_budget_bytes = 120000,
+      -- },
+      -- How many days back `:Cases marks` (`<leader>cm`) lists the cases you
+      -- worked on.
+      -- case_marks_days = 14,
+      -- After how many working days of waiting on T2 a SWAT ticket shows under "zu prüfen"
+      -- in `:Cases swats` (`casedesk.swats`).
+      -- swat_check_days = 5,
+      -- Capitalised words that stand where a name could but are none: after a
+      -- greeting ("Hi Team,"), before "'s" ("Tosca's"), as a word of a person's
+      -- name (never replaced on its own). Compared in any letter case. Extend it
+      -- for a product or a team word of your own cases.
+      -- anonymize_not_names = {
+      --   "Person",
+      --   "Team",
+      --   "All",
+      --   "Everyone",
+      --   "Everybody",
+      --   "Colleagues",
+      --   "Sir",
+      --   "Madam",
+      --   "Support",
+      --   "Kollegen",
+      --   "Kollegin",
+      --   "Kollege",
+      --   "Zusammen",
+      --   "Customer",
+      --   "Partner",
+      --   "Tosca",
+      --   "Tricentis",
+      --   "SAP",
+      --   "Windows",
+      --   "Microsoft",
+      --   "Azure",
+      --   "Commander",
+      --   "Engineering",
+      --   "Today",
+      --   "Tomorrow",
+      --   "Yesterday",
+      --   "Monday",
+      --   "Tuesday",
+      --   "Wednesday",
+      --   "Thursday",
+      --   "Friday",
+      --   "Saturday",
+      --   "Sunday",
+      --   -- words before "'s" that are no possessive ("Here's the link", "That's fine")
+      --   "Here",
+      --   "There",
+      --   "That",
+      --   "What",
+      --   "Let",
+      --   "It",
+      --   "Who",
+      --   "Where",
+      --   -- "Works Council" below a sign-off
+      --   "Council",
+      -- },
+      -- Rules of your own for `anonymize.lua` (`casedesk.anonymize_rules`), one per
+      -- entry, in the format of `anonymize_rules_file` (docs/anonymize-rules.md):
+      -- `name Jane Doe`, `not-name Tosca`, `after "call with" name`,
+      -- `after "customer:" 3 words as Customer`, `after "Ticket ID:" rest as Ticket`,
+      -- `pattern "INC%d+" as Ticket`, `pattern "routed to (%u%l+)" name` (Lua patterns),
+      -- `regex "\v(INC|REQ)\d+" as Ticket` (Vim regex).
+      -- anonymize_rules = {},
+      -- A file of such rules, read again when it changes; a missing file is no
+      -- error. It may hold names, so it lives next to the case data. Follows
+      -- `repo_root` unless set.
+      -- anonymize_rules_file = M.repo_root .. "/Workflow/anonymize.rules",
+      -- Words that, directly before a digit run, mark it as a phone number
+      -- (`anonymize.lua`). Matched case-insensitively at a word start. A bare digit
+      -- run without a label or a `+`/`00` prefix is NEVER redacted as a phone
+      -- number: a 7-digit case id and a phone number look identical, and wiping
+      -- case ids would wreck the text the prompt exists to carry.
+      -- anonymize_phone_labels = {
+      --   "phone",
+      --   "telephone",
+      --   "tel",
+      --   "mobile",
+      --   "cell",
+      --   "contact number",
+      --   "contact no",
+      --   "telefon",
+      --   "handy",
+      --   "rufnummer",
+      --   "fon",
+      -- },
+      -- `:Case anonymize diff [nr]` -- the split view (`casedesk.ui.anonymize_diff`):
+      -- pasted text on the left, the redacted result on the right.
+      -- - `debounce_ms`: how long after the last change on the left the right side
+      -- is redacted again (grows with the text's length, `lib.nvim.debounce.buffer`).
+      -- - `keys`: overrides of the view's buffer-local keys, by action name
+      -- (`{ copy = "gy" }`, `{ send = false }`, `{ copy = { "Y", "gy" } }`) --
+      -- empty by default, the defaults live with the actions in that module.
+      -- anonymize_diff = {
+      --   debounce_ms = 200,
+      --   keys = {},
+      -- },
+      -- Terms that name the same thing, so the lexical searches (`similar.lua`,
+      -- `solution.lua` — both tokenize through `casedesk.synonyms`) treat them as
+      -- one. The corpus names one subject with changing words ("Team agent",
+      -- "DEX agent"); without this TF-IDF scores two cases about the same problem
+      -- as unrelated. Shape: canonical phrase -> variants. A variant is replaced
+      -- by its canonical phrase before tokenizing, case-insensitively and
+      -- whole-word; spaces and hyphens inside a variant match each other. Longer
+      -- variants win over shorter ones, so `dex agent` is rewritten before `dex`.
+      -- A canonical phrase must not contain another entry's variant.
+      -- synonyms = {
+      --   ["distributed execution agent"] = { "dex agent", "team agent" },
+      --   ["distributed execution"] = { "dex" },
+      --   ["tosca user administration"] = { "tua" },
+      --   ["orchestrated service virtualization"] = { "osv" },
+      --   ["test data service"] = { "tds" },
+      --   ["group policy object"] = { "gpo" },
+      --   ["sap web extension"] = { "xscan" },
+      -- },
+      -- Topics with a "check this first" checklist. A keyword in the case title (at
+      -- `:Case new`) or in a pasted Activity Stream (`:Case activity`) offers it;
+      -- `:Case preflight <topic>` writes it into the case from its template.
+      -- `dex`: three companies independently hit Windows GPO hardening blocking
+      -- unattended execution, each found it as the third diagnostic step; the
+      -- checklist puts it first (case-corpus-analyse-2026-09-30.md §3).
+      -- keywords  whole words or phrases, case-insensitive
+      -- file      where the checklist is written, relative to the case folder
+      -- template  a `casedesk.templates` tag
+      -- summary   the one line the hint shows
+      -- preflights = {
+      --   dex = {
+      --     keywords = { "dex", "distributed execution", "team agent", "unattended", "autologon" },
+      --     file = "Research/DEX_Preflight.md",
+      --     template = templates.DEX_PREFLIGHT,
+      --     summary = "unbeaufsichtigtes DEX — Windows-GPO (Anmelde-Banner, Passwort-Policy, Autologon) zuerst prüfen, nicht erst als dritten Schritt",
+      --   },
+      -- },
+      -- Your own time zone as proposals to a customer or to Tier 2 name it
+      -- (`{tz}` in a `config.prepare` template). A zone NAME, not an offset: an
+      -- offset taken on the day the file is written is wrong for every slot on the
+      -- other side of a daylight-saving change.
+      -- timezone = "Europe/Vienna (CET/CEST)",
+      -- What `:Case prepare <topic>` writes into a case: everything a recurring
+      -- piece of case work needs, from one template — checklists, the drafts to
+      -- the people involved, the record afterwards. Written on request
+      -- (`casedesk.scaffold`, shared with `preflights`), never over an existing
+      -- file; `--new` writes the next numbered one.
+      -- `remoteSession`: a remote call between you, Tier 2 and the customer, after
+      -- MyDomains/Tosca/Onboarding/Processes/CaseRelated/HowToHoldRemoteSessions.md
+      -- (Confluence SUP 729485017).
+      -- file      where it is written, relative to the case folder
+      -- template  a `casedesk.templates` tag
+      -- summary   the one line the hint shows
+      -- keywords  optional: whole words or phrases in the title or a pasted
+      -- stream that offer the topic, as for `preflights`
+      -- docs      template token -> `{ path, url }` (or the bare path): `{<token>}`
+      -- becomes a link to `repo_root/<path>` relative to `file`,
+      -- `{<token>url}` the Confluence page; `:checkhealth casedesk`
+      -- reports a path that does not exist
+      -- prepare = {
+      --   remoteSession = {
+      --     file = "Research/RemoteSession.md",
+      --     template = templates.REMOTE_SESSION,
+      --     summary = "Remote-Session mit T2 und Kunde: Checklisten, Anfrage an T2, Terminvorschlag und Einladung an den Kunden, REM-Objekt, Zusammenfassung",
+      --     keywords = {
+      --       "remote session",
+      --       "remote call",
+      --       "remote meeting",
+      --       "web session",
+      --       "screen sharing",
+      --       "teams meeting",
+      --       "teams call",
+      --       "zoom meeting",
+      --       "zoom call",
+      --     },
+      --     docs = {
+      --       guide = {
+      --         path = "MyDomains/Tosca/Onboarding/Processes/CaseRelated/HowToHoldRemoteSessions.md",
+      --         url = "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/729485017/Onboarding+How+to+hold+Remote+Sessions",
+      --       },
+      --       rem = {
+      --         path = "MyDomains/Tosca/Onboarding/ServiceNow/AgentWorkspace/Cases/02_RemoteSessions.md",
+      --         url = "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/729483334/Onboarding+Remote+Sessions",
+      --       },
+      --       handover = {
+      --         path = "MyDomains/Tosca/Onboarding/Processes/CaseRelated/TimeZoneHandovers.md",
+      --         url = "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/729485211/Onboarding+Time+zone+handovers",
+      --       },
+      --       t2 = {
+      --         path = "MyDomains/Tosca/Onboarding/Processes/CaseRelated/HowToCollabWithT2.md",
+      --         url = "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/729484966/Onboarding+How+to+collaborate+with+T2",
+      --       },
+      --       summary = {
+      --         path = "MyDomains/Tosca/Onboarding/Processes/CaseRelated/SummaryGuideline.md",
+      --         url = "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/729484982/Onboarding+Summary+guideline",
+      --       },
+      --       policies = "Workflow/CDX/CDX_Ressourcen/Policies_CDX.md",
+      --       wordings = "Workflow/Templates/Wordings/RemoteCall_RemoteSession/RemoteCall_RemoteSession_Wordings.md",
+      --     },
+      --   },
+      -- },
+      -- When a title reads as a "how does X work / what is best practice" question
+      -- with nothing broken in it, the case is probably enablement or consulting,
+      -- not a defect (`casedesk.hints.scope_signal`). ANY word in `defect_words`, or
+      -- an error code, cancels the hint: a missed hint costs nothing, a wrong "this
+      -- is consulting" on a real defect costs a case. `links` are shown with it.
+      -- scope_hint = {
+      --   question_phrases = {
+      --     "how does",
+      --     "how do i",
+      --     "how to",
+      --     "how can i",
+      --     "best practice",
+      --     "best practices",
+      --     "what is the difference",
+      --     "can you explain",
+      --     "need to understand",
+      --     "want to understand",
+      --     "would like to understand",
+      --     "recommendation",
+      --     "wie funktioniert",
+      --     "wie kann ich",
+      --     "wie macht man",
+      --     "empfehlung",
+      --     "unterschied zwischen",
+      --   },
+      --   defect_words = {
+      --     "error",
+      --     "errors",
+      --     "exception",
+      --     "fail",
+      --     "fails",
+      --     "failed",
+      --     "failure",
+      --     "crash",
+      --     "crashes",
+      --     "timeout",
+      --     "cannot",
+      --     "unable",
+      --     "not working",
+      --     "stuck",
+      --     "hangs",
+      --     "denied",
+      --     "missing",
+      --     "bug",
+      --     "issue",
+      --     "problem",
+      --     "fehler",
+      --     "fehlermeldung",
+      --     "funktioniert nicht",
+      --     "nicht",
+      --     "kein",
+      --     "keine",
+      --   },
+      --   links = {
+      --     "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/6013681690/14.+Support+vs+Consulting+-+What+We+Take+and+What+We+Deflect+-+Agent",
+      --     "https://tricentis.atlassian.net/wiki/spaces/SUP/pages/6026002514/17.+Consulting+and+Enablement+Requests+-+Free-Tier+and+No-Contract+Customers+-+Agent",
+      --   },
+      -- },
+      -- The `:Case imp` notes — things worth knowing the next time a case of the
+      -- same company or contact comes in — relative to `repo_root`, one JSON object
+      -- per line (`casedesk.imp`). In the private work repo, never the plugin
+      -- repo: it is customer knowledge. One line per note, not one JSON document,
+      -- so a `git pull` from the other machine merges it line by line.
+      -- imp_file = "Cases/Important.jsonl",
+      -- Where the engine data sheets live, relative to `repo_root`: one folder per
+      -- engine with a `00_Engine.md` inside. `:Case ki`'s fact block points at the
+      -- matching sheet (`extract/facts.lua`); with no such folder it says nothing.
+      -- engine_lab_dir = "EngineLab/Engines",
+      -- Words in a case title that point at an engine, keyed by the sheet's folder
+      -- name under `engine_lab_dir`. Whole words, case-insensitive. Deliberately
+      -- narrow: a broad word ("sap", "browser") would name an engine on nearly
+      -- every case, and a hint that is always shown is no hint.
+      -- engine_hints = {
+      --   SAP = { "fiori", "ui5", "sapui5", "nwbc", "sap gui", "xscan" },
+      --   Mobile = { "mobile", "appium", "android", "ios" },
+      --   API = { "api", "rest", "swagger", "openapi" },
+      --   Database = { "database", "sql", "oracle", "odbc" },
+      --   Excel = { "excel", "xlsx", "xls" },
+      --   HTML_XBrowser = { "xbrowser", "html", "chrome", "edge", "firefox" },
+      --   Image_OCR = { "ocr", "image recognition" },
+      --   Mail = { "mail", "outlook", "smtp", "imap" },
+      --   Mainframe = { "mainframe", "3270", "5250" },
+      --   PDF = { "pdf" },
+      --   TextStream = { "textstream", "text stream", "fixed width", "csv" },
+      --   UIA_Desktop = { "uia", "wpf", "winforms" },
+      -- },
+      -- Tosca object-type names, in the spelling the product uses. `:Case ki
+      -- import` rewrites "execution list" / "Execution-List" / "executionlist" in
+      -- an AI answer to `` `ExecutionList` `` (`casedesk.keywords`). Each entry is
+      -- split at its capitals to find the variants, so write it in CamelCase; a
+      -- longer name is tried before one it contains. Singular whole words only.
+      -- tosca_keywords = {
+      --   "ExecutionList",
+      --   "TestCase",
+      --   "TestCaseTemplate",
+      --   "TestStep",
+      --   "TestStepValue",
+      --   "TestSheet",
+      --   "XModule",
+      --   "XTestStep",
+      -- },
+      -- `:Case activity`'s optional follow-ups, asked after the stream is filed and
+      -- every auto-detected fact is saved: "anonymize now?" (the `:Case anonymize`
+      -- viewer, clipboard included) and "translate now?" (the anonymized text when
+      -- the first was answered yes, else the raw stream). `false` switches a
+      -- question off. The translation question only appears when its engine is
+      -- there, and it IS the mandatory warning popup -- no send without a yes.
+      -- activity_ask_anonymize = true,
+      -- activity_ask_translate = true,
+      -- Which engine the `:Case activity` translation uses: `"language"`
+      -- (`language.nvim`, no AI) or `"ai"` (only through the `casedesk.ai`
+      -- facade: data class `kunde`, its gate, allow-list and audit line).
+      -- activity_translate_engine = "language",
+      -- `:Case ki import`: after the English reply draft is filed, offer a German
+      -- version of it for the internal note -- appended to `Notes.md`, never to the
+      -- draft. Off by default: the import asks nothing more than before unless this
+      -- is switched on. The question is the mandatory warning popup itself, so a no
+      -- sends nothing. `ki_import_translate_engine` as `activity_translate_engine`.
+      -- ki_import_ask_german_note = false,
+      -- ki_import_translate_engine = "language",
+      -- Folders of the work repo (relative to `repo_root`) whose Markdown files
+      -- each explain ONE term: the H1 is the term, the rest its explanation.
+      -- `:Cases terminology` lists them next to the `## Term` entries of every
+      -- `Terminologie.md`. Empty list: only the `Terminologie.md` files.
+      -- terminology_dirs = { "Terminologie", "Cases/SAP_Support/Terminologie" },
     },
   },
 
@@ -1155,6 +1799,38 @@ return {
       --   -- finished; only these files are touched. The headless CLI reads $TASKS_MARKER_DOCS instead.
       --   -- marker_docs = {},
       -- },
+      -- How `set`, `new`, the dashboard and the moves write a task or plan reference
+      -- (`blocked_by`, `after`, `plan`): "plain" ids (`<area>/<slug>`) | "wikilink"
+      -- (Obsidian `[[<slug>]]`). A value a file already holds keeps its form; both are
+      -- always read. The headless CLI reads $TASKS_LINKS instead.
+      -- links = "plain",
+      -- Named lists (a filter combination plus a sort order), keyed by name.
+      -- lists = { ["my-list"] = { effort = "<=S", value = ">=4", sort = "roi" } },
+      -- A task is a quick win with at least `min_value` (1-5) and at most `max_effort`
+      -- (`XS`..`XL` or days like `0.5d`); both must be written on the task.
+      -- quick_wins = { min_value = 4, max_effort = "S" },
+      -- `:Tasks sheet-run`: the path of testing.nvim's `scripts/testing.lua`
+      -- (nil = found like a dependency).
+      -- sheet_run = { testing_cli = nil },
+      -- reminders = {
+      --   -- One line at startup when reminders (`remind:`) are due (once per session,
+      --   -- only with a UI).
+      --   on_start = true,
+      -- },
+      -- `attach --latest` (the `ga` key): where it looks and how old a file may be.
+      -- attach = {
+      --   -- Folders to look into; empty = the usual screenshot folders of the system.
+      --   screenshot_dirs = {},
+      --   -- Only a file modified within this many seconds is taken, otherwise it asks.
+      --   max_age_s = 300,
+      -- },
+      -- Which finished tasks `<Tab>` offers for `:Tasks open` and `preview`: true = all,
+      -- false = none, a number = only those finished in the last N days (a task of any
+      -- age can still be typed in full).
+      -- completion = { finished = true },
+      -- Window of the `:Tasks new` form: "float" | "split" | "vsplit" | "current"
+      -- (`:Tasks new mode=...` overrides it for one call).
+      -- form = { mode = "float" },
       -- Plan steps in a task buffer.
       -- steps = {
       --   -- Ask whether to finish the task when the LAST open step of `## Plan` is ticked
@@ -1169,9 +1845,11 @@ return {
       --   --   prio = "p", -- advance priority of marked (else current) tasks
       --   --   done = "D", -- finish (asks first)
       --   --   filter = "f", -- set a filter chip
+      --   --   lists = "gl", -- named lists: apply, save, rename or delete one
       --   --   sort = "o", -- cycle the sort
       --   --   export = "e", -- export marked (else all shown) tasks
       --   --   rescan = "r", -- rescan now
+      --   --   attach = "ga", -- attach a screenshot to the task under the cursor (clipboard image, else the newest screenshot)
       --   --   backlog = "gb", -- Backlog picker of the area under the cursor
       --   --   roadmap = "gr", -- ROADMAP of the area under the cursor
       --   --   preview = "gp", -- preview the task file in the browser
@@ -1187,9 +1865,11 @@ return {
       --   --   prio = "<M-p>",
       --   --   done = "<M-d>",
       --   --   filter = "<M-f>",
+      --   --   lists = "<M-l>",
       --   --   sort = "<M-o>",
       --   --   export = "<M-e>",
       --   --   rescan = "<M-r>",
+      --   --   attach = "<M-i>",
       --   --   backlog = "<M-b>",
       --   --   roadmap = "<M-m>",
       --   --   preview = "<M-v>",
@@ -1275,6 +1955,12 @@ return {
 
       -- Zusaetzliche Umgebungsvariablen fuer jedes neue Terminal, z.B. { FOO = "1" }. Default: {}.
       -- env = {},
+
+      -- Programs in a native terminal can ask this Neovim: they get $NVIM_ASK, the path of lib.nvim's
+      -- `bin/nvim-ask` (a git hook on Windows has no terminal to ask on otherwise). See docs/ask.md.
+      -- ask = {
+      --   enable = true,
+      -- },
 
       -- In den Terminal-Modus wechseln, wenn ein Terminal ueber die API Fokus bekommt
       -- (toggle/open). Default: true.
