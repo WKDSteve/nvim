@@ -113,6 +113,28 @@ return {
       --       return vim.fn.stdpath("config")
       --     end,
       --   },
+      --   -- :GopathToReposDir / :GopathToNvimDir also place a BARE RELATIVE path
+      --   -- that was abbreviated from the middle, e.g.
+      --   -- `team-notes/project.nvim/ROADMAP/ROADMAP.md`: the directory
+      --   -- named by its first segment is searched for below the command's root
+      --   -- (the lib.nvim.fs.roots root of each shorten_dirs variable, or any
+      --   -- shorten_known_dirs entry), and
+      --   -- when the whole path exists there it becomes
+      --   -- `$REPOS_DIR/Notes/team-notes/casedesk.nvim/...`.
+      --   -- `enable = false` turns the search off.
+      --   root_search = {
+      --     enable = true,
+      --     max_depth = 3, -- levels below the root the first segment may sit at
+      --     max_dirs = 4000, -- directories scanned per lookup, at most
+      --   },
+      -- },
+
+      -- A commit hash under the cursor (`a02ddae`, `repo@a02ddae`) opens that commit. `open` is where `gP` shows it:
+      -- "float" | "split" | "vsplit" | "tab" | "current" (`git show` in a read-only buffer) or "web" (the commit page
+      -- of the remote, in the browser). `g|`, `g\` and `g}` pick a split, a vsplit and a tab whatever `open` says.
+      -- commit = {
+      --   enable = true,
+      --   open = "float",
       -- },
 
       -- Offer to create a resolved-but-missing file instead of erroring
@@ -138,6 +160,11 @@ return {
       --   excluded_dirs = { ".git", ".github", "node_modules", "target", "build", ".cache", "venv" }, -- replaces the list
       --   watch_patterns = nil, -- string[]; nil = { "*.lua", "*.vim" }
       --   auto_rebuild_on_save = false,
+      --   -- Most file paths one cache build indexes (breadth-first, so the shallow
+      --   -- levels of every root survive). Bounds the size of the cache file and the
+      --   -- startup cost of loading it when a root is huge (e.g. a session started in
+      --   -- %TEMP%); beyond the cap the live search takes over.
+      --   max_paths = 300000,
       -- },
 
       -- Whole-line path extraction.
@@ -191,6 +218,9 @@ return {
         -- probe = "<leader>pp",
         -- Check the path and offer to create it when missing.
         -- check = "gC",
+        -- Open the commit hash under the cursor, asking where (web, float, split,
+        -- vsplit, tab, current) instead of using `commit.open`.
+        -- ask_commit = "<leader>pc",
       },
 
       -- User commands; `false` skips one, `commands = false` skips all.
@@ -319,12 +349,33 @@ return {
         --     delay_ms = 1000,
         --     command = nil,  -- nil finds a browser on PATH/usual install dirs
         --   },
+        --   -- Hosts a hover may authenticate to, for the fetch and the PDF download (needs
+        --   -- `fetch`; never used by `shot`). The token is never in the table: `token_env`
+        --   -- names an environment variable. The host part of `match` takes no wildcard,
+        --   -- the path part may use `*`; https only.
+        --   -- e.g. { { match = "acme.atlassian.net", user = "me@acme.com", token_env = "CONFLUENCE_TOKEN" } }
+        --   -- (without `user` the token is sent as a Bearer). Replaces the list.
+        --   auth = {},
+        --   -- Fetched link text kept on disk across sessions, for documentation that
+        --   -- changes rarely: stdpath("cache")/hover.nvim/links (`:Hover links cache clear`).
+        --   cache = {
+        --     persist = false,   -- nothing is written until this is on AND `patterns` names something
+        --     patterns = {},     -- globs of the links to keep, e.g. { "docs.example.com/*" }
+        --     max_age_days = 7,  -- older pages are refreshed in the background on their next hover
+        --     stale_ok = true,   -- show a page older than max_age_days while it is refreshed; false waits
+        --   },
+        --   -- Links shown as a file of their own (for a page behind single sign-on that
+        --   -- nothing can render): { match = glob|glob[], show = path }[]; the first match
+        --   -- wins and the extension of `show` decides the preview. Replaces the list.
+        --   -- e.g. { { match = "wiki.example.com/a/*", show = "~/shots/a.pdf" } }
+        --   pins = {},
         -- },
 
         -- Targets with no link syntax: a path in prose, a comment, :messages.
         -- paths = {
         --   enabled = true,  -- bare paths are targets at all
         --   missing = true,  -- mark a bare path that resolves to nothing
+        --   notify_missing = true, -- an explicit request on such a path also says so in a message (needs `missing`)
         --   code = false,    -- also look for paths inside executable code,
         --                    -- not just comments/strings (Treesitter-gated)
         --   scope = { prose = {}, code = {} }, -- extra capture families to trust
@@ -350,6 +401,9 @@ return {
           -- step = "10%",
           -- Still's render width in pixels; nil lets media.nvim choose.
           -- width = nil,
+          -- How far the transport's seek keys (`transport_keys.seek_forward` / `seek_back`)
+          -- jump, in seconds; clamped to the file.
+          -- seek_seconds = 5,
 
           -- What `<CR>` does: "window" (default) opens a real mpv window, or
           -- without mpv the system's own player; "inline" paints block
@@ -442,7 +496,11 @@ return {
         -- position_keys = { next = { "<M-n>" } }, -- step to the next position-preview contributor
         -- zoom_keys = { into = { ">" }, out = { "|" }, reset = { "=" } },
         -- zen_keys = { toggle = { "F" } },
-        -- transport_keys = { toggle = { "<CR>" }, forward = { "." }, back = { "," } }, -- video play/pause, frame step
+        -- copy_keys = { copy = { "Y" } }, -- copy what the float shows (lines to the registers and clipboard, a drawn picture as a file path)
+        -- transport_keys = {
+        --   toggle = { "<CR>" }, forward = { "." }, back = { "," }, -- video play/pause, frame step
+        --   seek_forward = { "<Right>" }, seek_back = { "<Left>" }, -- jump `video.seek_seconds`
+        -- },
 
         -- Keymaps this plugin sets in the user's own namespace.
         -- keymaps = { show = false }, -- string|string[]|false; a key for `:Hover show`
@@ -983,6 +1041,24 @@ return {
         -- Disable the autocmds of single features: { auto_reveal = false }.
         -- autocmds = nil, -- table<string, false>
 
+        -- Named root directories that portable paths are written with: a symlink's
+        -- target and its messages, a path copied with `[e` and a Markdown link
+        -- inserted with insert_path = "env" come out as
+        -- `$REPOS_DIR/foo.nvim/x.lua` / `$NVIM_CONFIG_DIR/lua/x.lua` instead of
+        -- `E:/repos/foo.nvim/x.lua`, so the text (and the link) means the same on a
+        -- machine where the checkout sits on another drive. Explicitly relative
+        -- actions (`relative`, `buffer_relative`, Markdown links relative to the
+        -- buffer), ones that need a real path (`uri`, open-with, the OS
+        -- clipboard) and the absolute copies (`[a`, `]a`, `[R`, `[f`, `[F`,
+        -- insert_path = "absolute") are not affected. See docs/configuration.md.
+        -- env_roots = {
+        --   enable = true, -- false: never fold, write plain absolute paths
+        --   -- vars = { "REPOS_DIR" },  -- environment variables whose value is a root
+        --   --                          -- (default; setting it REPLACES the list)
+        --   nvim_config = true, -- $NVIM_CONFIG_DIR = stdpath("config"), no env var needed
+        --   extra = {}, -- more roots: { WKDBOOKS = "E:/repos/WKDBooks", NOTES = function() ... end }
+        -- },
+
         -- Reference engine: keeps markdown links and require()/import statements
         -- pointing at the right file after a rename / move / delete.
         refs = {
@@ -1045,6 +1121,20 @@ return {
           --   max_files = 5000, -- cap for the ripgrep-free fallback walk
           --   timeout_ms = 3000,
           -- },
+          -- On-demand reports over the reference engine: `:Filetree references` (who
+          -- points at this file) and `:Filetree refs unused` (which files in a folder
+          -- nobody points at). Read-only counterpart of the rewrite pipeline above,
+          -- so they run whatever `enabled`/`on_*` say.
+          -- report = {
+          --   -- How `:Filetree references` shows the list: "popup" (a float, <CR> jumps)
+          --   -- or "picker" (telescope / fzf-lua / quickfix, per `picker` above).
+          --   view = "popup",
+          --   -- `extensions` is left unset on purpose (list-shaped, see the note under
+          --   -- `outgoing_assets`): `refs unused` then falls back to the asset
+          --   -- allowlist of `filetree.refs.assets`; `--all` lifts the filter.
+          --   -- extensions = { "png", "jpg", ... }
+          --   max_files = 5000, -- files one `refs unused` sweep checks at most
+          -- },
           -- Keep the replaced lines so `:Filetree refs undo` can put them back.
           -- undo = true,
           -- undo_depth = 10, -- rewrites that stay undoable
@@ -1062,6 +1152,7 @@ return {
         --   search = true, -- find files / grep in dir
         --   info = true, -- node info
         --   marks = true, -- toggle / mark all / unmark all / clear / show marked
+        --   media = true, -- image/PDF nodes only: preview / open externally / OCR / image info
         --   window = true, -- open/close the tree itself
         -- },
 
@@ -1559,6 +1650,9 @@ return {
           --   keymap_next = "]M",
           --   keymap_prev = "[M",
           --   auto_clear_ms = 60000, -- clear all marks after this idle time; 0 disables
+          --   -- Order in which marks hand their paths to every consumer (copy path, file
+          --   -- lists, fileops, ...): "marked" = as they were marked, "tree" = sorted by full path.
+          --   order = "marked",
           -- },
           -- session = {
           --   enabled = true,
