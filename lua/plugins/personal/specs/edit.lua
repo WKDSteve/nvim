@@ -653,6 +653,27 @@ return {
           -- nocode_default = false,
           -- Network timeout per job, in ms.
           -- timeout_ms = 8000,
+          -- deadline_ms = 0, -- budget for the whole call, across all its requests (0 = none; timeout_ms still applies per request)
+          -- max_blocks = 50, -- most requests one call may need; an input that needs more is refused before the first request (0 = no limit)
+          -- max_chars = 0, -- lower the per-request block budget in bytes (DeepL: bytes + 8 per line; 0 = provider default); larger inputs are split on line boundaries
+          -- engine = "ai": translation through ai.nvim (soft dependency, bulk profile, policy-checked).
+          -- ai = {
+          --   provider = nil, -- ai.nvim provider id ("claude", "ollama", ...); nil = ai.nvim's own choice
+          --   model = nil, -- model; nil = the one ai.nvim is configured with
+          --   glossary = nil, -- { Term = "Begriff" } fixed translations, or { "Neovim" } terms kept as they are
+          --   style = nil, -- tone, e.g. "formal, second person"
+          --   max_chars = 6000, -- largest request (prompt + system), in characters
+          --   concurrency = 2, -- requests in flight per run
+          --   max_total_chars = 500000, -- cumulative characters per run (a document); false = no cap
+          -- },
+          -- translate_markdown(): the Markdown-safe document translation (docs/FEATURES/TRANSLATE.md).
+          -- markdown = {
+          --   concurrency = 3, -- requests in flight at once
+          --   max_chars = 3000, -- masked bytes per request (units are batched up to this)
+          --   disk_cache = true, -- keep translated units in stdpath("cache")/language.nvim across sessions
+          --   cache_max_kb = 2048, -- size cap of that file; the oldest entries go first
+          --   keep = {}, -- words that are never translated (proper names), e.g. { "Neovim" }
+          -- },
           -- deepl = {
           --   -- string|nil; or the ENV var DEEPL_API_KEY.
           --   api_key = nil,
@@ -812,9 +833,51 @@ return {
       -- popup is independent and stays on).
       -- Native in-buffer rendering (headings, bullets, checkboxes, code blocks, quotes, inline
       -- markup; `:Markdown render`, `<leader>mrr`) replaces render-markdown.nvim.
-      render = { enabled = true },
+      render = {
+        -- true: on for every markdown buffer (`:Markdown render` toggles it together
+        -- with the table grid). Display only (extmarks); the cursor row shows its text.
+        enabled = true,
+        -- margin = 40, -- rows drawn above and below the visible ones
+        -- debounce_ms = 60,
+        -- headings = {
+        --   enabled = true,
+        --   icons = { "◉ ", "○ ", "✸ ", "✿ ", "◆ ", "◇ " }, -- one per level
+        --   background = true,
+        --   setext = true, -- a paragraph line over `===` / `---` is drawn as a heading
+        -- },
+        -- bullets = { enabled = true, icons = { "•", "◦", "▪" } }, -- one per nesting level
+        -- ordered = { enabled = true }, -- the number of a `1.` / `1)` list item gets its own colour
+        -- checkboxes = { enabled = true, unchecked = "☐", checked = "☑", partial = "◐" },
+        -- -- icons: the language label gets the icon of nvim-web-devicons / mini.icons;
+        -- -- icon_map = { lua = "L" } overrides it per language.
+        -- code = { enabled = true, background = true, label = true, icons = true, icon_map = {} },
+        -- rules = { enabled = true, char = "─" }, -- thematic breaks
+        -- quotes = { enabled = true, icon = "▎", callouts = true },
+        -- inline = {
+        --   enabled = true,
+        --   code = true,
+        --   links = true,
+        --   images = true,
+        --   bold = true, -- **bold** and __bold__
+        --   italic = true, -- *italic* and _italic_ (and ***both***)
+        --   strike = true, -- ~~strike~~
+        --   comments = true, -- <!-- a comment on one line --> is dimmed
+        --   math = true, -- $x$ and $$x$$ on one line: the dollars go, the formula is coloured
+        --   footnotes = true, -- [^id] references and [^id]: definitions lose the brackets and the caret
+        -- },
+      },
       table = {
-        render = { enabled = true },
+        render = {
+          enabled = true,
+          -- min_width = 6, -- narrowest a column is squeezed to before the table overflows
+          -- row_separator = "auto", -- true | false | "auto" (only when a row wraps)
+        },
+        -- Table formats looked for inside documents (list, view, select, render read
+        -- them): "gfm" (pipe tables), "org", "box" (box-drawing), "grid" (MySQL / reST /
+        -- Pandoc grid), "psql", "rst" (simple tables), "wiki" (MediaWiki), "asciidoc",
+        -- "latex" (tabular), "html" (colspan / rowspan). CSV / TSV / JSON are standalone:
+        -- `:Markdown table convert from=csv`. Replaces the list.
+        -- formats = { "gfm" },
         truncate = { enabled = false, max = 40, marker = "…", popup = true },
       },
 
