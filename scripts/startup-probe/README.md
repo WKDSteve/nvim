@@ -133,6 +133,7 @@ powershell -NoProfile -File scripts\startup-probe\measure-machine.ps1
 | `fs` | `fs_stat`, `fs_open`, `nvim_exec2` … in der Summe |
 | `lazy` | Welche Plugins hat lazy.nvim geladen, wodurch (Event, `require`, Dependency von …) und wie lange? |
 | `marks` | Wann kamen `LazyDone`, `VimEnter`, `UIEnter`, `VeryLazy`? |
+| `maps` | Welche Taste wurde mehrfach mit anderer Aktion belegt, wer zuerst, wer danach, in welcher Phase? (`vim.keymap.set` und die `nvim_*set_keymap`; lazy.nvim-Stubs und which-key-Trigger zählen nicht; `:map` und Vimscript nicht gesehen; nur Buffer 1 der Sitzung.) |
 | `report` | Die Zeitachse aus `startup` (wie `:StartupReport`, als Text) |
 
 ---

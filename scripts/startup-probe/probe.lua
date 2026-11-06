@@ -703,6 +703,186 @@ if wanted.marks then
   end
 end
 
+-- ── maps ────────────────────────────────────────────────────────────────────
+-- Every mapping set during startup, so a later registration that overwrites an earlier one shows up
+-- with both call sites and the phase each ran in (`:verbose map` only knows the last one).
+if wanted.maps then
+  local sets = {} ---@type { mode: string, lhs: string, norm: string, buf: integer, at: number, src: string, rhs: string }[]
+  local inside = false
+
+  ---First frame of the stack that is neither Neovim's own runtime nor this probe.
+  ---@return string
+  local function caller()
+    for level = 3, 12 do
+      local info = debug.getinfo(level, "Sl")
+      if not info then
+        break
+      end
+      local src = info.source:gsub("^@", ""):gsub("\\", "/")
+      if
+        not (
+          src:find("/runtime/lua/vim/", 1, true)
+          or src:find("startup-probe", 1, true)
+          or src:find("lua/lib/nvim/bindings/keymap/", 1, true)
+        )
+      then
+        return src:gsub("^.*/lua/", "lua/"):gsub("^.*/nvim%-data/lazy/", "")
+          .. ":"
+          .. info.currentline
+      end
+    end
+    return "?"
+  end
+
+  ---@param modes string|string[]
+  ---@param lhs string
+  ---@param rhs any
+  ---@param buf integer
+  local function record(modes, lhs, rhs, buf)
+    local norm = lhs
+    local ok, term = pcall(vim.api.nvim_replace_termcodes, lhs, true, true, true)
+    if ok then
+      norm = term
+    end
+    ---@type string[]
+    local list = type(modes) == "table" and modes or { modes }
+    for _, mode in ipairs(list) do
+      sets[#sets + 1] = {
+        mode = mode,
+        lhs = lhs,
+        norm = norm,
+        buf = buf,
+        at = now(),
+        src = caller(),
+        rhs = type(rhs) == "string" and rhs or "<function>",
+      }
+    end
+  end
+
+  wrap(vim.keymap, "set", function(orig, modes, lhs, rhs, opts, ...)
+    local was = inside
+    inside = true
+    local ok, err = pcall(function(...)
+      return orig(modes, lhs, rhs, opts, ...)
+    end, ...)
+    inside = was
+    if not ok then
+      error(err, 0)
+    end
+    local buf = type(opts) == "table" and opts.buffer or 0
+    record(modes, lhs, rhs, buf == true and vim.api.nvim_get_current_buf() or buf or 0)
+    return err
+  end)
+  wrap(vim.api, "nvim_set_keymap", function(orig, mode, lhs, rhs, opts)
+    if not inside then
+      record(mode, lhs, rhs, 0)
+    end
+    return orig(mode, lhs, rhs, opts)
+  end)
+  wrap(vim.api, "nvim_buf_set_keymap", function(orig, buf, mode, lhs, rhs, opts)
+    if not inside then
+      record(mode, lhs, rhs, buf)
+    end
+    return orig(buf, mode, lhs, rhs, opts)
+  end)
+
+  local phase_marks = {} ---@type { at: number, name: string }[]
+  vim.api.nvim_create_autocmd({ "VimEnter", "UIEnter" }, {
+    callback = function(e)
+      phase_marks[#phase_marks + 1] = { at = now(), name = e.event }
+    end,
+  })
+  vim.api.nvim_create_autocmd("User", {
+    pattern = { "VeryLazy", "LazyDone", "UIReady" },
+    callback = function(e)
+      phase_marks[#phase_marks + 1] = { at = now(), name = e.match }
+    end,
+  })
+
+  ---The last event that had happened when the mapping was set.
+  ---@param at number
+  ---@return string
+  local function phase_of(at)
+    local name = "before VimEnter"
+    for _, m in ipairs(phase_marks) do
+      if m.at <= at then
+        name = "after " .. m.name
+      end
+    end
+    return name
+  end
+
+  dumps[#dumps + 1] = function(out)
+    -- Same mode, same key, same buffer scope, set more than once with a different right-hand side.
+    -- lazy.nvim puts a stub on every `keys` entry and swaps it for the real mapping when the plugin loads, and
+    -- which-key re-sets its trigger keys: both are bookkeeping, not a plugin overriding another.
+    local infra = { "lazy/core/handler/keys.lua", "which-key/triggers.lua" }
+    local ignored = 0
+    local groups, order = {}, {}
+    for _, s in ipairs(sets) do
+      local skip = false
+      for _, pat in ipairs(infra) do
+        skip = skip or s.src:find(pat, 1, true) ~= nil
+      end
+      if skip then
+        ignored = ignored + 1
+      else
+        local key = s.mode .. "\0" .. s.norm .. "\0" .. s.buf
+        if not groups[key] then
+          groups[key] = {}
+          order[#order + 1] = key
+        end
+        table.insert(groups[key], s)
+      end
+    end
+    local clashes = {}
+    for _, key in ipairs(order) do
+      local list = groups[key]
+      local differs = false
+      for i = 2, #list do
+        if list[i].rhs ~= list[1].rhs or list[i].rhs == "<function>" then
+          differs = true
+        end
+      end
+      if #list > 1 and differs then
+        clashes[#clashes + 1] = list
+      end
+    end
+    add(
+      out,
+      "== maps: %d mappings set (%d by lazy.nvim / which-key bookkeeping, not compared), %d keys set again with another action",
+      #sets,
+      ignored,
+      #clashes
+    )
+    add(
+      out,
+      "   seen: vim.keymap.set, nvim_set_keymap, nvim_buf_set_keymap. Not seen: :map commands, Vimscript."
+    )
+    summary.maps = { total = #sets, ignored = ignored, rewritten = #clashes, keys = {} }
+    for _, list in ipairs(clashes) do
+      local first = list[1]
+      add(
+        out,
+        "  [%s] %s%s",
+        first.mode,
+        first.lhs,
+        first.buf ~= 0 and ("  (buffer " .. first.buf .. ")") or ""
+      )
+      for _, s in ipairs(list) do
+        add(out, "      %7.0f ms  %-18s %s", s.at, phase_of(s.at), s.src)
+      end
+      summary.maps.keys[#summary.maps.keys + 1] = {
+        mode = first.mode,
+        lhs = first.lhs,
+        sets = vim.tbl_map(function(s)
+          return { at = s.at, phase = phase_of(s.at), src = s.src }
+        end, list),
+      }
+    end
+  end
+end
+
 -- ── report ──────────────────────────────────────────────────────────────────
 if wanted.report then
   dumps[#dumps + 1] = function(out)
