@@ -133,7 +133,7 @@ function M.run(ctx)
     return require("machine").is(role)
   end
   local say = ctx.notify or function(msg, level)
-    notify(msg, level)
+    notify.notify(msg, level)
   end
   local run = ctx.spawn or spawn
   local started = {}

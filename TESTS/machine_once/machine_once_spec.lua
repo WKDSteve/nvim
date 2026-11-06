@@ -97,6 +97,27 @@ return function(H)
       { "git-signing" },
       "the workstation role runs it too"
     )
+
+    -- the default notifier (no `notify` injected) is a table, not a function: it must not raise
+    registered = false
+    local seen = {}
+    local real_vim_notify = vim.notify
+    vim.notify = function(msg, level)
+      seen[#seen + 1] = { msg = msg, level = level }
+    end
+    local ok, err = pcall(once.run, {
+      host = "bernhardpc",
+      is_role = function()
+        return false
+      end,
+      has_ui = true,
+      claude = false,
+      spawn = function(_, done)
+        done(1, "fake output")
+      end,
+    })
+    vim.notify = real_vim_notify
+    eq(ok, true, "the default notifier does not raise: " .. tostring(err))
   end)
   step.done = real_done
   if not good then
