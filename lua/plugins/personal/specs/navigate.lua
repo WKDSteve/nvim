@@ -559,7 +559,7 @@ return {
       -- Redirect Office documents to the system app on any read (BufReadCmd).
       -- office_open = {
       --   enabled = true,
-      --   extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx" },
+      --   extensions = { "doc", "docx", "xls", "xlsx", "ppt", "pptx", "msg", "oft", "odt", "ods", "odp" },
       -- },
 
       -- Log every context-gather and dispatch step to :messages.
