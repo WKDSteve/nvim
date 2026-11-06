@@ -39,6 +39,7 @@ local function spec(H)
   for _, name in ipairs({
     "tasks-desktop",
     "rules-desktop",
+    "hub-desktop",
     "docmap-desktop",
     "ai-desktop",
     "takt",

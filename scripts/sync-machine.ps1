@@ -40,7 +40,7 @@ if (-not $ReposDir -or -not (Test-Path $ReposDir)) {
 $extra = @(
     'tasks-vault', 'rules-vault', 'WKDBooks', 'WKDBook-Tricentis', 'Configs',
     'my-zsh', 'wkd', 'FightingGame', 'Kurse',
-    'tasks-desktop', 'rules-desktop', 'docmap-desktop', 'ai-desktop', 'appkit',
+    'tasks-desktop', 'rules-desktop', 'hub-desktop', 'docmap-desktop', 'ai-desktop', 'appkit',
     'streamtap', 'takt', 'pult'
 )
 
@@ -63,6 +63,12 @@ $natives = @{
     }
     'rules-desktop' = @{
         Artifact = 'target\release\rules-hub.exe'
+        Sources  = @('crates', 'ui', 'Cargo.lock')
+        Hint     = 'scripts\build-install.ps1 -BuildOnly   (build and install: without -BuildOnly; tools: :MyNative deps)'
+        Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-install.ps1 -BuildOnly'
+    }
+    'hub-desktop' = @{
+        Artifact = 'target\release\hub-desktop.exe'
         Sources  = @('crates', 'ui', 'Cargo.lock')
         Hint     = 'scripts\build-install.ps1 -BuildOnly   (build and install: without -BuildOnly; tools: :MyNative deps)'
         Command  = 'powershell -NoProfile -ExecutionPolicy Bypass -File scripts\build-install.ps1 -BuildOnly'

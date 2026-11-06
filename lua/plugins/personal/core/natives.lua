@@ -59,6 +59,13 @@ M.list = {
     sources = { "crates", "ui", "Cargo.lock" },
     needs = { "rust", "msvc", "node" },
   }),
+  desktop({
+    repo = "WKDSteve/hub-desktop",
+    name = "hub-desktop",
+    artifact = "target/release/hub-desktop.exe",
+    sources = { "crates", "ui", "Cargo.lock" },
+    needs = { "rust", "msvc", "node" },
+  }),
   -- build-install.ps1 hands over to scripts/setup.ps1, which configures build/ when it is not there
   desktop({
     repo = "WKDSteve/ai-desktop",
