@@ -147,7 +147,6 @@ $REPOS_DIR/tasks-vault/ALL/Zentral-App-Report-Inventur-2026-10-08.md
    -> Task (parked): `ALL/ultracode-pass-all-plugins`
 2. alle bindings und features durchegehen und einen wunderbaren workflow doc machen, in der ich auch "fragen" nacheghen kann, also "ich wil xyy" -> dann hiehrin
    -> Task (parked): `ALL/workflow-guide-doc`
-3. $NVIM_CONFIG_DIR/docs\ROADMAP\LONG_RUNDer Handover ist aktualisiert und gepusht (`b6cb461b`, Datei `nvim/docs/ROADMAP/handovers/terminal.nvim.md`). Das ist die Zusammenfassung zum Einfügen im nächsten Chat:
 
 ---
 

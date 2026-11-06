@@ -15,5 +15,3 @@ today, yesterday	heute, gestern
 last 4 weeks, last 10 days	28 bzw. 10 Tage rückwärts, heute eingeschlossen
 month, last month, last 3 months	Monat bis heute, voller Vormonat, 3 Monatsanfänge zurück
 year, last year	Jahr bis heute, volles Vorjahr
-
-Task: In der autocompletion im usrcmd werden last usw. nicht angezgit; solte aber
