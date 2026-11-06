@@ -140,6 +140,13 @@ return {
           -- idle_ms = 500,
           -- Lines of buffer context sent before/after the cursor.
           -- max_context_lines = 60,
+          -- Response-length cap of a completion request (a whole number >= 1; only
+          -- the claude provider reads it). An answer cut off at the cap is discarded.
+          -- max_tokens = 512,
+          -- How much the model may think: "low" | "medium" | "high" | "xhigh" | "max",
+          -- or false for none. Only the claude provider sends it, lowered to what
+          -- the model takes.
+          -- effort = "low",
           -- string; overrides `provider` for completion requests only (false = unset).
           -- Pinned together with `model` below: a claude-* id must never be
           -- sent to another provider that "auto" happens to resolve.
@@ -160,6 +167,49 @@ return {
 
         -- vim.log.levels threshold of ai.nvim's own notifications.
         -- log_level = vim.log.levels.WARN,
+        -- The agent that is active at startup, a name from `agents`; `false` is none.
+        -- `:Ai agent <name>` changes it for the running session only (nothing is
+        -- persisted, like `:Ai provider`).
+        -- agent = false,
+        -- Named presets of provider, model and system prompt that `:Ai agent <name>`
+        -- switches between. Empty means no preset: every request resolves its
+        -- provider, model and system prompt as before. Shape:
+        --   agents = {
+        --     review = { provider = "claude", model = "claude-opus-4-5", system = "You review code." },
+        --     local_ = { provider = "ollama", model = "llama3" },
+        --   }
+        -- Every field is optional; a field a request sets itself always wins.
+        -- agents = {},
+        -- Guard rails for unattended bulk requests (`req.bulk`, see lua/ai/bulk.lua).
+        -- `max_session_chars` caps the characters of ALL bulk requests of one
+        -- Neovim session; `false` = no cap. `false`, not `nil`, so the key exists
+        -- and is not reported as an unknown one.
+        -- bulk = {
+        --   max_session_chars = false,
+        -- },
+        -- Which providers this machine may use at all (see lua/ai/policy.lua). An
+        -- empty `allowed` list means no restriction -- the default, and the
+        -- behaviour before this option existed. Non-empty: `provider = "auto"`
+        -- walks only these, and a request or `:Ai provider` naming anything else
+        -- is refused (or has to be confirmed, see docs/configuration.md). `allowed`
+        -- is the only key: another one (a typo such as `alowed`) refuses every
+        -- provider, like a malformed `allowed` does -- and so does a top-level key
+        -- that is `policy` itself misspelt (`polcy`, `policies`, within two edits).
+        -- policy = {
+        --   allowed = {},
+        -- },
+        -- Usage reporting (see lua/ai/usage.lua): after every request, one event with
+        -- metadata only (provider, model, tokens, duration, outcome -- never any
+        -- text) goes to a local ai-desktop server, which keeps the usage log and
+        -- shows it on its dashboard. Opt-in: on, it is one extra network request per
+        -- AI request, to a server the user runs themselves, so the default is off.
+        -- `host` is the ai-desktop base URL; `false` (not `nil`, which would drop
+        -- the key, see `completion.provider`) = the one the ai_desktop provider
+        -- uses: AI_DESKTOP_HOST, else LOOMAI_HOST, else http://127.0.0.1:8080.
+        -- usage = {
+        --   report = false,
+        --   host = false,
+        -- },
       },
     }
   end)(),
