@@ -2166,24 +2166,24 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Session
 
-- [ ] `:Session marks select` -- Jump to mark <index>
-- [ ] `:Session marks preview` -- Read-only preview of mark <index> (q closes)
-- [ ] `:Session marks import-harpoon` -- Take over a harpoon v2 list (bucket defaults to stdpath('config'))
-- [ ] `:Session marks list` -- Print the list
-- [ ] `:Session marks debug` -- Dump the list, its scope and its store into a scratch buffer
-- [ ] `:Session load` -- Load session [name] (omit for the configured default_name) _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün, nur teilweise: Variante ohne Namen ungetestet)_
+- [x] `:Session marks select` -- Jump to mark <index> _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
+- [x] `:Session marks preview` -- Read-only preview of mark <index> (q closes) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
+- [x] `:Session marks import-harpoon` -- Take over a harpoon v2 list (bucket defaults to stdpath('config')) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
+- [x] `:Session marks list` -- Print the list _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
+- [x] `:Session marks debug` -- Dump the list, its scope and its store into a scratch buffer _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
+- [x] `:Session load` -- Load session [name] (omit for the configured default_name) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-lifecycle.sheet.lua)_
 - [x] `:Session save-timestamp` -- Save session with timestamp suffix _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session load-layout` -- Restore a window-split layout: :Session load-layout <name> _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
-- [ ] `:Session marks` -- Open the mark list in the configured picker
-- [ ] `:Session marks menu` -- Open the mark list: auto|edit|kit|snacks|telescope|fzf
+- [x] `:Session marks` -- Open the mark list in the configured picker _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-kit.sheet.lua)_
+- [x] `:Session marks menu` -- Open the mark list: auto|edit|kit|snacks|telescope|fzf _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-kit.sheet.lua)_
 - [x] `:Session load-tab` -- Load a tab session into a new tab: :Session load-tab <name> _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
-- [ ] `:Session toggle-track` -- Toggle git skip-worktree on a session file
+- [x] `:Session toggle-track` -- Toggle git skip-worktree on a session file _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-toggle-track.sheet.lua)_
 - [x] `:Session save-tab` -- Save only the current tab's window layout [name] _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
-- [ ] `:Session chip-toggle` -- Show/hide the corner chip on demand
-- [ ] `:Session marks add` -- Add a file to the list (default: current buffer, appended)
+- [x] `:Session chip-toggle` -- Show/hide the corner chip on demand _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-chip.sheet.lua)_
+- [x] `:Session marks add` -- Add a file to the list (default: current buffer, appended) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
 - [x] `:Session rename` -- Rename a session: :Session rename <old> <new> _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session stale` -- List saved sessions whose recorded branch no longer exists _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
-- [ ] `:Session marks defaults sync` -- Append every missing default and pin; the rest stays
+- [x] `:Session marks defaults sync` -- Append every missing default and pin; the rest stays _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
 - [x] `:Session save-layout` -- Save the current window-split layout: :Session save-layout <name> _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session list` -- List all saved sessions _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session current` -- Print the active session name _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
@@ -2607,10 +2607,10 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:Sbx image remove` -- Remove a local image
 - [ ] `:Sbx volume remove` -- Remove a volume
 - [ ] `:Sbx image prune` -- Remove all dangling images (--buffer: stream to a terminal buffer)
-- [ ] `:Session marks defaults reset` -- Rebuild the list from the defaults and pins, in that order
-- [ ] `:Session marks unpin` -- Stop treating a file as a default (the list entry stays)
-- [ ] `:Session marks pin` -- Pin a file: a default that survives `defaults reset`
-- [ ] `:Session marks remove` -- Remove a file from the list (default: current buffer)
+- [x] `:Session marks defaults reset` -- Rebuild the list from the defaults and pins, in that order _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
+- [x] `:Session marks unpin` -- Stop treating a file as a default (the list entry stays) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
+- [x] `:Session marks pin` -- Pin a file: a default that survives `defaults reset` _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
+- [x] `:Session marks remove` -- Remove a file from the list (default: current buffer) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks.sheet.lua)_
 - [x] `:Session delete-stale` -- Delete every stale session (see :Session stale), one confirm for the whole batch _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session delete` -- Delete a session by name _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
 - [x] `:Session save` -- Save session [name] (tab-complete to overwrite an existing one) _(auto 2026-10-29: sessions.nvim/TESTS/usercmds_spec.lua grün)_
