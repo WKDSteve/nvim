@@ -2064,105 +2064,105 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Sandbox
 
-- [ ] `:Sandbox container unpause` -- Resume a paused container's processes
-- [ ] `:Sandbox container rename` -- Rename a container
-- [ ] `:Sandbox container pause` -- Pause a running container's processes
-- [ ] `:Sandbox container stats` -- Show a one-shot resource usage snapshot of a container
-- [ ] `:Sandbox container top` -- List the processes running inside a container
-- [ ] `:Sandbox container inspect` -- Inspect detailed information about a container
-- [ ] `:Sandbox container run` -- Interactively create and start a new container (prompts for image, name, ports, volumes, env)
-- [ ] `:Sandbox image pull` -- Pull an image (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox image push` -- Push an image to a remote registry
-- [ ] `:Sandbox container cp` -- Copy a file/directory between the host and a container (either side may be <id>:<path>)
-- [ ] `:Sandbox image list` -- List all local images
-- [ ] `:Sandbox compose logs` -- Show logs for the compose project detected in cwd
-- [ ] `:Sandbox container exec-once` -- Run a one-off command inside a container (non-interactive)  [workdir=<path>]
-- [ ] `:Sandbox wsl set-version` -- Toggle a distro between WSL1/WSL2
-- [ ] `:Sandbox wsl set-default` -- Set a distro as the WSL default
-- [ ] `:Sandbox wsl exec` -- Open a shell or run a command inside a WSL distro
-- [ ] `:Sandbox wsl export` -- Export a distro to a tarball on disk
-- [ ] `:Sandbox network create` -- Create a new named network
-- [ ] `:Sandbox wsl import` -- Import a distro from a tarball
-- [ ] `:Sandbox container list` -- List all containers
-- [ ] `:Sandbox image tag` -- Tag a local image with a new repository:tag
-- [ ] `:Sandbox wsl start` -- Start a WSL distro
-- [ ] `:Sandbox container exec` -- Open a shell session inside a running container  [workdir=<path>]
-- [ ] `:Sandbox container logs` -- Show logs of a container
-- [ ] `:Sandbox image build` -- Build an image from a Dockerfile/Containerfile (streams to a terminal buffer)
-- [ ] `:Sandbox image load` -- Load (import) an image from a tarball on disk
-- [ ] `:Sandbox network connect` -- Connect a container to a network
-- [ ] `:Sandbox network inspect` -- Inspect detailed information about a network
-- [ ] `:Sandbox network disconnect` -- Disconnect a container from a network
-- [ ] `:Sandbox compose up` -- Start the compose project detected in cwd (detached)
-- [ ] `:Sandbox volume list` -- List all local volumes
-- [ ] `:Sandbox network list` -- List all local networks
-- [ ] `:Sandbox volume create` -- Create a new named volume
-- [ ] `:Sandbox volume inspect` -- Inspect detailed information about a volume
-- [ ] `:Sandbox image save` -- Save (export) an image to a tarball on disk
-- [ ] `:Sandbox compose services` -- List services declared in the compose file (static, no engine call)
-- [ ] `:Sandbox wsl list` -- List all registered WSL distributions
-- [ ] `:Sandbox devcontainer lazygit` -- Open gitsuite.nvim's lazygit for the devcontainer's workspace (optional)
-- [ ] `:Sandbox devcontainer attach` -- Open a shell in the running devcontainer for the project in cwd
-- [ ] `:Sandbox image history` -- Show an image's layer history
-- [ ] `:Sandbox image inspect` -- Inspect detailed information about an image
-- [ ] `:Sandbox compose ps` -- List services in the compose project detected in cwd
-- [ ] `:Sandbox devcontainer build` -- Build/pull a .devcontainer/devcontainer.json's image and start a container from it
-- [ ] `:Sandbox registry logout` -- Log out of a registry
-- [ ] `:Sandbox engine set` -- Switch the active engine for this session
-- [ ] `:Sandbox docs generate` -- Regenerate docs/GENERATED_COMMANDS.md from the live route table, so docs/BINDINGS.md (hand-maintained) can be diffed against it to catch drift
-- [ ] `:Sandbox engine get` -- Show the currently active engine and why
-- [ ] `:Sandbox registry login` -- Log in to a registry (prompts for username/password)
+- [x] `:Sandbox container unpause` -- Resume a paused container's processes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container rename` -- Rename a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container pause` -- Pause a running container's processes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container stats` -- Show a one-shot resource usage snapshot of a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container top` -- List the processes running inside a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container inspect` -- Inspect detailed information about a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container run` -- Interactively create and start a new container (prompts for image, name, ports, volumes, env) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox image pull` -- Pull an image (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox image push` -- Push an image to a remote registry _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox container cp` -- Copy a file/directory between the host and a container (either side may be <id>:<path>) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox image list` -- List all local images _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose logs` -- Show logs for the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox container exec-once` -- Run a one-off command inside a container (non-interactive)  [workdir=<path>] _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox wsl set-version` -- Toggle a distro between WSL1/WSL2 _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox wsl set-default` -- Set a distro as the WSL default _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox wsl exec` -- Open a shell or run a command inside a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox wsl export` -- Export a distro to a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox network create` -- Create a new named network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox wsl import` -- Import a distro from a tarball _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox container list` -- List all containers _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-list-keys.sheet.lua)_
+- [x] `:Sandbox image tag` -- Tag a local image with a new repository:tag _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox wsl start` -- Start a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox container exec` -- Open a shell session inside a running container  [workdir=<path>] _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container logs` -- Show logs of a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox image build` -- Build an image from a Dockerfile/Containerfile (streams to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox image load` -- Load (import) an image from a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox network connect` -- Connect a container to a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox network inspect` -- Inspect detailed information about a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox network disconnect` -- Disconnect a container from a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose up` -- Start the compose project detected in cwd (detached) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox volume list` -- List all local volumes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox network list` -- List all local networks _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox volume create` -- Create a new named volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox volume inspect` -- Inspect detailed information about a volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox image save` -- Save (export) an image to a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose services` -- List services declared in the compose file (static, no engine call) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox wsl list` -- List all registered WSL distributions _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [ ] `:Sandbox devcontainer lazygit` -- Open gitsuite.nvim's lazygit for the devcontainer's workspace (optional) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua, only the error without gitsuite.nvim; lazygit itself left for a person)_
+- [x] `:Sandbox devcontainer attach` -- Open a shell in the running devcontainer for the project in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox image history` -- Show an image's layer history _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox image inspect` -- Inspect detailed information about an image _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose ps` -- List services in the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox devcontainer build` -- Build/pull a .devcontainer/devcontainer.json's image and start a container from it _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox registry logout` -- Log out of a registry _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox engine set` -- Switch the active engine for this session _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-engine.sheet.lua)_
+- [x] `:Sandbox docs generate` -- Regenerate docs/GENERATED_COMMANDS.md from the live route table, so docs/BINDINGS.md (hand-maintained) can be diffed against it to catch drift _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-statusline-docs.sheet.lua)_
+- [x] `:Sandbox engine get` -- Show the currently active engine and why _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-engine.sheet.lua)_
+- [x] `:Sandbox registry login` -- Log in to a registry (prompts for username/password) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
 
 ### :Sbx
 
-- [ ] `:Sbx container list` -- List all containers
-- [ ] `:Sbx container exec` -- Open a shell session inside a running container  [workdir=<path>]
-- [ ] `:Sbx compose services` -- List services declared in the compose file (static, no engine call)
-- [ ] `:Sbx compose ps` -- List services in the compose project detected in cwd
-- [ ] `:Sbx compose logs` -- Show logs for the compose project detected in cwd
-- [ ] `:Sbx engine get` -- Show the currently active engine and why
-- [ ] `:Sbx engine set` -- Switch the active engine for this session
-- [ ] `:Sbx compose up` -- Start the compose project detected in cwd (detached)
-- [ ] `:Sbx container logs` -- Show logs of a container
-- [ ] `:Sbx network disconnect` -- Disconnect a container from a network
-- [ ] `:Sbx network connect` -- Connect a container to a network
-- [ ] `:Sbx network create` -- Create a new named network
-- [ ] `:Sbx registry login` -- Log in to a registry (prompts for username/password)
-- [ ] `:Sbx docs generate` -- Regenerate docs/GENERATED_COMMANDS.md from the live route table, so docs/BINDINGS.md (hand-maintained) can be diffed against it to catch drift
-- [ ] `:Sbx wsl set-version` -- Toggle a distro between WSL1/WSL2
-- [ ] `:Sbx wsl set-default` -- Set a distro as the WSL default
-- [ ] `:Sbx wsl export` -- Export a distro to a tarball on disk
-- [ ] `:Sbx wsl import` -- Import a distro from a tarball
-- [ ] `:Sbx registry logout` -- Log out of a registry
-- [ ] `:Sbx wsl exec` -- Open a shell or run a command inside a WSL distro
-- [ ] `:Sbx wsl start` -- Start a WSL distro
-- [ ] `:Sbx devcontainer build` -- Build/pull a .devcontainer/devcontainer.json's image and start a container from it
-- [ ] `:Sbx devcontainer attach` -- Open a shell in the running devcontainer for the project in cwd
-- [ ] `:Sbx wsl list` -- List all registered WSL distributions
-- [ ] `:Sbx devcontainer lazygit` -- Open gitsuite.nvim's lazygit for the devcontainer's workspace (optional)
-- [ ] `:Sbx network list` -- List all local networks
-- [ ] `:Sbx network inspect` -- Inspect detailed information about a network
-- [ ] `:Sbx volume inspect` -- Inspect detailed information about a volume
-- [ ] `:Sbx container cp` -- Copy a file/directory between the host and a container (either side may be <id>:<path>)
-- [ ] `:Sbx container top` -- List the processes running inside a container
-- [ ] `:Sbx container stats` -- Show a one-shot resource usage snapshot of a container
-- [ ] `:Sbx container run` -- Interactively create and start a new container (prompts for image, name, ports, volumes, env)
-- [ ] `:Sbx container inspect` -- Inspect detailed information about a container
-- [ ] `:Sbx image list` -- List all local images
-- [ ] `:Sbx container rename` -- Rename a container
-- [ ] `:Sbx container pause` -- Pause a running container's processes
-- [ ] `:Sbx container exec-once` -- Run a one-off command inside a container (non-interactive)  [workdir=<path>]
-- [ ] `:Sbx container unpause` -- Resume a paused container's processes
-- [ ] `:Sbx image pull` -- Pull an image (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx image push` -- Push an image to a remote registry
-- [ ] `:Sbx image inspect` -- Inspect detailed information about an image
-- [ ] `:Sbx volume list` -- List all local volumes
-- [ ] `:Sbx volume create` -- Create a new named volume
-- [ ] `:Sbx image history` -- Show an image's layer history
-- [ ] `:Sbx image load` -- Load (import) an image from a tarball on disk
-- [ ] `:Sbx image tag` -- Tag a local image with a new repository:tag
-- [ ] `:Sbx image build` -- Build an image from a Dockerfile/Containerfile (streams to a terminal buffer)
-- [ ] `:Sbx image save` -- Save (export) an image to a tarball on disk
+- [x] `:Sbx container list` -- List all containers _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container exec` -- Open a shell session inside a running container  [workdir=<path>] _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose services` -- List services declared in the compose file (static, no engine call) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose ps` -- List services in the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose logs` -- Show logs for the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx engine get` -- Show the currently active engine and why _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx engine set` -- Switch the active engine for this session _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose up` -- Start the compose project detected in cwd (detached) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container logs` -- Show logs of a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network disconnect` -- Disconnect a container from a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network connect` -- Connect a container to a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network create` -- Create a new named network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx registry login` -- Log in to a registry (prompts for username/password) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx docs generate` -- Regenerate docs/GENERATED_COMMANDS.md from the live route table, so docs/BINDINGS.md (hand-maintained) can be diffed against it to catch drift _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx wsl set-version` -- Toggle a distro between WSL1/WSL2 _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx wsl set-default` -- Set a distro as the WSL default _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx wsl export` -- Export a distro to a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx wsl import` -- Import a distro from a tarball _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx registry logout` -- Log out of a registry _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx wsl exec` -- Open a shell or run a command inside a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx wsl start` -- Start a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx devcontainer build` -- Build/pull a .devcontainer/devcontainer.json's image and start a container from it _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx devcontainer attach` -- Open a shell in the running devcontainer for the project in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx wsl list` -- List all registered WSL distributions _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [ ] `:Sbx devcontainer lazygit` -- Open gitsuite.nvim's lazygit for the devcontainer's workspace (optional) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, only the error without gitsuite.nvim; lazygit itself left for a person)_
+- [x] `:Sbx network list` -- List all local networks _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network inspect` -- Inspect detailed information about a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx volume inspect` -- Inspect detailed information about a volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container cp` -- Copy a file/directory between the host and a container (either side may be <id>:<path>) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container top` -- List the processes running inside a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container stats` -- Show a one-shot resource usage snapshot of a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container run` -- Interactively create and start a new container (prompts for image, name, ports, volumes, env) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container inspect` -- Inspect detailed information about a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image list` -- List all local images _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container rename` -- Rename a container _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container pause` -- Pause a running container's processes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container exec-once` -- Run a one-off command inside a container (non-interactive)  [workdir=<path>] _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container unpause` -- Resume a paused container's processes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image pull` -- Pull an image (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image push` -- Push an image to a remote registry _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image inspect` -- Inspect detailed information about an image _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx volume list` -- List all local volumes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx volume create` -- Create a new named volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image history` -- Show an image's layer history _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image load` -- Load (import) an image from a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image tag` -- Tag a local image with a new repository:tag _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image build` -- Build an image from a Dockerfile/Containerfile (streams to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image save` -- Save (export) an image to a tarball on disk _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
 
 ### :Session
 
@@ -2571,42 +2571,42 @@ caution, not a verdict. Read the description before triggering any of these.
 - [x] `:Reposcope filter` -- Filter the repository list by substring (no args resets the list) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
 - [ ] `:Rules unwaive` -- Remove a waiver from .rules-waivers.json: the findings it accepted flag again. Asks first (--yes skips the question)
 - [ ] `:RulesVault create` -- Make a rules vault: folder, README, .rules.json, .gitattributes, .gitignore, CI and a first ruleset. Lists what happens and the setup() step that is left to you, then asks (--yes skips it). Never overwrites a file, never adds a remote
-- [ ] `:Sandbox container kill` -- Force kill a container (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox container restart` -- Restart a container (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox container remove` -- Remove a stopped container (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox container prune` -- Remove all stopped containers (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox container start` -- Start a stopped container (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox container stop` -- Stop a running container (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox wsl stop` -- Stop (terminate) a WSL distro
-- [ ] `:Sandbox container logs-follow` -- Stream a container's logs live (press q in the buffer to stop)
-- [ ] `:Sandbox image remove` -- Remove a local image
-- [ ] `:Sandbox image prune` -- Remove all dangling images (--buffer: stream to a terminal buffer)
-- [ ] `:Sandbox network prune` -- Remove all unused networks
-- [ ] `:Sandbox compose down` -- Stop and remove the compose project detected in cwd
-- [ ] `:Sandbox network remove` -- Remove a network
-- [ ] `:Sandbox volume prune` -- Remove all unused volumes
-- [ ] `:Sandbox volume remove` -- Remove a volume
-- [ ] `:Sandbox compose restart` -- Restart the compose project detected in cwd
-- [ ] `:Sandbox wsl shutdown-all` -- Shut down the WSL2 VM and all running distros
-- [ ] `:Sandbox engine reset` -- Clear the session engine override, falling back to .sandboxrc/config
-- [ ] `:Sbx container logs-follow` -- Stream a container's logs live (press q in the buffer to stop)
-- [ ] `:Sbx compose restart` -- Restart the compose project detected in cwd
-- [ ] `:Sbx engine reset` -- Clear the session engine override, falling back to .sandboxrc/config
-- [ ] `:Sbx compose down` -- Stop and remove the compose project detected in cwd
-- [ ] `:Sbx network prune` -- Remove all unused networks
-- [ ] `:Sbx network remove` -- Remove a network
-- [ ] `:Sbx wsl shutdown-all` -- Shut down the WSL2 VM and all running distros
-- [ ] `:Sbx wsl stop` -- Stop (terminate) a WSL distro
-- [ ] `:Sbx container prune` -- Remove all stopped containers (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx container remove` -- Remove a stopped container (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx container start` -- Start a stopped container (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx container stop` -- Stop a running container (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx container restart` -- Restart a container (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx container kill` -- Force kill a container (--buffer: stream to a terminal buffer)
-- [ ] `:Sbx volume prune` -- Remove all unused volumes
-- [ ] `:Sbx image remove` -- Remove a local image
-- [ ] `:Sbx volume remove` -- Remove a volume
-- [ ] `:Sbx image prune` -- Remove all dangling images (--buffer: stream to a terminal buffer)
+- [x] `:Sandbox container kill` -- Force kill a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container restart` -- Restart a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container remove` -- Remove a stopped container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container prune` -- Remove all stopped containers (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container start` -- Start a stopped container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox container stop` -- Stop a running container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox wsl stop` -- Stop (terminate) a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox container logs-follow` -- Stream a container's logs live (press q in the buffer to stop) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
+- [x] `:Sandbox image remove` -- Remove a local image _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox image prune` -- Remove all dangling images (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox network prune` -- Remove all unused networks _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose down` -- Stop and remove the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox network remove` -- Remove a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox volume prune` -- Remove all unused volumes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox volume remove` -- Remove a volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-resources.sheet.lua)_
+- [x] `:Sandbox compose restart` -- Restart the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-compose-devcontainer.sheet.lua)_
+- [x] `:Sandbox wsl shutdown-all` -- Shut down the WSL2 VM and all running distros _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sandbox engine reset` -- Clear the session engine override, falling back to .sandboxrc/config _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-engine.sheet.lua)_
+- [x] `:Sbx container logs-follow` -- Stream a container's logs live (press q in the buffer to stop) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose restart` -- Restart the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx engine reset` -- Clear the session engine override, falling back to .sandboxrc/config _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx compose down` -- Stop and remove the compose project detected in cwd _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network prune` -- Remove all unused networks _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx network remove` -- Remove a network _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx wsl shutdown-all` -- Shut down the WSL2 VM and all running distros _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx wsl stop` -- Stop (terminate) a WSL distro _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua, wsl.exe faked)_
+- [x] `:Sbx container prune` -- Remove all stopped containers (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container remove` -- Remove a stopped container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container start` -- Start a stopped container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container stop` -- Stop a running container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container restart` -- Restart a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx container kill` -- Force kill a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx volume prune` -- Remove all unused volumes _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image remove` -- Remove a local image _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx volume remove` -- Remove a volume _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
+- [x] `:Sbx image prune` -- Remove all dangling images (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-alias-wsl.sheet.lua)_
 - [x] `:Session marks defaults reset` -- Rebuild the list from the defaults and pins, in that order _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
 - [x] `:Session marks unpin` -- Stop treating a file as a default (the list entry stays) _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
 - [x] `:Session marks pin` -- Pin a file: a default that survives `defaults reset` _(auto 2026-11-07: sessions.nvim/TESTS/sheets/sessions-marks-edit.sheet.lua)_
