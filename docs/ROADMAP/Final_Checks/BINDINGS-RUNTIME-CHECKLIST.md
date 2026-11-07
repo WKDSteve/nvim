@@ -891,18 +891,18 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Emojis
 
-- [ ] `:Emojis overlay` -- Open the quick-insert overlay (grid|grid_keys|list)
-- [ ] `:Emojis count` -- Count emojis in the given scope
-- [ ] `:Emojis replace` -- Replace emojis with :shortcode: placeholders in the given scope
-- [ ] `:Emojis insert` -- Open the insert picker
-- [ ] `:Emojis toggle` -- Cycle the emoji checkbox on the cursor line (or the given range)
-- [ ] `:Emojis` -- [emojis] :Emojis [clear|insert|list|count|replace|unreplace|first|next|wrap|overlay|toggle|unicode] [word|line|visual|%|cwd]
-- [ ] `:Emojis first` -- Jump to the first emoji in the buffer
-- [ ] `:Emojis unreplace` -- Restore :shortcode: placeholders back to emojis in the given scope
-- [ ] `:Emojis wrap` -- Surround emojis with the configured marker in the given scope
-- [ ] `:Emojis next` -- Jump to the next emoji in the buffer (wraps)
-- [ ] `:Emojis list` -- List emojis found in the given scope
-- [ ] `:Emojis unicode` -- Unicode toolkit: name (char under cursor) | search[!] <query> | table | digraphs
+- [x] `:Emojis overlay` -- Open the quick-insert overlay (grid|grid_keys|list) _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-pickers.sheet.lua, emojis.nvim/TESTS/sheets/emojis-overlay.sheet.lua)_
+- [x] `:Emojis count` -- Count emojis in the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis replace` -- Replace emojis with :shortcode: placeholders in the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis insert` -- Open the insert picker _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-pickers.sheet.lua, emojis.nvim/TESTS/sheets/emojis-telescope.sheet.lua)_
+- [x] `:Emojis toggle` -- Cycle the emoji checkbox on the cursor line (or the given range) _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua, emojis.nvim/TESTS/sheets/emojis-toggle.sheet.lua)_
+- [x] `:Emojis` -- [emojis] :Emojis [clear|insert|list|count|replace|unreplace|first|next|wrap|overlay|toggle|unicode] [word|line|visual|%|cwd] _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis first` -- Jump to the first emoji in the buffer _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis unreplace` -- Restore :shortcode: placeholders back to emojis in the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis wrap` -- Surround emojis with the configured marker in the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua)_
+- [x] `:Emojis next` -- Jump to the next emoji in the buffer (wraps) _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua, emojis.nvim/TESTS/sheets/emojis-nav.sheet.lua)_
+- [x] `:Emojis list` -- List emojis found in the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua, emojis.nvim/TESTS/sheets/emojis-cwd.sheet.lua)_
+- [x] `:Emojis unicode` -- Unicode toolkit: name (char under cursor) | search[!] <query> | table | digraphs _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-unicode-name.sheet.lua, emojis.nvim/TESTS/sheets/emojis-unicode-search.sheet.lua)_
 
 ### :EslintFix
 
@@ -2502,7 +2502,7 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:Debug proc stop` -- Stop logging and restore the wrapped functions
 - [ ] `:Debug keylogger stop` -- Stop the key logger
 - [ ] `:DocMap` -- Regenerate the module map (:DocMap [check|full|open|graph|why <a> <b>|dot|mermaid|consumers|diff <ref>|impact <ref>|churn [range]|untested|pick|checklist [all]|plugins|bindings|tools|endpoints|serve [stop]|helptags|annotate [--write|--sidecar]|all [full]])
-- [ ] `:Emojis clear` -- Remove emojis from the given scope
+- [x] `:Emojis clear` -- Remove emojis from the given scope _(auto 2026-11-07: emojis.nvim/TESTS/sheets/emojis-text-ops.sheet.lua, emojis.nvim/TESTS/sheets/emojis-cwd.sheet.lua)_
 - [ ] `:File delete` -- Delete the file from disk and close the buffer
 - [ ] `:Filetree refs undo` -- Revert the last reference rewrite
 - [ ] `:Filetree symlink delete` -- Remove marked symlinks (else the node under the cursor) via trash — never a non-symlink
