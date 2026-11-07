@@ -776,12 +776,12 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Data
 
-- [ ] `:Data pretty` -- Pretty-print, format auto-detected (fenced block, register contents, or filetype)
-- [ ] `:Data` -- Format/filter with json/yaml/xml auto-detected from a fenced block or filetype (range-aware; no range = whole buffer)
-- [ ] `:Data filter` -- Interactively filter flattened path/value entries, format auto-detected (requires pickers.nvim; --preview to diff before replacing)
-- [ ] `:Data lines` -- One 'path: value' per leaf, format auto-detected (--sep to override)
-- [ ] `:Data sort` -- Pretty-print with object keys sorted, format auto-detected
-- [ ] `:Data keys` -- Only the (dotted) key paths, format auto-detected
+- [x] `:Data pretty` -- Pretty-print, format auto-detected (fenced block, register contents, or filetype) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-auto.sheet.lua)_
+- [x] `:Data` -- Format/filter with json/yaml/xml auto-detected from a fenced block or filetype (range-aware; no range = whole buffer) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-auto.sheet.lua)_
+- [x] `:Data filter` -- Interactively filter flattened path/value entries, format auto-detected (requires pickers.nvim; --preview to diff before replacing) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-filter.sheet.lua)_
+- [x] `:Data lines` -- One 'path: value' per leaf, format auto-detected (--sep to override) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-auto.sheet.lua)_
+- [x] `:Data sort` -- Pretty-print with object keys sorted, format auto-detected _(auto 2026-11-07: data.nvim/TESTS/sheets/data-auto.sheet.lua)_
+- [x] `:Data keys` -- Only the (dotted) key paths, format auto-detected _(auto 2026-11-07: data.nvim/TESTS/sheets/data-auto.sheet.lua)_
 
 ### :Debug
 
@@ -1424,15 +1424,15 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :JSON
 
-- [ ] `:JSON sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today)
-- [ ] `:JSON filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing)
-- [ ] `:JSON keys` -- List only the (dotted) key paths, no values
-- [ ] `:JSON` -- JSON format/filter (range-aware; no range = whole buffer)
-- [ ] `:JSON compact` -- Collapse onto one line
-- [ ] `:JSON pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4)
-- [ ] `:JSON to` -- Convert to yaml
-- [ ] `:JSON lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override)
-- [ ] `:JSON ndjson` -- Pretty-print each line as its own JSON object; malformed lines are left untouched
+- [x] `:JSON sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-filter.sheet.lua)_
+- [x] `:JSON keys` -- List only the (dotted) key paths, no values _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON` -- JSON format/filter (range-aware; no range = whole buffer) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON compact` -- Collapse onto one line _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON to` -- Convert to yaml _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
+- [x] `:JSON ndjson` -- Pretty-print each line as its own JSON object; malformed lines are left untouched _(auto 2026-11-07: data.nvim/TESTS/sheets/data-json.sheet.lua)_
 
 ### :KitPreview
 
@@ -2449,23 +2449,23 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :XML
 
-- [ ] `:XML compact` -- Collapse onto one line
-- [ ] `:XML` -- XML format/filter (range-aware; no range = whole buffer)
-- [ ] `:XML pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4)
-- [ ] `:XML lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override)
-- [ ] `:XML sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today)
-- [ ] `:XML keys` -- List only the (dotted) key paths, no values
-- [ ] `:XML filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing)
+- [x] `:XML compact` -- Collapse onto one line _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML` -- XML format/filter (range-aware; no range = whole buffer) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML keys` -- List only the (dotted) key paths, no values _(auto 2026-11-07: data.nvim/TESTS/sheets/data-xml.sheet.lua)_
+- [x] `:XML filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-filter.sheet.lua)_
 
 ### :YAML
 
-- [ ] `:YAML filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing)
-- [ ] `:YAML to` -- Convert to json
-- [ ] `:YAML` -- YAML format/filter (range-aware; no range = whole buffer)
-- [ ] `:YAML lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override)
-- [ ] `:YAML pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4)
-- [ ] `:YAML keys` -- List only the (dotted) key paths, no values
-- [ ] `:YAML sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today)
+- [x] `:YAML filter` -- Interactively filter flattened path/value entries (requires pickers.nvim; --preview to diff before replacing) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-filter.sheet.lua)_
+- [x] `:YAML to` -- Convert to json _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
+- [x] `:YAML` -- YAML format/filter (range-aware; no range = whole buffer) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
+- [x] `:YAML lines` -- One 'path: value' per leaf, nested keys dotted (--sep to override) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
+- [x] `:YAML pretty` -- Pretty-print (default 2-space indent; pretty 4 for 4) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
+- [x] `:YAML keys` -- List only the (dotted) key paths, no values _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
+- [x] `:YAML sort` -- Pretty-print with object keys sorted (see data.format.<fmt> for why this equals 'pretty' today) _(auto 2026-11-07: data.nvim/TESTS/sheets/data-yaml.sheet.lua)_
 
 ## ⚠ Handle with care
 
