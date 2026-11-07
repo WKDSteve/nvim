@@ -847,31 +847,31 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Diff
 
-- [ ] `:Diff` -- (no description)
+- [x] `:Diff` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-bare.sheet.lua)_
 
 ### :DiffBuffers
 
-- [ ] `:DiffBuffers` -- (no description)
+- [x] `:DiffBuffers` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-buffers.sheet.lua)_
 
 ### :DiffClear
 
-- [ ] `:DiffClear` -- (no description)
+- [x] `:DiffClear` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-orig.sheet.lua)_
 
 ### :DiffExit
 
-- [ ] `:DiffExit` -- (no description)
+- [x] `:DiffExit` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-exit.sheet.lua)_
 
 ### :DiffHistory
 
-- [ ] `:DiffHistory` -- (no description)
+- [x] `:DiffHistory` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-history.sheet.lua)_
 
 ### :DiffOrig
 
-- [ ] `:DiffOrig` -- (no description)
+- [x] `:DiffOrig` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-orig.sheet.lua)_
 
 ### :DiffProfile
 
-- [ ] `:DiffProfile` -- (no description)
+- [x] `:DiffProfile` -- (no description) _(auto 2026-11-07: diff.nvim/TESTS/sheets/diff-profile.sheet.lua)_
 
 ### :DirPicker
 
