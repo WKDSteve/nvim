@@ -114,14 +114,14 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### Recommender
 
-- [ ] `<leader>lrc` -- Recommender: project-wide (cwd)
-- [ ] `<leader>lrh` -- Recommender: regex analyzer, high threshold
-- [ ] `<leader>lrj` -- Recommender: javascript analyzer
-- [ ] `<leader>lrp` -- Recommender: python analyzer
-- [ ] `<leader>lrr` -- Recommender: regex analyzer
-- [ ] `<leader>lR` -- Recommender: replace mode
-- [ ] `<leader>lr` -- Recommender: run
-- [ ] `<leader>lrt` -- Recommender: treesitter analyzer
+- [x] `<leader>lrc` -- Recommender: project-wide (cwd) _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lrh` -- Recommender: regex analyzer, high threshold _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lrj` -- Recommender: javascript analyzer _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lrp` -- Recommender: python analyzer _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lrr` -- Recommender: regex analyzer _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lR` -- Recommender: replace mode _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lr` -- Recommender: run _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
+- [x] `<leader>lrt` -- Recommender: treesitter analyzer _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-bindings.sheet.lua)_
 
 ### Reposcope
 
@@ -1966,7 +1966,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Recommender
 
-- [ ] `:Recommender` -- (no description)
+- [x] `:Recommender` -- (no description) _(auto 2026-11-07: recommender.nvim/TESTS/sheets/rec-default.sheet.lua)_
 
 ### :Replace
 
