@@ -125,8 +125,8 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### Reposcope
 
-- [ ] `<leader>rc` -- Reposcope: Close Reposcope
-- [ ] `<leader>rs` -- Reposcope: open the UI
+- [x] `<leader>rc` -- Reposcope: Close Reposcope _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-views.sheet.lua)_
+- [x] `<leader>rs` -- Reposcope: open the UI _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-views.sheet.lua)_
 
 ### Session
 
@@ -2014,21 +2014,21 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Reposcope
 
-- [ ] `:Reposcope prompt` -- Reload visible prompt fields (e.g. :Reposcope prompt prefix keywords)
-- [ ] `:Reposcope session` -- Manage the persisted search session (:Reposcope session save|restore|clear)
-- [ ] `:Reposcope queries` -- Show your most-frequent search queries (:Reposcope queries list|clear)
-- [ ] `:Reposcope filter-clear` -- Clear the active filter and show the full list again
-- [ ] `:Reposcope sort` -- Open an interactive menu to sort the repository list
-- [ ] `:Reposcope skipped-readmes` -- Print the number of debounced (skipped) README fetches
-- [ ] `:Reposcope print-dev` -- Print whether developer mode is currently active
-- [ ] `:Reposcope stats` -- Display collected request stats and metrics
-- [ ] `:Reposcope providers` -- List available providers and show which one is active
-- [ ] `:Reposcope messages` -- Show reposcope's message history in a buffer (yankable); `clear` forgets it
-- [ ] `:Reposcope toggle-dev` -- Toggle developer mode (debug logging, internal info)
-- [ ] `:Reposcope favorites` -- List or clear favorited repositories (:Reposcope favorites list|clear)
-- [ ] `:Reposcope start` -- Open the Reposcope UI
-- [ ] `:Reposcope close` -- Close all Reposcope windows and buffers
-- [ ] `:Reposcope filter-prompt` -- Open a floating prompt to filter repositories interactively
+- [x] `:Reposcope prompt` -- Reload visible prompt fields (e.g. :Reposcope prompt prefix keywords) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
+- [x] `:Reposcope session` -- Manage the persisted search session (:Reposcope session save|restore|clear) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-session.sheet.lua)_
+- [x] `:Reposcope queries` -- Show your most-frequent search queries (:Reposcope queries list|clear) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-cache-queries.sheet.lua)_
+- [x] `:Reposcope filter-clear` -- Clear the active filter and show the full list again _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
+- [x] `:Reposcope sort` -- Open an interactive menu to sort the repository list _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
+- [x] `:Reposcope skipped-readmes` -- Print the number of debounced (skipped) README fetches _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-cache-queries.sheet.lua)_
+- [x] `:Reposcope print-dev` -- Print whether developer mode is currently active _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-diagnostics.sheet.lua)_
+- [x] `:Reposcope stats` -- Display collected request stats and metrics _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-diagnostics.sheet.lua)_
+- [x] `:Reposcope providers` -- List available providers and show which one is active _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-diagnostics.sheet.lua)_
+- [x] `:Reposcope messages` -- Show reposcope's message history in a buffer (yankable); `clear` forgets it _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-diagnostics.sheet.lua)_
+- [x] `:Reposcope toggle-dev` -- Toggle developer mode (debug logging, internal info) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-diagnostics.sheet.lua)_
+- [x] `:Reposcope favorites` -- List or clear favorited repositories (:Reposcope favorites list|clear) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-favorites.sheet.lua)_
+- [x] `:Reposcope start` -- Open the Reposcope UI _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-core-loop.sheet.lua)_
+- [x] `:Reposcope close` -- Close all Reposcope windows and buffers _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-favorites.sheet.lua)_
+- [x] `:Reposcope filter-prompt` -- Open a floating prompt to filter repositories interactively _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
 
 ### :RevealInFm
 
@@ -2568,7 +2568,7 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:RATelemetryStopAll` -- runtime-analysis.telemetry: stop every live instance (same as :RATelemetry stop)
 - [ ] `:ReplacePreset` -- Run a saved preset: :ReplacePreset {name}
 - [ ] `:ReplaceSavePreset` -- Usage: :ReplaceSavePreset {name} {old} {new} [scope] [--flags]
-- [ ] `:Reposcope filter` -- Filter the repository list by substring (no args resets the list)
+- [x] `:Reposcope filter` -- Filter the repository list by substring (no args resets the list) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
 - [ ] `:Rules unwaive` -- Remove a waiver from .rules-waivers.json: the findings it accepted flag again. Asks first (--yes skips the question)
 - [ ] `:RulesVault create` -- Make a rules vault: folder, README, .rules.json, .gitattributes, .gitignore, CI and a first ruleset. Lists what happens and the setup() step that is left to you, then asks (--yes skips it). Never overwrites a file, never adds a remote
 - [ ] `:Sandbox container kill` -- Force kill a container (--buffer: stream to a terminal buffer)
