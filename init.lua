@@ -314,7 +314,7 @@ startup.on("UIReady", "repo_backup", function()
 end)
 
 -- UIReady: setup steps that a machine runs once (lua/machine_once.lua), e.g. commit
--- signing on BERNHARDPC and the workstation. Async; nothing to do once its marker is there.
+-- signing on OHANA and the workstation. Async; nothing to do once its marker is there.
 startup.on("UIReady", "machine_once", function()
   require("machine_once").run()
 end)

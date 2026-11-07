@@ -55,7 +55,7 @@ M.steps = {
     -- each device signs its commits; its key goes into the device registry of the runner-guard
     -- (docs/NOTES/CDX/README.md, testing.nvim docs/RUNNER-GUARD.md)
     id = "git-signing",
-    hosts = { "BERNHARDPC" },
+    hosts = { "OHANA" },
     roles = { "workstation" },
     argv = {
       shell,

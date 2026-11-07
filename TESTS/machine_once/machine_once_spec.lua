@@ -11,19 +11,19 @@ return function(H)
   local reg = vim.fn.tempname()
   local f = assert(io.open(reg, "w"))
   f:write('STEVESPC,me@x namespaces="git" ssh-ed25519 AAAA STEVESPC\n')
-  f:write("# BERNHARDPC,me@x ssh-ed25519 BBBB\n")
+  f:write("# OHANA,me@x ssh-ed25519 BBBB\n")
   f:write('me@x,Other namespaces="git" ssh-ed25519 CCCC\n')
   f:close()
   eq(once.registered(reg, "stevespc"), true, "a device in the registry (any case)")
   eq(once.registered(reg, "OTHER"), true, "... also as a later principal")
-  eq(once.registered(reg, "BERNHARDPC"), false, "a commented line does not count")
+  eq(once.registered(reg, "OHANA"), false, "a commented line does not count")
   eq(once.registered(reg, "me"), false, "only whole principals")
   eq(once.registered(reg .. ".nope", "STEVESPC"), false, "no registry: not done")
   os.remove(reg)
 
   local step = assert(once.steps[1])
   eq(step.id, "git-signing", "the first step is the commit signing")
-  eq(vim.tbl_contains(step.hosts, "BERNHARDPC"), true, "it is for BERNHARDPC")
+  eq(vim.tbl_contains(step.hosts, "OHANA"), true, "it is for OHANA")
   eq(vim.tbl_contains(step.roles, "workstation"), true, "and for the workstation")
   eq(
     step.argv[#step.argv]:match("setup%-git%-signing%.ps1$") ~= nil,
@@ -42,7 +42,7 @@ return function(H)
     local function run(over)
       calls, said = {}, {}
       return once.run(vim.tbl_extend("force", {
-        host = "bernhardpc",
+        host = "ohana",
         is_role = function()
           return false
         end,
@@ -67,7 +67,7 @@ return function(H)
     eq(run({ claude = true }), {}, "a Claude session runs nothing")
 
     answer = 1
-    eq(run(), { "git-signing" }, "BERNHARDPC (any case) runs the step")
+    eq(run(), { "git-signing" }, "OHANA (any case) runs the step")
     eq(#calls, 1, "... once")
     eq(said[#said].level, vim.log.levels.ERROR, "a failed step says so")
     eq(said[#said].msg:find("fake output", 1, true) ~= nil, true, "... with the output")
@@ -106,7 +106,7 @@ return function(H)
       seen[#seen + 1] = { msg = msg, level = level }
     end
     local ok, err = pcall(once.run, {
-      host = "bernhardpc",
+      host = "ohana",
       is_role = function()
         return false
       end,
