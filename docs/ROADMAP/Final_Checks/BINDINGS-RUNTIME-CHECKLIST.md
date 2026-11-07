@@ -227,16 +227,16 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### buffer-ctx
 
-- [ ] `<leader>cnf` -- buffer-ctx: copy filepath (cwd-relative)
-- [ ] `<leader>cnl` -- buffer-ctx: copy location (path:line)
-- [ ] `<leader>cnm` -- buffer-ctx: copy module path
+- [x] `<leader>cnf` -- buffer-ctx: copy filepath (cwd-relative) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
+- [x] `<leader>cnl` -- buffer-ctx: copy location (path:line) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
+- [x] `<leader>cnm` -- buffer-ctx: copy module path _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
 
 ### buffer_ctx
 
-- [ ] `<C-p>` -- [buffer-ctx] Mark: yank marked lines
-- [ ] `<S-m>` -- [buffer-ctx] Mark: toggle line (or N with a count)
-- [ ] `<leader>ob` -- [buffer-ctx] Open current buffer in the browser
-- [ ] `<leader>of` -- [buffer-ctx] Reveal current buffer in the file manager
+- [x] `<C-p>` -- [buffer-ctx] Mark: yank marked lines _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
+- [x] `<S-m>` -- [buffer-ctx] Mark: toggle line (or N with a count) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
+- [ ] `<leader>ob` -- [buffer-ctx] Open current buffer in the browser _(left for a person: the browser itself; what is handed over: auto 2026-11-07, buffer-ctx.nvim/TESTS/sheets/bctx-reveal.sheet.lua)_
+- [ ] `<leader>of` -- [buffer-ctx] Reveal current buffer in the file manager _(left for a person: the file manager itself; what is handed over: auto 2026-11-07, buffer-ctx.nvim/TESTS/sheets/bctx-reveal.sheet.lua)_
 
 ### cascade
 
@@ -719,37 +719,37 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Copy
 
-- [ ] `:Copy boilerplate` -- boilerplate → :Copy
-- [ ] `:Copy filename` -- filename → :Copy
-- [ ] `:Copy module` -- module → :Copy
-- [ ] `:Copy timestamp` -- timestamp → :Copy
-- [ ] `:Copy mdlink` -- mdlink → :Copy
-- [ ] `:Copy bufnr` -- bufnr → :Copy
-- [ ] `:Copy filepath` -- filepath → :Copy
-- [ ] `:Copy date` -- date → :Copy
-- [ ] `:Copy uuid` -- uuid → :Copy
-- [ ] `:Copy location` -- location → :Copy
-- [ ] `:Copy snippet` -- snippet → :Copy
-- [ ] `:Copy git` -- git → :Copy
-- [ ] `:Copy linecount` -- linecount → :Copy
-- [ ] `:Copy annotation` -- annotation → :Copy
-- [ ] `:Copy env` -- env → :Copy
+- [x] `:Copy boilerplate` -- boilerplate → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-boilerplate.sheet.lua)_
+- [x] `:Copy filename` -- filename → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
+- [x] `:Copy module` -- module → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy timestamp` -- timestamp → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy mdlink` -- mdlink → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mdlink.sheet.lua)_
+- [x] `:Copy bufnr` -- bufnr → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy filepath` -- filepath → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
+- [x] `:Copy date` -- date → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy uuid` -- uuid → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy location` -- location → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy snippet` -- snippet → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-annotation-snippet.sheet.lua)_
+- [x] `:Copy git` -- git → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy linecount` -- linecount → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Copy annotation` -- annotation → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-annotation-snippet.sheet.lua)_
+- [x] `:Copy env` -- env → :Copy _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
 
 ### :CopyFilepathAbsolute
 
-- [ ] `:CopyFilepathAbsolute` -- [buffer-ctx compat] Copy absolute filepath to clipboard
+- [x] `:CopyFilepathAbsolute` -- [buffer-ctx compat] Copy absolute filepath to clipboard _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
 
 ### :CopyFilepathEnv
 
-- [ ] `:CopyFilepathEnv` -- [buffer-ctx compat] Copy filepath, $REPOS_DIR/$NVIM_CONFIG_DIR folded in
+- [x] `:CopyFilepathEnv` -- [buffer-ctx compat] Copy filepath, $REPOS_DIR/$NVIM_CONFIG_DIR folded in _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath-roots.sheet.lua)_
 
 ### :CopyFilepathRelative
 
-- [ ] `:CopyFilepathRelative` -- [buffer-ctx compat] Copy cwd-relative filepath to clipboard
+- [x] `:CopyFilepathRelative` -- [buffer-ctx compat] Copy cwd-relative filepath to clipboard _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath.sheet.lua)_
 
 ### :CopyFilepathRepos
 
-- [ ] `:CopyFilepathRepos` -- [buffer-ctx compat] Copy $REPOS_DIR-relative filepath to clipboard
+- [x] `:CopyFilepathRepos` -- [buffer-ctx compat] Copy $REPOS_DIR-relative filepath to clipboard _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-filepath-roots.sheet.lua)_
 
 ### :CopyLocation
 
@@ -1073,15 +1073,15 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Format
 
-- [ ] `:Format clear` -- Clear buffer content
-- [ ] `:Format indent` -- Fix indentation: indent [--spaces|--tabs] [width]
-- [ ] `:Format enum` -- Enumerate tokens in visual selection: enum [STYLE] [sep=SEP] [start=N] [inline=bool]
-- [ ] `:Format case` -- Change case: case <upper|lower|title|sentence>
-- [ ] `:Format column` -- Align selected char to column: column <N> [fill]
-- [ ] `:Format textwidth` -- Reflow text to width: textwidth <N|max>
-- [ ] `:Format sort` -- Sort buffer lines: sort [-r] [-i] [-n]
-- [ ] `:Format table` -- Format Markdown table(s): table [ALIGN] [header=ALIGN] [cell=ALIGN] [skip=COL] [scope=cursor|buffer|cwd|PATH]
-- [ ] `:Format squeeze` -- Collapse consecutive blank lines to at most one
+- [x] `:Format clear` -- Clear buffer content _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format indent` -- Fix indentation: indent [--spaces|--tabs] [width] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format enum` -- Enumerate tokens in visual selection: enum [STYLE] [sep=SEP] [start=N] [inline=bool] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-layout.sheet.lua)_
+- [x] `:Format case` -- Change case: case <upper|lower|title|sentence> _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format column` -- Align selected char to column: column <N> [fill] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-layout.sheet.lua)_
+- [x] `:Format textwidth` -- Reflow text to width: textwidth <N|max> _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-layout.sheet.lua)_
+- [x] `:Format sort` -- Sort buffer lines: sort [-r] [-i] [-n] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format table` -- Format Markdown table(s): table [ALIGN] [header=ALIGN] [cell=ALIGN] [skip=COL] [scope=cursor|buffer|cwd|PATH] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-layout.sheet.lua)_
+- [x] `:Format squeeze` -- Collapse consecutive blank lines to at most one _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
 
 ### :Ft
 
@@ -1383,22 +1383,22 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Insert
 
-- [ ] `:Insert filepath` -- filepath → :Insert
+- [x] `:Insert filepath` -- filepath → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
 - [ ] `:Insert imagepaste` -- images.nvim: paste the clipboard image, insert its Markdown link at the cursor (requires images.nvim)
-- [ ] `:Insert mdlink` -- mdlink → :Insert
-- [ ] `:Insert filename` -- filename → :Insert
-- [ ] `:Insert date` -- date → :Insert
-- [ ] `:Insert timestamp` -- timestamp → :Insert
-- [ ] `:Insert git` -- git → :Insert
-- [ ] `:Insert linecount` -- linecount → :Insert
-- [ ] `:Insert bufnr` -- bufnr → :Insert
-- [ ] `:Insert module` -- module → :Insert
-- [ ] `:Insert env` -- env → :Insert
-- [ ] `:Insert snippet` -- snippet → :Insert
-- [ ] `:Insert location` -- location → :Insert
-- [ ] `:Insert uuid` -- uuid → :Insert
-- [ ] `:Insert annotation` -- annotation → :Insert
-- [ ] `:Insert boilerplate` -- boilerplate → :Insert
+- [x] `:Insert mdlink` -- mdlink → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mdlink.sheet.lua)_
+- [x] `:Insert filename` -- filename → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert date` -- date → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert timestamp` -- timestamp → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert git` -- git → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert linecount` -- linecount → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert bufnr` -- bufnr → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert module` -- module → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert env` -- env → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert snippet` -- snippet → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-annotation-snippet.sheet.lua)_
+- [x] `:Insert location` -- location → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert uuid` -- uuid → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-context.sheet.lua)_
+- [x] `:Insert annotation` -- annotation → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-annotation-snippet.sheet.lua)_
+- [x] `:Insert boilerplate` -- boilerplate → :Insert _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-boilerplate.sheet.lua)_
 
 ### :Insights
 
@@ -1660,16 +1660,16 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Mark
 
-- [ ] `:Mark toggle` -- Toggle the mark on the current line, or over a range
-- [ ] `:Mark yank` -- Yank all marked lines to the system clipboard
+- [x] `:Mark toggle` -- Toggle the mark on the current line, or over a range _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
+- [x] `:Mark yank` -- Yank all marked lines to the system clipboard _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
 
 ### :MarkLineToggle
 
-- [ ] `:MarkLineToggle` -- [buffer-ctx compat] Toggle mark on current line
+- [x] `:MarkLineToggle` -- [buffer-ctx compat] Toggle mark on current line _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
 
 ### :MarkLinesYank
 
-- [ ] `:MarkLinesYank` -- [buffer-ctx compat] Yank all marked lines
+- [x] `:MarkLinesYank` -- [buffer-ctx compat] Yank all marked lines _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
 
 ### :MasonInstallAll
 
@@ -1845,7 +1845,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :OpenInBrowser
 
-- [ ] `:OpenInBrowser` -- [buffer-ctx] Open current buffer with the OS-registered application (browser)
+- [ ] `:OpenInBrowser` -- [buffer-ctx] Open current buffer with the OS-registered application (browser) _(left for a person: the browser itself; what is handed over: auto 2026-11-07, buffer-ctx.nvim/TESTS/sheets/bctx-reveal.sheet.lua)_
 
 ### :PdfPort
 
@@ -2032,7 +2032,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :RevealInFm
 
-- [ ] `:RevealInFm` -- [buffer-ctx] Reveal current buffer in the system file manager
+- [ ] `:RevealInFm` -- [buffer-ctx] Reveal current buffer in the system file manager _(left for a person: the file manager itself; what is handed over: auto 2026-11-07, buffer-ctx.nvim/TESTS/sheets/bctx-reveal.sheet.lua)_
 
 ### :Rules
 
@@ -2507,10 +2507,10 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:Filetree refs undo` -- Revert the last reference rewrite
 - [ ] `:Filetree symlink delete` -- Remove marked symlinks (else the node under the cursor) via trash — never a non-symlink
 - [ ] `:Filetree cwd forget` -- Drop the policy saved for this project (persist)
-- [ ] `:Format cite` -- Remove [cite: N] markers (AI answers)
-- [ ] `:Format filter` -- Filter lines: filter [--remove] <pattern> ...
-- [ ] `:Format unique` -- Remove duplicate buffer lines: unique [-i]
-- [ ] `:Format trim` -- Remove trailing whitespace from buffer
+- [x] `:Format cite` -- Remove [cite: N] markers (AI answers) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format filter` -- Filter lines: filter [--remove] <pattern> ... _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format unique` -- Remove duplicate buffer lines: unique [-i] _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
+- [x] `:Format trim` -- Remove trailing whitespace from buffer _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-format-lines.sheet.lua)_
 - [ ] `:Ft refs undo` -- Revert the last reference rewrite
 - [ ] `:Ft cwd forget` -- Drop the policy saved for this project (persist)
 - [ ] `:Ft symlink delete` -- Remove marked symlinks (else the node under the cursor) via trash — never a non-symlink
@@ -2541,7 +2541,7 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:MDView paragraph` -- Tint the paragraph/list/table/code block the cursor is in, in the preview, or stop; no argument toggles
 - [ ] `:MDView file-log path` -- Set the file log path (or `default` to reset it); omit to report the current path
 - [ ] `:MDView zoom` -- Adjust the preview font-size zoom (+ | - | reset | <factor>)
-- [ ] `:Mark clear` -- Remove every mark in this buffer (optionally only one category)
+- [x] `:Mark clear` -- Remove every mark in this buffer (optionally only one category) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
 - [ ] `:MdRebuildWords` -- [md_words] Force full rebuild of the project-wide word cache
 - [ ] `:Media cache clear` -- Delete every rendered still
 - [ ] `:My opt reset` -- Restore key(s) to the values the plugin shipped; no key = all
