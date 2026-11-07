@@ -39,3 +39,5 @@ Mit `-- --cached` teilen Commit und Basis einen Cache und laufen schneller. Auf 
 Hintergrund prüfen und währenddessen weiterarbeiten (immer nur ein `ci commit` zur Zeit); das Urteil vor dem Push und
 im Review lesen. Am Ende alle auf einmal (`--range`) kostet je Commit einen vollen Lauf plus den der Basis, mehrere
 am Stück dauern schnell 40 Minuten. Ein umgeschriebener Commit (Rebase, Amend) mit gleichem Baum behält sein Urteil.
+
+**Schnell prüfen, nicht jedes Mal alles.** Zwischenläufe beim Arbeiten mit `scripts/test.sh --changed` (nur die Specs, die die geänderten Dateien erreichen; wählt laut `testing.nvim/docs/CACHE.md` nie weniger als nötig). Einen Commit prüfst du mit `scripts/test.sh ci commit <sha> -- --cached`. Die volle Suite ohne `--changed`/`--cached` läuft einmal vor dem Push; `--changed` ist kein CI-Gate.
