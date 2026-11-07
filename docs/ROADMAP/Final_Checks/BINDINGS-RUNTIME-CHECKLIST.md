@@ -421,12 +421,12 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### terminal
 
-- [ ] `<C-j>` -- terminal: Window down (count; hands off at the edge)
-- [ ] `<C-h>` -- terminal: Window left (count; hands off at the edge)
-- [ ] `<C-l>` -- terminal: Window right (count; hands off at the edge)
-- [ ] `<C-k>` -- terminal: Window up (count; hands off at the edge)
-- [ ] `<Esc>` -- terminal: Leave terminal mode
-- [ ] `<A-h>` -- terminal: Toggle the terminal (a count picks terminal N)
+- [x] `<C-j>` -- terminal: Window down (count; hands off at the edge) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-navigate.sheet.lua; real multiplexer: task terminal.nvim/live-check)_
+- [x] `<C-h>` -- terminal: Window left (count; hands off at the edge) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-navigate.sheet.lua; real multiplexer: task terminal.nvim/live-check)_
+- [x] `<C-l>` -- terminal: Window right (count; hands off at the edge) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-navigate.sheet.lua; real multiplexer: task terminal.nvim/live-check)_
+- [x] `<C-k>` -- terminal: Window up (count; hands off at the edge) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-navigate.sheet.lua; real multiplexer: task terminal.nvim/live-check)_
+- [x] `<Esc>` -- terminal: Leave terminal mode _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
+- [x] `<A-h>` -- terminal: Toggle the terminal (a count picks terminal N) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
 
 ### ui.nvim
 
@@ -2285,17 +2285,17 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Terminal
 
-- [ ] `:Terminal hide` -- Hide a terminal's window; its job keeps running
-- [ ] `:Terminal open` -- Show and focus a terminal, creating it when needed
-- [ ] `:Terminal` -- Named terminals of this project
-- [ ] `:Terminal toggle` -- Toggle a terminal (the name "3" is the toggle key with count 3)
-- [ ] `:Terminal adopt` -- Show a tmux/WezTerm terminal's screen in a read-only buffer
-- [ ] `:Terminal cheat` -- Show the cheatsheet of the shell (]] [[ pages, / searches, <CR> types the line)
-- [ ] `:Terminal send file` -- Send the file to a terminal (typed only; --exec presses Enter)
-- [ ] `:Terminal run` -- Run a command (typed as a line; --direct starts it as the job itself); put -- before a command with dashed words
-- [ ] `:Terminal list` -- Pick one of this project's terminals: open, close or send a line
-- [ ] `:Terminal send selection` -- Send the selection to a terminal (typed only; --exec presses Enter)
-- [ ] `:Terminal send line` -- Send the line to a terminal (typed only; --exec presses Enter)
+- [x] `:Terminal hide` -- Hide a terminal's window; its job keeps running _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
+- [x] `:Terminal open` -- Show and focus a terminal, creating it when needed _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
+- [x] `:Terminal` -- Named terminals of this project _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
+- [x] `:Terminal toggle` -- Toggle a terminal (the name "3" is the toggle key with count 3) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
+- [x] `:Terminal adopt` -- Show a tmux/WezTerm terminal's screen in a read-only buffer _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-pin-adopt.sheet.lua; fake wezterm cli; real pane: task terminal.nvim/live-check)_
+- [x] `:Terminal cheat` -- Show the cheatsheet of the shell (]] [[ pages, / searches, <CR> types the line) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-cheat.sheet.lua; the prompt of / stubbed)_
+- [x] `:Terminal send file` -- Send the file to a terminal (typed only; --exec presses Enter) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-send.sheet.lua)_
+- [x] `:Terminal run` -- Run a command (typed as a line; --direct starts it as the job itself); put -- before a command with dashed words _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-send.sheet.lua)_
+- [x] `:Terminal list` -- Pick one of this project's terminals: open, close or send a line _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-list.sheet.lua; the prompt of <C-s> stubbed)_
+- [x] `:Terminal send selection` -- Send the selection to a terminal (typed only; --exec presses Enter) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-send.sheet.lua)_
+- [x] `:Terminal send line` -- Send the line to a terminal (typed only; --exec presses Enter) _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-send.sheet.lua)_
 
 ### :Testing
 
@@ -2621,8 +2621,8 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:TSParserPolicy` -- Show/set the treesitter parser install policy (off|prompt|auto|reset)
 - [x] `:Tasks lists` -- Pick a named list (built in, saved, or from setup({ lists })) and open it as the task dashboard; save and delete lists with the dashboard key gl or `tasks lists` _(auto 2026-10-29: tasks.nvim/TESTS/tasks_routes_spec.lua grün, tasks.nvim/TESTS/tasks_command_spec.lua grün)_
 - [x] `:Tasks set` -- Change frontmatter of an open task (key=value, a value may hold spaces, an empty value removes the key) and regenerate the index; a finished task takes remind= only (set it, or take it away) _(auto 2026-10-29: tasks.nvim/TESTS/tasks_routes_spec.lua grün, tasks.nvim/TESTS/tasks_command_spec.lua grün)_
-- [ ] `:Terminal pin` -- Restart a native terminal as a pane of tmux/WezTerm so it outlives Neovim
-- [ ] `:Terminal close` -- Stop a terminal's job and remove it
+- [x] `:Terminal pin` -- Restart a native terminal as a pane of tmux/WezTerm so it outlives Neovim _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-pin-adopt.sheet.lua; fake wezterm cli; real pane: task terminal.nvim/live-check)_
+- [x] `:Terminal close` -- Stop a terminal's job and remove it _(auto 2026-11-07: terminal.nvim/TESTS/sheets/terminal-toggle.sheet.lua)_
 - [ ] `:Testing cache clear` -- Delete the result cache of the project (it is regenerable: costs time, never correctness)
 - [ ] `:Testing init` -- Generate .testing.lua, TESTS/minimal_init.lua, scripts/test.sh and a CI job (never overwrites)
 - [ ] `:Testing migrate` -- Plan the move of a plugin repo to testing.nvim (dry-run; `apply` writes into a clean git tree)
