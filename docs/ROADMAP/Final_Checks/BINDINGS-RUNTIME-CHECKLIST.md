@@ -357,8 +357,8 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### my
 
-- [ ] `<leader>od` -- my: cycle diff profile
-- [ ] `<leader>oh` -- my: toggle cursorline highlight
+- [x] `<leader>od` -- my: cycle diff profile _(auto 2026-11-07: my.nvim/TESTS/sheets/my-status.sheet.lua)_
+- [x] `<leader>oh` -- my: toggle cursorline highlight _(auto 2026-11-07: my.nvim/TESTS/sheets/my-hl.sheet.lua)_
 
 ### pickers
 
@@ -1709,16 +1709,16 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :My
 
-- [ ] `:My hl list` -- List all highlight config keys
-- [ ] `:My opt show` -- Show an editor-option config value, or the whole table
-- [ ] `:My opt list` -- List all editor-option config keys
-- [ ] `:My diff` -- Build 'diffopt' from a named profile
-- [ ] `:My opt set` -- Set an editor-option config value (bang toggles a boolean)
-- [ ] `:My status` -- Which subsystems are loaded, key counts, current diffopt
-- [ ] `:My hl debug` -- Report what each breadcrumb context provider returns here
-- [ ] `:My hl why` -- Explain whether the current buffer is skipped, and by which rule
-- [ ] `:My hl show` -- Show a highlight config value, or the whole table
-- [ ] `:My hl set` -- Set a highlight config value (bang toggles a boolean)
+- [x] `:My hl list` -- List all highlight config keys _(auto 2026-11-07: my.nvim/TESTS/sheets/my-hl.sheet.lua)_
+- [x] `:My opt show` -- Show an editor-option config value, or the whole table _(auto 2026-11-07: my.nvim/TESTS/sheets/my-opt.sheet.lua)_
+- [x] `:My opt list` -- List all editor-option config keys _(auto 2026-11-07: my.nvim/TESTS/sheets/my-opt.sheet.lua)_
+- [x] `:My diff` -- Build 'diffopt' from a named profile _(auto 2026-11-07: my.nvim/TESTS/sheets/my-status.sheet.lua)_
+- [x] `:My opt set` -- Set an editor-option config value (bang toggles a boolean) _(auto 2026-11-07: my.nvim/TESTS/sheets/my-opt.sheet.lua)_
+- [x] `:My status` -- Which subsystems are loaded, key counts, current diffopt _(auto 2026-11-07: my.nvim/TESTS/sheets/my-status.sheet.lua)_
+- [x] `:My hl debug` -- Report what each breadcrumb context provider returns here _(auto 2026-11-07: my.nvim/TESTS/sheets/my-buffer.sheet.lua)_
+- [x] `:My hl why` -- Explain whether the current buffer is skipped, and by which rule _(auto 2026-11-07: my.nvim/TESTS/sheets/my-buffer.sheet.lua)_
+- [x] `:My hl show` -- Show a highlight config value, or the whole table _(auto 2026-11-07: my.nvim/TESTS/sheets/my-hl.sheet.lua)_
+- [x] `:My hl set` -- Set a highlight config value (bang toggles a boolean) _(auto 2026-11-07: my.nvim/TESTS/sheets/my-hl.sheet.lua)_
 
 ### :MyPlugins
 
@@ -2544,10 +2544,10 @@ caution, not a verdict. Read the description before triggering any of these.
 - [x] `:Mark clear` -- Remove every mark in this buffer (optionally only one category) _(auto 2026-11-07: buffer-ctx.nvim/TESTS/sheets/bctx-mark.sheet.lua)_
 - [ ] `:MdRebuildWords` -- [md_words] Force full rebuild of the project-wide word cache
 - [ ] `:Media cache clear` -- Delete every rendered still
-- [ ] `:My opt reset` -- Restore key(s) to the values the plugin shipped; no key = all
-- [ ] `:My guicursor` -- Set 'guicursor' from a named preset
-- [ ] `:My hl reset` -- Restore key(s) to the values the plugin shipped; no key = all
-- [ ] `:My` -- my.nvim: highlights, editor options, diff profiles, guicursor presets
+- [x] `:My opt reset` -- Restore key(s) to the values the plugin shipped; no key = all _(auto 2026-11-07: my.nvim/TESTS/sheets/my-opt.sheet.lua)_
+- [x] `:My guicursor` -- Set 'guicursor' from a named preset _(auto 2026-11-07: my.nvim/TESTS/sheets/my-status.sheet.lua)_
+- [x] `:My hl reset` -- Restore key(s) to the values the plugin shipped; no key = all _(auto 2026-11-07: my.nvim/TESTS/sheets/my-hl.sheet.lua)_
+- [x] `:My` -- my.nvim: highlights, editor options, diff profiles, guicursor presets _(auto 2026-11-07: my.nvim/TESTS/sheets/my-status.sheet.lua)_
 - [ ] `:MyPlugins mode` -- Show, or persistently switch, plugins.personal.core.source's OVERRIDE (restart required to apply)
 - [ ] `:MyPlugins picker` -- Interactive multi-select: assign clone/update/pull/fetch/remove/reclone per plugin, then run them all at once
 - [ ] `:MyPlugins reclone` -- Delete (if clean) and re-clone present listed plugins, or clone missing ones fresh, after confirmation; --dry-run previews the safe/unsafe/missing split without touching anything
