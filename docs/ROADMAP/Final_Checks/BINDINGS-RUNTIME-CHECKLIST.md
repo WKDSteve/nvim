@@ -240,27 +240,27 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### cascade
 
-- [ ] `<C-M-y>` -- cascade: cycle char under cursor (in-word)
-- [ ] `<C-M-x>` -- cascade: cycle char under cursor back (in-word)
-- [ ] `<leader>cP` -- cascade: pick a cycle-group value
-- [ ] `<C-y>` -- cascade: increment / cycle word
-- [ ] `<C-x>` -- cascade: decrement / cycle word
-- [ ] `-` -- cascade: decrement / cycle word
+- [x] `<C-M-y>` -- cascade: cycle char under cursor (in-word) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua; the key's arrival in a terminal: task cascade.nvim/manual-checklist-run)_
+- [x] `<C-M-x>` -- cascade: cycle char under cursor back (in-word) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua; the key's arrival in a terminal: task cascade.nvim/manual-checklist-run)_
+- [x] `<leader>cP` -- cascade: pick a cycle-group value _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua)_
+- [x] `<C-y>` -- cascade: increment / cycle word _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua)_
+- [x] `<C-x>` -- cascade: decrement / cycle word _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua)_
+- [x] `-` -- cascade: decrement / cycle word _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua)_
 - [x] `<A-Left>` -- cascade: dedent (Ncount = N lines, +renumber) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
-- [ ] `<A-Left>` -- cascade: dedent line (insert)
+- [x] `<A-Left>` -- cascade: dedent line (insert) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-indent.sheet.lua)_
 - [x] `<leader><A-Left>` -- cascade: dedent (Ncount = N levels, +renumber) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
-- [ ] `+` -- cascade: increment / cycle word
+- [x] `+` -- cascade: increment / cycle word _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-cycle.sheet.lua)_
 - [x] `<A-Right>` -- cascade: indent (Ncount = N lines, +renumber) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
-- [ ] `<A-Right>` -- cascade: indent line (insert)
+- [x] `<A-Right>` -- cascade: indent line (insert) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-indent.sheet.lua)_
 - [x] `<leader><A-Right>` -- cascade: indent (Ncount = N levels, +renumber) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
-- [ ] `<A-Down>` -- cascade: move line/selection down
-- [ ] `<A-Down>` -- cascade: move line down (insert)
-- [ ] `<A-Up>` -- cascade: move line/selection up
-- [ ] `<A-Up>` -- cascade: move line up (insert)
-- [ ] `<leader>cR` -- cascade: renumber the numbers inside the selection
+- [x] `<A-Down>` -- cascade: move line/selection down _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-move.sheet.lua)_
+- [x] `<A-Down>` -- cascade: move line down (insert) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-move.sheet.lua)_
+- [x] `<A-Up>` -- cascade: move line/selection up _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-move.sheet.lua)_
+- [x] `<A-Up>` -- cascade: move line up (insert) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-move.sheet.lua)_
+- [x] `<leader>cR` -- cascade: renumber the numbers inside the selection _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-renumber.sheet.lua)_
 - [x] `<leader><Left>` -- cascade: swap char with left neighbor (Ncount = N times) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
 - [x] `<leader><Right>` -- cascade: swap char with right neighbor (Ncount = N times) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
-- [ ] `<leader><C-Left>` -- cascade: swap word with left neighbor word (Ncount = N times)
+- [x] `<leader><C-Left>` -- cascade: swap word with left neighbor word (Ncount = N times) _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-transpose.sheet.lua)_
 - [x] `<leader><C-Right>` -- cascade: swap word with right neighbor word (Ncount = N times) _(auto 2026-10-29: cascade.nvim/TESTS/commands_spec.lua grün)_
 
 ### casedesk
@@ -532,7 +532,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [x] `:Cascade sort` -- Sort list A-Z (range-aware; ! = Z-A) _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
 - [x] `:Cascade cycle add` -- Add a cycle group at runtime: :Cascade cycle add on,off,maybe _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
 - [x] `:Cascade reverse` -- Reverse list order (range-aware) _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
-- [ ] `:Cascade strings` -- Strings domain: on/off/toggle for this buffer, or `now` to convert the literal at the cursor
+- [x] `:Cascade strings` -- Strings domain: on/off/toggle for this buffer, or `now` to convert the literal at the cursor _(auto 2026-11-07: cascade.nvim/TESTS/sheets/cascade-strings-js.sheet.lua; needs an installed parser, a reported skip on CI)_
 - [x] `:Cascade indent` -- Indent line/range (+renumber; arg = levels) _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
 - [x] `:Cascade strip` -- Strip checkboxes (range-aware) _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
 - [x] `:Cascade dedent` -- Dedent line/range (+renumber; arg = levels) _(auto 2026-10-29: cascade.nvim/TESTS/usrcmds_spec.lua grün)_
