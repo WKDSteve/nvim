@@ -316,16 +316,16 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### gopath
 
-- [ ] `gC` -- gopath: check path exists / offer create
-- [ ] `gY` -- gopath: copy path:line:col
-- [ ] `g?` -- gopath: debug under cursor
+- [x] `gC` -- gopath: check path exists / offer create _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-check.sheet.lua)_
+- [x] `gY` -- gopath: copy path:line:col _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
+- [x] `g?` -- gopath: debug under cursor _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
 - [ ] `gM` -- gopath: reveal in file explorer
 - [ ] `gT` -- gopath: reveal in filetree.nvim (soft dependency)
-- [ ] `gF` -- gopath: open here
-- [ ] `g|` -- gopath: open in split
-- [ ] `g}` -- gopath: open in tab
-- [ ] `g\` -- gopath: open in vsplit
-- [ ] `<leader>pp` -- gopath: probe path under cursor (vsplit)
+- [x] `gF` -- gopath: open here _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
+- [x] `g|` -- gopath: open in split _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
+- [x] `g}` -- gopath: open in tab _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
+- [x] `g\` -- gopath: open in vsplit _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
+- [x] `<leader>pp` -- gopath: probe path under cursor (vsplit) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-probe.sheet.lua)_
 
 ### insights
 
@@ -1265,60 +1265,60 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Gopath
 
-- [ ] `:Gopath cache info` -- Show filesystem cache stats
-- [ ] `:Gopath to-repos-dir` -- Rewrite the current line's repos-root path to $VAR, or just a visual selection of it (see env_variable_resolution.shorten_dirs)
-- [ ] `:Gopath to-nvim-dir` -- Rewrite the current line's stdpath('config') occurrences to $VAR, or just a visual selection of it (see env_variable_resolution.shorten_known_dirs)
-- [ ] `:Gopath cache build` -- Rebuild the filesystem cache
-- [ ] `:Gopath cache add-root` -- Add a directory to the filesystem cache roots
-- [ ] `:Gopath probe` -- Probe path under cursor/selection
-- [ ] `:Gopath copy` -- Copy path:line:col to clipboard
-- [ ] `:Gopath check` -- Check existence / offer to create the path under the cursor
-- [ ] `:Gopath debug` -- Show resolution info for the path under the cursor
-- [ ] `:Gopath open` -- Resolve & open the path under the cursor
+- [x] `:Gopath cache info` -- Show filesystem cache stats _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
+- [x] `:Gopath to-repos-dir` -- Rewrite the current line's repos-root path to $VAR, or just a visual selection of it (see env_variable_resolution.shorten_dirs) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-shorten.sheet.lua)_
+- [x] `:Gopath to-nvim-dir` -- Rewrite the current line's stdpath('config') occurrences to $VAR, or just a visual selection of it (see env_variable_resolution.shorten_known_dirs) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-shorten.sheet.lua)_
+- [x] `:Gopath cache build` -- Rebuild the filesystem cache _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
+- [x] `:Gopath cache add-root` -- Add a directory to the filesystem cache roots _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
+- [x] `:Gopath probe` -- Probe path under cursor/selection _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-probe.sheet.lua)_
+- [x] `:Gopath copy` -- Copy path:line:col to clipboard _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
+- [x] `:Gopath check` -- Check existence / offer to create the path under the cursor _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-check.sheet.lua)_
+- [x] `:Gopath debug` -- Show resolution info for the path under the cursor _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
+- [x] `:Gopath open` -- Resolve & open the path under the cursor _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
 
 ### :GopathCacheAddRoot
 
-- [ ] `:GopathCacheAddRoot` -- Gopath: add cache root (alias for :Gopath cache add-root <dir>)
+- [x] `:GopathCacheAddRoot` -- Gopath: add cache root (alias for :Gopath cache add-root <dir>) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
 
 ### :GopathCacheBuild
 
-- [ ] `:GopathCacheBuild` -- Gopath: rebuild fs cache (alias for :Gopath cache build)
+- [x] `:GopathCacheBuild` -- Gopath: rebuild fs cache (alias for :Gopath cache build) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
 
 ### :GopathCacheInfo
 
-- [ ] `:GopathCacheInfo` -- Gopath: show cache info (alias for :Gopath cache info)
+- [x] `:GopathCacheInfo` -- Gopath: show cache info (alias for :Gopath cache info) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-cache.sheet.lua)_
 
 ### :GopathCheck
 
-- [ ] `:GopathCheck` -- Gopath: check existence / offer create (alias for :Gopath check)
+- [x] `:GopathCheck` -- Gopath: check existence / offer create (alias for :Gopath check) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-check.sheet.lua)_
 
 ### :GopathCopy
 
-- [ ] `:GopathCopy` -- Gopath: copy path:line:col (alias for :Gopath copy)
+- [x] `:GopathCopy` -- Gopath: copy path:line:col (alias for :Gopath copy) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
 
 ### :GopathDebug
 
-- [ ] `:GopathDebug` -- Gopath: debug resolution (alias for :Gopath debug)
+- [x] `:GopathDebug` -- Gopath: debug resolution (alias for :Gopath debug) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
 
 ### :GopathOpen
 
-- [ ] `:GopathOpen` -- Gopath: open target (alias for :Gopath open [mode])
+- [x] `:GopathOpen` -- Gopath: open target (alias for :Gopath open [mode]) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
 
 ### :GopathProbe
 
-- [ ] `:GopathProbe` -- Gopath: probe path under cursor/selection (! = split)
+- [x] `:GopathProbe` -- Gopath: probe path under cursor/selection (! = split) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-probe.sheet.lua)_
 
 ### :GopathResolve
 
-- [ ] `:GopathResolve` -- Gopath: show resolution result (alias for :Gopath debug)
+- [x] `:GopathResolve` -- Gopath: show resolution result (alias for :Gopath debug) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
 
 ### :GopathToNvimDir
 
-- [ ] `:GopathToNvimDir` -- Gopath: shorten line's stdpath('config') occurrences to $VAR, or just a visual selection of it (alias for :Gopath to-nvim-dir)
+- [x] `:GopathToNvimDir` -- Gopath: shorten line's stdpath('config') occurrences to $VAR, or just a visual selection of it (alias for :Gopath to-nvim-dir) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-shorten.sheet.lua)_
 
 ### :GopathToReposDir
 
-- [ ] `:GopathToReposDir` -- Gopath: shorten line's repos-root path to $VAR, or just a visual selection of it (alias for :Gopath to-repos-dir)
+- [x] `:GopathToReposDir` -- Gopath: shorten line's repos-root path to $VAR, or just a visual selection of it (alias for :Gopath to-repos-dir) _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-shorten.sheet.lua)_
 
 ### :GrepConfig
 
