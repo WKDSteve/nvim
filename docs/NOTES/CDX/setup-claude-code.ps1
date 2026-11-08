@@ -124,6 +124,22 @@ if (-not $tasksVault) {
     Write-Host "  TASKS_VAULT bereits gesetzt: $tasksVault"
 }
 
+# TASKS_MARKER_DOCS: Dokumente mit `<!-- GENERATED:plan ... -->`-Bloecken, die `tasks done` nach jedem Abschluss neu
+# erzeugt (kommagetrennt; die CLI hat kein `setup`). Das Mobile-Projektdokument liegt im tasks-vault; vorhandene
+# Eintraege bleiben, der Pfad wird nur ergaenzt.
+$markerDoc = if ($reposDir) { Join-Path $reposDir 'tasks-vault\ALL\ROADMAP\projects\mobile-integration-mobil-apps-der-familien.md' } else { $null }
+if ($markerDoc -and (Test-Path $markerDoc)) {
+    $cur = [Environment]::GetEnvironmentVariable('TASKS_MARKER_DOCS', 'User')
+    $have = @(($cur -split ',') | Where-Object { $_ })
+    if ($have | Where-Object { $_.Trim() -ieq $markerDoc }) {
+        Write-Host "  TASKS_MARKER_DOCS enthaelt bereits $markerDoc"
+    } else {
+        Set-UserEnvVar -name 'TASKS_MARKER_DOCS' -value (($have + $markerDoc) -join ',')
+    }
+} else {
+    Write-Host "  TASKS_MARKER_DOCS: Mobile-Projektdokument fehlt (tasks-vault pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
+}
+
 # NVIM_MACHINE_ROLE (workstation | unset = privater Rechner) wird hier nicht gesetzt: lua/machine.lua der nvim-Config
 # liest sie schon, und die Claude-Regeln (CLAUDE.global.md, Abschnitt Maschine) lesen dieselbe Variable. Gelesen wie
 # machine.lua: Prozess-Umgebung, lower(), nur bekannte Rollen. Ist sie dort leer, aber im User- oder Machine-Scope
