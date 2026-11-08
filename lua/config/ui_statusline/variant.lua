@@ -64,6 +64,7 @@ return {
         -- "terminal_count",
         "undo_depth",
         "tasks_counter",
+        "testing_ci",
         "sync_issues",
         "plugin_progress",
         "plugin_summary",
@@ -88,6 +89,24 @@ return {
         -- empty without a vault or a matching area.
         tasks_counter = function()
           return tasks_counter()
+        end,
+
+        -- testing.nvim: the verdict of the last `testing ci` of the buffer's project ("ci: ✓ full @abc1234",
+        -- "ci: ✗ suite", "ci: … fast" while a run goes, "stale" when HEAD's tree moved on); empty without a
+        -- document. Reads a cache; refreshes it (and asks git for the tree) in the background at most every
+        -- 5 s (testing.nvim docs/CI.md, "Statusline"). Shown once testing.nvim is loaded (its spec loads it on
+        -- `:Testing`): a `require` here would make lazy.nvim load the whole plugin at the first redraw.
+        testing_ci = function()
+          if not package.loaded["testing"] then
+            return ""
+          end
+          local ok, text = pcall(function()
+            return require("testing.ci.editor").statusline()
+          end)
+          if not ok or type(text) ~= "string" or text == "" then
+            return ""
+          end
+          return " %#St_Lsp#" .. text:gsub("%%", "%%%%")
         end,
 
         -- "sync:N" repos the last `:MyPlugins sync` left unresolved (skipped ones do not
