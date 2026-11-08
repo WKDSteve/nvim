@@ -92,6 +92,23 @@ if (Test-Path (Join-Path $testingBin 'testing.cmd')) {
     Write-Host "  $testingBin fehlt: Befehl testing nicht auf dem PATH (testing.nvim klonen/pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
 }
 
+# PATH: der Befehl `tasks` (tasks.nvim/bin, bin/tasks.cmd), wie `testing` oben.
+$tasksBin = Join-Path $reposDir 'tasks.nvim\bin'
+if (Test-Path (Join-Path $tasksBin 'tasks.cmd')) {
+    $envKey = Get-Item 'HKCU:\Environment'
+    $userPath = $envKey.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
+    $entries = @($userPath -split ';' | Where-Object { $_ })
+    if ($entries | Where-Object { $_.TrimEnd('\') -ieq $tasksBin }) {
+        Write-Host "  PATH enthaelt bereits $tasksBin"
+    } else {
+        Set-ItemProperty -Path 'HKCU:\Environment' -Name 'Path' -Value (($entries + $tasksBin) -join ';') -Type ExpandString
+        [Environment]::SetEnvironmentVariable('REPOS_DIR', $reposDir, 'User')
+        Write-Host "  PATH ergaenzt: $tasksBin (neue Shells; die App erst nach einem Neustart)"
+    }
+} else {
+    Write-Host "  $tasksBin fehlt: Befehl tasks nicht auf dem PATH (tasks.nvim pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
+}
+
 # TASKS_VAULT: Wurzel des Repos tasks-vault (Task-Vault: Areas mit ROADMAP/tasks, Backlog, Notizen, TOOLS). Der Hub
 # von tasks-desktop und die CLI von tasks.nvim lesen sie; der Vault ist seit 2026-10-12 ein eigenes Repo, nicht
 # mehr ein Ordner in WKDBooks. Auf jeder Maschine liegt er unter $REPOS_DIR/tasks-vault.

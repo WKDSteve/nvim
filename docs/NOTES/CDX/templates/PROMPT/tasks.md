@@ -13,7 +13,7 @@ Begriffe: `status` = open, doing, blocked, decision (wartet auf mich), parked (z
 
 ## CLI (headless, ohne Editor)
 
-`nvim --headless -u NONE -l $REPOS_DIR/tasks.nvim/scripts/tasks.lua <befehl> … --vault=$REPOS_DIR/tasks-vault` (`--help` zeigt alles; `lib.nvim` über `LIB_NVIM_DIR`, sonst `$REPOS_DIR/lib.nvim`). Absoluter Pfad, nicht dafür in andere Repos `cd`en. In PowerShell `$env:REPOS_DIR`; Werte mit `[ ]` oder `,` in Anführungszeichen: `set <id> "blocked_by=[a/b,c/d]"`. Langtext nie durch die Shell (`HEREDOC.md`), sondern mit dem Edit-Tool in die Datei. Exit 0 / 1 (Fehler) / 2 (falsche Nutzung).
+`tasks <befehl> … --vault=$REPOS_DIR/tasks-vault` (kurz, wenn `$REPOS_DIR/tasks.nvim/bin` auf dem PATH liegt; Rückfall: `nvim --headless -u NONE -l $REPOS_DIR/tasks.nvim/scripts/tasks.lua <befehl> …`; `--help` zeigt alles; `lib.nvim` über `LIB_NVIM_DIR`, sonst `$REPOS_DIR/lib.nvim`). Absoluter Pfad, nicht dafür in andere Repos `cd`en. In PowerShell `$env:REPOS_DIR`; Werte mit `[ ]` oder `,` in Anführungszeichen: `set <id> "blocked_by=[a/b,c/d]"`. Langtext nie durch die Shell (`HEREDOC.md`), sondern mit dem Edit-Tool in die Datei. Exit 0 / 1 (Fehler) / 2 (falsche Nutzung).
 
 - Lesen: `show <id>`, `list [<area>] --status=open,doing --ready --actor=cdx --format=ids|tsv|json`, `next [<area>] --actor=cdx --n=3`, `plans`, `plan --plan=<id>|--for=<id>`, `areas`, `list --done`.
 - Ändern: `set <id> key=value …` (leerer Wert entfernt den Key; ersetzt Listen komplett).
