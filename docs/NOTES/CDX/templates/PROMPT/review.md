@@ -1,5 +1,4 @@
 Checke/review alle commits dieses chats die nicht reine docs waren und fixe sie gleich.
 Ich stelle das reasoning auf hoch oder mehr, damit du es gleich grün abhaken kannst.
 Prüfe die Commits mit `scripts/test.sh ci commit <sha>` (eigener Worktree), nie im Arbeitsbaum, und lass keinen aus, weil die Suite rot ist.
-Wurden die Commits schon direkt nach dem Erstellen geprüft (`ci commit <sha>` im Hintergrund), nur deren Urteil lesen statt sie neu laufen zu lassen; ungeprüfte einzeln nachholen.
-Auch hier `scripts/test.sh ci commit <sha> -- --cached` (Commit und Basis teilen den Cache); vor dem Push läuft keine Suite extra (ein CLEANes `ci commit` ist der Beweis, den der pre-push-Hook annimmt).
+Die Commits haben ihr quick-Urteil schon nach dem Erstellen bekommen (`ci commit <sha> --quick`) und der Endstand sein volles (`CI-02`): diese Urteile lesen statt neu laufen zu lassen; einen einzelnen Commit voll (`scripts/test.sh ci commit <sha> --wsl -- --cached`) nur, wenn er strittig ist oder ungeprüft blieb. Regeln: `$RULES_VAULT/rulesets/arbeit/regeln/CI_TAKT.md`.
