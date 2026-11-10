@@ -22,6 +22,8 @@ Konvention: `- [ ]` offen, `- [x]` verifiziert, darunter bei Bedarf eine Zeile `
 
 Task `nvim-config/live-check-noice-skip-regeln-und-start-ohne-standalone-nui`. Code: `nvim@42218a31c`, `22b131799` (notify-Skip-Regeln) und `nvim@5422af9f8`, `69f9e79fa` (redundanter `nui.nvim`-Eintrag entfernt). Headless durch Specs gedeckt, in einer echten UI nie angesehen.
 
+> **Stand 2026-11-10:** automatisiert als Testblatt [`TESTS/sheets/noice-skip-rules.sheet.lua`](../../../TESTS/sheets/noice-skip-rules.sheet.lua) (config = "user"): die drei Skip-Regeln, ein normales notify und `nui.nvim` als Abhängigkeit von noice und neo-tree. Lauf: `testing sheets run --all --root <config>`.
+
 Vorbereitung: Neovim frisch starten.
 
 - [x] `:lua vim.notify('Buffer is not modifiable', vim.log.levels.WARN)` — erwartet: **keine** Mini-Meldung.
@@ -81,27 +83,29 @@ Danach: Task `nvim-config/large-files-hook-live-test-lazygit` mit `done` schlie�
 
 Task `nvim-config/live-check-structure-jump-and-bindings-check` (Tags `needs-live-test`, `bindings`, `treesitter`). Code: `lua/bindings/mappings/treesitter_structure.lua` (`up = "[u"`, `down = "]u"`; `[b`/`]b` ist ein Neovim-0.12-Default), Queries in `after/queries/{lua,json,python,rust,toml,yaml}/textobjects.scm`. Dieselben Kästchen stehen im Abschnitt „nvim-config“ (M5 und A) von `PLUGIN_ROADMAPS_TESTPLAN.md`; dort mit abhaken.
 
+> **Stand 2026-11-10:** automatisiert. M5 als Testblatt [`TESTS/sheets/structure-jump.sheet.lua`](../../../TESTS/sheets/structure-jump.sheet.lua) (Fixtures `TESTS/fixtures/structure/`), die Zählung von A als [`TESTS/sheets/bindings-check.sheet.lua`](../../../TESTS/sheets/bindings-check.sheet.lua); beide auf der installierten Config (config = "user"). Dabei gefunden und behoben: in rust übersprang `[u` den `match` und blieb am `fn` hängen (`nvim@39b7ab454`). Offen bleibt nur die Stichprobe gegen den Notizbaum; sie steht als Judge-Punkt im Block der Task (Abnahme).
+
 M5 — Sprung zur umschließenden Struktur:
-- [ ] **lua:** in einer verschachtelten Funktion `[u` — erwartet: Cursor springt auf den Kopf der umschließenden Struktur; jedes weitere `[u` eine Ebene weiter raus (`for` → `if` → `function`). `]u` abwärts zum schließenden Ende.
-  Notiz:
-- [ ] **lua:** in einer Konfigurationstabelle — Tabellenkopf um Tabellenkopf.
-  Notiz:
-- [ ] **json:** in einem verschachtelten Objekt.
-  Notiz:
-- [ ] **python:** in einer Methode in einer Klasse (`if`/`for` in `def` in `class`).
-  Notiz:
-- [ ] **rust:** in einem `match`/`if` in einer `fn` in einem `impl`.
-  Notiz:
-- [ ] **toml:** in einer verschachtelten Tabelle (`[a.b]`).
-  Notiz:
-- [ ] **yaml:** tief verschachtelt (z. B. CI-Workflow).
-  Notiz:
-- [ ] `[b`/`]b` und `[s`/`]s` (Familie) arbeiten unverändert.
-  Notiz:
+- [x] **lua:** in einer verschachtelten Funktion `[u` — erwartet: Cursor springt auf den Kopf der umschließenden Struktur; jedes weitere `[u` eine Ebene weiter raus (`for` → `if` → `function`). `]u` abwärts zum schließenden Ende.
+  Notiz: 2026-11-10 Testblatt `structure-jump`: if -> for -> function, `]u` die Enden.
+- [x] **lua:** in einer Konfigurationstabelle — Tabellenkopf um Tabellenkopf.
+  Notiz: 2026-11-10 Testblatt `structure-jump`: Tabellenkopf um Tabellenkopf.
+- [x] **json:** in einem verschachtelten Objekt.
+  Notiz: 2026-11-10 Testblatt `structure-jump`: tls -> server -> Wurzel.
+- [x] **python:** in einer Methode in einer Klasse (`if`/`for` in `def` in `class`).
+  Notiz: 2026-11-10 Testblatt `structure-jump`: if -> for -> def in class.
+- [x] **rust:** in einem `match`/`if` in einer `fn` in einem `impl`.
+  Notiz: 2026-11-10 Testblatt `structure-jump`: match -> for -> fn -> impl.
+- [x] **toml:** in einer verschachtelten Tabelle (`[a.b]`).
+  Notiz: 2026-11-10 Testblatt `structure-jump`: [server.tls] -> [server].
+- [x] **yaml:** tief verschachtelt (z. B. CI-Workflow).
+  Notiz: 2026-11-10 Testblatt `structure-jump`: files -> tls -> server.
+- [x] `[b`/`]b` und `[s`/`]s` (Familie) arbeiten unverändert.
+  Notiz: 2026-11-10 Testblatt `structure-jump`: andere Tasten als der Struktur-Sprung.
 
 A — Source-Achse von `:Bindings check`:
-- [ ] `:Bindings check` läuft durch und meldet die verbliebenen Befunde. Erwartung: rund **51** (ursprünglich 150, nach zwei Werkzeugfixes 51). Kommt eine wesentlich größere Zahl, ist eher das Werkzeug verdächtig als die Config. Gemeldete Zahl:
-  Notiz:
+- [x] `:Bindings check` läuft durch und meldet die verbliebenen Befunde. Erwartung: rund **51** (ursprünglich 150, nach zwei Werkzeugfixes 51). Kommt eine wesentlich größere Zahl, ist eher das Werkzeug verdächtig als die Config. Gemeldete Zahl:
+  Notiz: 2026-11-10 Testblatt `bindings-check`: läuft, **63** Befunde (das Blatt verlangt höchstens 100).
 - [ ] Stichprobe gegen den Notizbaum: ein **gemeldeter** Keymap fehlt dort tatsächlich; ein **nicht gemeldeter** steht dort.
   Notiz:
 
@@ -186,19 +190,21 @@ Danach: Zahlen und Version in die Notizen der Task `nvim-config/ohana-startup-re
 
 Task `nvim-config/context-open-review` (`kind: research`, Tags `context-open`, `needs-user`). `M-o` öffnet, was unter dem Cursor liegt, und verteilt an `gopath.nvim`, `markdown.nvim`, `images.nvim`, `pdfport.nvim` oder `open.nvim`. Code: `lua/bindings/usrcmds/context_open/` (`init.lua`, `providers.lua`, `scan.lua`, `util.lua`, `README.md`). Ziel: ausprobieren und klären, ob er erweitert werden soll.
 
+> **Stand 2026-11-10:** der Mechanik-Teil ist das Testblatt [`TESTS/sheets/context-open.sheet.lua`](../../../TESTS/sheets/context-open.sheet.lua) (Fixtures `TESTS/fixtures/context-open/`): Kandidaten je Ziel, `M-o` mit Chooser auf `pfad:zeile`, `M-O` auf einer `require`-Zeile. Dabei gefunden und behoben: die gopath-Wahl war seit `gopath.nvim@a4a2804` kaputt (`nvim@3eda4bcaf`). Eine Mediendatei bekommt nur `split`/`vsplit`/`tab` (kein Medien-Anbieter). Was bleibt (Ausprobieren im Alltag, Anbieterliste, README), steht im Block der Task (Abnahme).
+
 Ausprobieren (`M-o`, alternativ `M-O`) an echten Zielen:
-- [ ] URL in einer Tabellenzelle (Markdown).
-  Notiz:
-- [ ] Bildpfad.
-  Notiz:
-- [ ] PDF.
-  Notiz:
-- [ ] Markdown-Link.
-  Notiz:
+- [x] URL in einer Tabellenzelle (Markdown).
+  Notiz: 2026-11-10 Testblatt `context-open`: Tabellenansicht und Browser, also Chooser.
+- [x] Bildpfad.
+  Notiz: 2026-11-10 Testblatt `context-open`: images.nvim.
+- [x] PDF.
+  Notiz: 2026-11-10 Testblatt `context-open`: pdfport und System-Viewer, kein Text-Buffer.
+- [x] Markdown-Link.
+  Notiz: 2026-11-10 Testblatt `context-open`: gopath öffnet die Datei.
 - [ ] Mediendatei (Video/Audio).
-  Notiz:
-- [ ] Pfad mit `:Zeile` (z. B. `lua/foo.lua:42`).
-  Notiz:
+  Notiz: 2026-11-10: nur gopath und open.nvims `split`/`vsplit`/`tab` (Video als Text-Buffer); ein Medien-Anbieter fehlt.
+- [x] Pfad mit `:Zeile` (z. B. `lua/foo.lua:42`).
+  Notiz: 2026-11-10 Testblatt `context-open`: Chooser, gopath öffnet auf der Zeile.
 
 Erweiterung prüfen — Kandidaten für neue Anbieter (nach dem Bau entstanden): `media.nvim`, `hover.nvim`, `mdview.nvim`, `filetree.nvim`-Knoten, `casedesk.nvim`-Cases, `buffer-ctx.nvim` (`:OpenInBrowser`, `:RevealInFm`).
 - [ ] Liste der Plugins, die einen Anbieter verdienen, hier eintragen; je Fund ein Task (Config-Tasks, `context_open` ist Config-Code).

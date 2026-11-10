@@ -35,10 +35,15 @@ Checkliste); hier nur die zwei neuen Wege vom 2026-10-06. Doku: `docs/commands.m
 **Vorbereitung:** zwei echte offene Cases A und B (beliebig). Ein Zwischenablage-Betrachter zum
 Gegenlesen (z. B. `:put +` in einem Scratch-Buffer, `:enew`).
 
+> **Stand 2026-11-10:** Picker, `--labels`/`--sep` und der Chip bei `:w` und notify sind das Testblatt
+> `casedesk.nvim/TESTS/sheets/clipboard-pin.sheet.lua` (Kind-Editor mit UI, temporärer Case-Baum, Zwischenablage als Rekorder; Snapshot des Pickers).
+> Der Zustand steht im Block der Task (Abnahme). Von Hand bleiben: echte Zwischenablage, echter Case,
+> der Hit-Enter-Prompt und die Spotlights über Case-Wechsel.
+
 ### 1a. Picker ohne Argument
 
-- [ ] In Case A: `:Case clipboard` (ohne Argument) öffnet die Mehrfachauswahl (`kit.select`, `multi`)
-- [ ] Mindestens drei Felder abhaken (z. B. `number`, `title`, `link`): die Auswahl bestätigen
+- [x] In Case A: `:Case clipboard` (ohne Argument) öffnet die Mehrfachauswahl (`kit.select`, `multi`)
+- [x] Mindestens drei Felder abhaken (z. B. `number`, `title`, `link`): die Auswahl bestätigen _(Testblatt: zwei Felder mit `<Tab>`, `<CR>`)_
 - [ ] Zwischenablage (`:enew`, `"+p`): enthält genau die gewählten Werte, in der erwarteten
       Reihenfolge, Werte stimmen mit dem Case überein
 - [ ] Abbrechen im Picker (`<Esc>`): nichts in der Zwischenablage geändert, keine Fehlermeldung
@@ -46,9 +51,9 @@ Gegenlesen (z. B. `:put +` in einem Scratch-Buffer, `:enew`).
 ### 1b. Mit Argumenten
 
 - [x] `:Case clipboard number,title --labels`: jeder Wert trägt seinen Namen als Präfix _(auto 2026-10-29: casedesk.nvim/TESTS/clipboard_spec.lua grün)_
-- [ ] `:Case clipboard number,title --sep=pipe`: die Werte sind mit dem Pipe-Zeichen verbunden
+- [x] `:Case clipboard number,title --sep=pipe`: die Werte sind mit dem Pipe-Zeichen verbunden
       (Erwartung laut Task: `--sep=pipe` wird als Trenner aufgelöst; wenn stattdessen der Text
-      "pipe" erscheint, ist das ein Befund)
+      "pipe" erscheint, ist das ein Befund) _(Testblatt 2026-11-10: `100001 | Tosca crashes on start | Acme`)_
 - [ ] Beides gegen den echten Case: die Werte decken sich mit `Summary.md`/dem Pin-Chip
 
 ### 1c. Spotlights pro Case
@@ -123,8 +128,8 @@ Task `casedesk.nvim/pin-message-windows-live-check` (Rest aus `pin-ignore-messag
 **Vorbereitung:** einen Case öffnen (z. B. dessen `Summary.md`); rechts unten steht der Pin-Chip
 (`pin.anchor = "bottom-right"` ist der Default).
 
-- [ ] `:w` in einem Case: der Chip rechts unten bleibt stehen
-- [ ] `:lua vim.notify("x")`: der Chip bleibt, auch nachdem die Meldung wieder weg ist
+- [x] `:w` in einem Case: der Chip rechts unten bleibt stehen _(Testblatt `clipboard-pin`)_
+- [x] `:lua vim.notify("x")`: der Chip bleibt, auch nachdem die Meldung wieder weg ist _(Testblatt `clipboard-pin`)_
 - [ ] `:echo "a\nb\nc"` (mehrzeilig, "more"/Enter): der Chip bleibt bzw. ist nach Enter sofort
       wieder da
 - [ ] Optional: im Meldungsfenster `:lua print(vim.bo.buftype, vim.api.nvim_win_get_config(0).relative)`
