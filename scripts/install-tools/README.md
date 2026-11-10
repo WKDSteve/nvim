@@ -45,7 +45,10 @@ eigenes unsigniertes Programm meldet CrowdStrike Falcon:
   cargo-audit/-deny, MSVC, clang, cmake, ninja, Inno Setup, sowie tree-sitter-CLI
   und zig, die nur Parser kompilieren (die Config kompiliert dort keine);
 - der Weg `cargo install` (ein Tool mit winget/scoop-Paket kommt trotzdem);
-- pip-Quellpakete: pip nimmt dort nur fertige Wheels (`--only-binary :all:`).
+- pip-Quellpakete: pip nimmt dort nur fertige Wheels (`--only-binary :all:`);
+- der scoop-Bootstrap: fehlt scoop, startet das Skript dort keinen Installer
+  per `iex` aus dem Netz (eigener Falcon-Auslöser, auch nicht mit `-Force`);
+  scoop dann von Hand einrichten oder die scoop-Tools (luacheck) weglassen.
 
 `-List` und `-Status` zeigen solche Tools als „workstation: builds“. Eine
 bewusste Ausnahme geht mit `-Force`. Die eigenen Desktop-Apps installiert

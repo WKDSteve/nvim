@@ -228,6 +228,9 @@ def find_tool(t):
 # third-party tools may be installed there, but nothing may be compiled locally (CrowdStrike Falcon reports
 # own unsigned builds). So build toolchains are left out, cargo install is no route, pip takes wheels only.
 NO_LOCAL_BUILDS = False
+# Also set by main(), independent of --force: on the workstation no installer is fetched and run through
+# iex (irm get.scoop.sh | iex is "code from the net started directly", a Falcon trigger of its own).
+ON_WORKSTATION = False
 
 
 def skip_reason(t):
@@ -263,8 +266,8 @@ def system_managers():
     """Package managers present here, in preference order."""
     if OS == "win":
         found = [pm for pm in ("winget", "scoop") if shutil.which(pm)]
-        # scoop is offered even when missing: this script can bootstrap it
-        if "scoop" not in found:
+        # scoop is offered even when missing: this script can bootstrap it (not on the workstation: iex)
+        if "scoop" not in found and not ON_WORKSTATION:
             found.append("scoop?")
         return found
     found = [pm for pm in LINUX_PMS if shutil.which(PM_EXE[pm])] if OS == "linux" else []
@@ -472,6 +475,10 @@ def run(argv, dry):
 def bootstrap_scoop(dry, yes):
     if shutil.which("scoop"):
         return True
+    if ON_WORKSTATION:
+        print("  scoop fehlt; auf der Workstation startet dieses Skript keinen Installer per iex aus dem Netz"
+              " - scoop von Hand einrichten (https://scoop.sh) oder diese Tools weglassen.")
+        return False
     if not ask("scoop fehlt, wird aber gebraucht. Jetzt installieren (irm get.scoop.sh | iex)?", yes):
         return False
     shell = shutil.which("pwsh") or shutil.which("powershell")
@@ -681,9 +688,9 @@ def main(argv=None):
         return 2
     groups = [g for g in groups if g not in parse_groups(a.skip)]
 
-    global NO_LOCAL_BUILDS
-    on_workstation = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower() == "workstation"
-    NO_LOCAL_BUILDS = on_workstation and not a.force
+    global NO_LOCAL_BUILDS, ON_WORKSTATION
+    ON_WORKSTATION = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower() == "workstation"
+    NO_LOCAL_BUILDS = ON_WORKSTATION and not a.force
 
     repos = repos_dir(a.repos_dir)
     tools, manifest, problems = collect(repos)

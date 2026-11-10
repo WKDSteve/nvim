@@ -197,6 +197,21 @@ class WorkstationTest(unittest.TestCase):
 
     def tearDown(self):
         it.NO_LOCAL_BUILDS = False
+        it.ON_WORKSTATION = False
+
+    def test_no_scoop_bootstrap_through_iex(self):
+        it.ON_WORKSTATION = True
+        calls = []
+        old_which, old_run = it.shutil.which, it.run
+        it.shutil.which = lambda name: None if name == "scoop" else old_which(name)
+        it.run = lambda argv, dry: calls.append(argv) or 0
+        try:
+            self.assertFalse(it.bootstrap_scoop(dry=False, yes=True))
+            if it.OS == "win":
+                self.assertNotIn("scoop?", it.system_managers())
+        finally:
+            it.shutil.which, it.run = old_which, old_run
+        self.assertEqual(calls, [])
 
     def test_prebuilt_tools_stay_installable(self):
         for b in ("lazygit", "nvim", "gh", "stylua", "pnpm"):
