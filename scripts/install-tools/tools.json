@@ -1,0 +1,261 @@
+{
+  "$comment": "Extra manifest for install_tools.py. Plugin tools come from $REPOS_DIR/*/docs/install.json; this file adds a group (and missing install routes) to those, plus the tools no plugin spec declares and the dev toolchain. Keys of pkg: winget, scoop, apt, dnf, pacman, zypper, apk, brew. Keys of alt: npm, pip, cargo, url. os limits a tool to win/linux/mac; skip_wsl leaves a GUI program out inside WSL (it runs on the Windows side). reject: path fragments that do not count as found (the Microsoft Store python stub).",
+  "groups": {
+    "core": "Basis: Editor, Suche, Git, Laufzeiten - ohne die geht wenig",
+    "plugins": "leichte Werkzeuge einzelner Plugins (PDF, Bilder, Rechtschreibung, ...)",
+    "heavy": "gross oder selten gebraucht (Office, Browser, Player, OCR, lokale KI) - nur mit --all",
+    "dev": "Toolchain fuer Tests, Lint, CI und Builds der eigenen Repos"
+  },
+  "default_group": "plugins",
+  "overrides": {
+    "git": { "group": "core" },
+    "curl": { "group": "core" },
+    "rg": { "group": "core" },
+    "fd": { "group": "core" },
+    "fzf": { "group": "core" },
+    "node": { "group": "core", "pkg": { "winget": "OpenJS.NodeJS.LTS" } },
+    "chafa": { "pkg": { "winget": "hpjansson.Chafa" } },
+    "lua-language-server": { "group": "dev", "pkg": { "winget": "LuaLS.lua-language-server" } },
+    "img2pdf": { "alt": { "pip": "img2pdf" } },
+    "ffmpeg": { "group": "plugins" },
+    "ffprobe": { "group": "plugins" },
+    "mpv": { "group": "heavy" },
+    "ollama": { "group": "heavy", "alt": { "url": "https://ollama.com/download" } },
+    "soffice": { "group": "heavy" },
+    "chrome": { "group": "heavy" },
+    "tesseract": { "group": "heavy" },
+    "weasyprint": { "group": "heavy", "alt": { "pip": "weasyprint" } },
+    "whisper": { "group": "heavy", "alt": { "pip": "openai-whisper" } },
+    "whisper-cli": { "group": "heavy", "alt": { "url": "https://github.com/ggml-org/whisper.cpp/releases" } },
+    "trash-put": { "os": ["linux"] },
+    "wslview": { "os": ["linux"] }
+  },
+  "tools": [
+    {
+      "bin": "nvim",
+      "group": "core",
+      "why": "Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it.",
+      "used_by": ["nvim-config", "testing.nvim"],
+      "pkg": { "winget": "Neovim.Neovim", "scoop": "neovim", "apt": "neovim", "dnf": "neovim", "pacman": "neovim", "zypper": "neovim", "apk": "neovim", "brew": "neovim" }
+    },
+    {
+      "bin": "python",
+      "bin_alternatives": ["python3", "py"],
+      "reject": ["\\WindowsApps\\"],
+      "group": "core",
+      "why": "Runs tools/*.py of every repo and the pip routes of this script (python3 on Windows is the Store stub, which does not count).",
+      "used_by": ["all repos", "pdfport.nvim", "media.nvim"],
+      "pkg": { "winget": "Python.Python.3.14", "scoop": "python", "apt": "python3", "dnf": "python3", "pacman": "python", "zypper": "python3", "apk": "python3", "brew": "python" }
+    },
+    {
+      "bin": "gh",
+      "group": "core",
+      "why": "GitHub CLI: pickers.nvim's GitHub source, terminal.nvim's repo list, private reads of the runners and ci_status.",
+      "used_by": ["pickers.nvim", "terminal.nvim", "runners"],
+      "pkg": { "winget": "GitHub.cli", "scoop": "gh", "apt": "gh", "dnf": "gh", "pacman": "github-cli", "zypper": "gh", "apk": "github-cli", "brew": "gh" }
+    },
+    {
+      "bin": "lazygit",
+      "group": "core",
+      "why": "The git UI gitsuite.nvim opens in a float.",
+      "used_by": ["gitsuite.nvim"],
+      "pkg": { "winget": "JesseDuffield.lazygit", "scoop": "lazygit", "apt": "lazygit", "dnf": "lazygit", "pacman": "lazygit", "apk": "lazygit", "brew": "lazygit" },
+      "alt": { "url": "https://github.com/jesseduffield/lazygit/releases" }
+    },
+    {
+      "bin": "tree-sitter",
+      "group": "core",
+      "why": "nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI.",
+      "used_by": ["nvim-config", "lib.nvim (parser_policy)"],
+      "pkg": { "winget": "tree-sitter.tree-sitter-cli", "scoop": "tree-sitter", "pacman": "tree-sitter-cli", "brew": "tree-sitter-cli" },
+      "alt": { "npm": "tree-sitter-cli" }
+    },
+    {
+      "bin": "zig",
+      "bin_alternatives": ["gcc", "cc", "clang", "cl"],
+      "group": "core",
+      "why": "A C compiler for nvim-treesitter's parser builds (any of zig, gcc, clang, cl counts).",
+      "used_by": ["nvim-config"],
+      "pkg": { "winget": "zig.zig", "scoop": "zig", "apt": "gcc", "dnf": "gcc", "pacman": "gcc", "zypper": "gcc", "apk": "build-base", "brew": "zig" }
+    },
+    {
+      "bin": "7z",
+      "bin_alternatives": ["7zz", "7za"],
+      "group": "core",
+      "why": "Archives: release packaging of the repos, extracting downloads.",
+      "used_by": ["release workflows"],
+      "pkg": { "winget": "7zip.7zip", "scoop": "7zip", "apt": "7zip", "dnf": "p7zip", "pacman": "7zip", "zypper": "7zip", "apk": "7zip", "brew": "sevenzip" },
+      "paths": { "win": ["$PROGRAMFILES\\7-Zip\\7z.exe"] }
+    },
+    {
+      "bin": "zip",
+      "group": "plugins",
+      "why": "filetree.nvim's compress action (tar/bsdtar is the fallback, Windows ships tar).",
+      "used_by": ["filetree.nvim"],
+      "pkg": { "winget": "GnuWin32.Zip", "scoop": "zip", "apt": "zip", "dnf": "zip", "pacman": "zip", "zypper": "zip", "apk": "zip", "brew": "zip" }
+    },
+    {
+      "bin": "nvr",
+      "group": "plugins",
+      "why": "neovim-remote: lazygit inside gitsuite.nvim opens files in the running nvim instead of a nested one.",
+      "used_by": ["gitsuite.nvim"],
+      "alt": { "pip": "neovim-remote" }
+    },
+    {
+      "bin": "cspell",
+      "group": "plugins",
+      "why": "The code-aware spell checker of language.nvim (fast with node as a sidecar).",
+      "used_by": ["language.nvim"],
+      "alt": { "npm": "cspell" }
+    },
+    {
+      "bin": "codespell",
+      "group": "plugins",
+      "why": "Spell provider of language.nvim for common misspellings in code and docs.",
+      "used_by": ["language.nvim"],
+      "pkg": { "apt": "codespell", "dnf": "codespell", "pacman": "codespell", "brew": "codespell" },
+      "alt": { "pip": "codespell" }
+    },
+    {
+      "bin": "typos",
+      "group": "plugins",
+      "why": "Spell provider of language.nvim (fast source-code typo finder).",
+      "used_by": ["language.nvim"],
+      "pkg": { "winget": "Crate-CI.Typos", "scoop": "typos", "pacman": "typos", "brew": "typos-cli" },
+      "alt": { "cargo": "typos-cli" }
+    },
+    {
+      "bin": "trans",
+      "os": ["linux", "mac"],
+      "group": "plugins",
+      "why": "translate-shell: the shell translate provider of language.nvim (no API key needed).",
+      "used_by": ["language.nvim"],
+      "pkg": { "apt": "translate-shell", "dnf": "translate-shell", "pacman": "translate-shell", "zypper": "translate-shell", "brew": "translate-shell" }
+    },
+    {
+      "bin": "tmux",
+      "os": ["linux", "mac"],
+      "group": "plugins",
+      "why": "Terminal backend of terminal.nvim outside WezTerm.",
+      "used_by": ["terminal.nvim"],
+      "pkg": { "apt": "tmux", "dnf": "tmux", "pacman": "tmux", "zypper": "tmux", "apk": "tmux", "brew": "tmux" }
+    },
+    {
+      "bin": "vlc",
+      "group": "heavy",
+      "why": "External player hover.nvim hands a video to.",
+      "used_by": ["hover.nvim"],
+      "pkg": { "winget": "VideoLAN.VLC", "scoop": "vlc", "apt": "vlc", "dnf": "vlc", "pacman": "vlc", "zypper": "vlc", "brew": "vlc" },
+      "paths": { "win": ["$PROGRAMFILES\\VideoLAN\\VLC\\vlc.exe"], "mac": ["/Applications/VLC.app/Contents/MacOS/VLC"] }
+    },
+    {
+      "bin": "marker_single",
+      "group": "heavy",
+      "why": "pdfport.nvim's ML PDF-to-markdown producer (marker-pdf, pulls PyTorch, several GB).",
+      "used_by": ["pdfport.nvim"],
+      "alt": { "pip": "marker-pdf" }
+    },
+    {
+      "bin": "wezterm",
+      "skip_wsl": true,
+      "group": "dev",
+      "why": "The terminal the Configs repo sets up; terminal.nvim's WezTerm backend.",
+      "used_by": ["Configs", "terminal.nvim"],
+      "pkg": { "winget": "wez.wezterm", "scoop": "wezterm", "pacman": "wezterm", "brew": "wezterm" },
+      "alt": { "url": "https://wezterm.org/install/linux.html" },
+      "paths": { "win": ["$PROGRAMFILES\\WezTerm\\wezterm.exe"] }
+    },
+    {
+      "bin": "stylua",
+      "group": "dev",
+      "why": "Lua formatter of every .nvim repo (format gates, CI parity before push).",
+      "used_by": ["all .nvim repos"],
+      "pkg": { "winget": "JohnnyMorganz.StyLua", "scoop": "stylua", "pacman": "stylua", "brew": "stylua" },
+      "alt": { "cargo": "stylua" }
+    },
+    {
+      "bin": "luacheck",
+      "group": "dev",
+      "why": "Lua linter of every .nvim repo (lint gates, CI parity before push).",
+      "used_by": ["all .nvim repos"],
+      "pkg": { "scoop": "luacheck", "apt": "lua-check", "pacman": "luacheck", "brew": "luacheck" }
+    },
+    {
+      "bin": "pnpm",
+      "group": "dev",
+      "why": "Package manager of tasks-desktop, rules-desktop and the appkit UI.",
+      "used_by": ["tasks-desktop", "rules-desktop", "appkit"],
+      "pkg": { "winget": "pnpm.pnpm", "scoop": "pnpm", "pacman": "pnpm", "brew": "pnpm" },
+      "alt": { "npm": "pnpm" }
+    },
+    {
+      "bin": "cargo",
+      "group": "dev",
+      "why": "Rust toolchain via rustup (cargo, rustc, rustfmt, clippy) for all Rust repos.",
+      "used_by": ["streamtap", "testing.nvim runner", "*-desktop"],
+      "pkg": { "winget": "Rustlang.Rustup", "scoop": "rustup", "apt": "rustup", "dnf": "rustup", "pacman": "rustup", "brew": "rustup" },
+      "alt": { "url": "https://rustup.rs" }
+    },
+    {
+      "bin": "cargo-audit",
+      "group": "dev",
+      "why": "Supply-chain job of the Rust repos (needs cargo first).",
+      "used_by": ["Rust repos"],
+      "alt": { "cargo": "cargo-audit" }
+    },
+    {
+      "bin": "cargo-deny",
+      "group": "dev",
+      "why": "Supply-chain job of the Rust repos (needs cargo first).",
+      "used_by": ["Rust repos"],
+      "alt": { "cargo": "cargo-deny" }
+    },
+    {
+      "bin": "jq",
+      "group": "dev",
+      "why": "JSON in shell steps: docmap-desktop and the release workflows.",
+      "used_by": ["docmap-desktop", "release workflows"],
+      "pkg": { "winget": "jqlang.jq", "scoop": "jq", "apt": "jq", "dnf": "jq", "pacman": "jq", "zypper": "jq", "apk": "jq", "brew": "jq" }
+    },
+    {
+      "bin": "shellcheck",
+      "group": "dev",
+      "why": "Hygiene jobs: lints the shell scripts of the repos.",
+      "used_by": ["hygiene jobs"],
+      "pkg": { "winget": "koalaman.shellcheck", "scoop": "shellcheck", "apt": "shellcheck", "dnf": "ShellCheck", "pacman": "shellcheck", "zypper": "ShellCheck", "apk": "shellcheck", "brew": "shellcheck" }
+    },
+    {
+      "bin": "actionlint",
+      "group": "dev",
+      "why": "Lints GitHub workflow files (streamtap hygiene job).",
+      "used_by": ["streamtap"],
+      "pkg": { "winget": "rhysd.actionlint", "scoop": "actionlint", "pacman": "actionlint", "brew": "actionlint" },
+      "alt": { "url": "https://github.com/rhysd/actionlint/releases" }
+    },
+    {
+      "bin": "cmake",
+      "group": "dev",
+      "why": "Build of ai-desktop (and whisper.cpp from source).",
+      "used_by": ["ai-desktop"],
+      "pkg": { "winget": "Kitware.CMake", "scoop": "cmake", "apt": "cmake", "dnf": "cmake", "pacman": "cmake", "zypper": "cmake", "apk": "cmake", "brew": "cmake" },
+      "paths": { "win": ["$PROGRAMFILES\\CMake\\bin\\cmake.exe"] }
+    },
+    {
+      "bin": "pwsh",
+      "group": "dev",
+      "why": "PowerShell 7: workflow steps with shell: pwsh, the scripts of the nvim config, several plugin helpers.",
+      "used_by": ["nvim-config", "lib.nvim", "workflows"],
+      "pkg": { "winget": "Microsoft.PowerShell", "scoop": "pwsh", "brew": "powershell" },
+      "alt": { "url": "https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux" }
+    },
+    {
+      "bin": "iscc",
+      "os": ["win"],
+      "group": "dev",
+      "why": "Inno Setup compiler for the ai-desktop installer.",
+      "used_by": ["ai-desktop"],
+      "pkg": { "winget": "JRSoftware.InnoSetup" },
+      "paths": { "win": ["$PROGRAMFILES(X86)\\Inno Setup 6\\ISCC.exe", "$PROGRAMFILES\\Inno Setup 6\\ISCC.exe", "$LOCALAPPDATA\\Programs\\Inno Setup 6\\ISCC.exe"] }
+    }
+  ]
+}

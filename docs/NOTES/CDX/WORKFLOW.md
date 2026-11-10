@@ -66,6 +66,17 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    `node setup-devtools.js --status`.
 4. Claude-App/Terminal **neu starten** (Env-Vars greifen erst dann).
 5. Repos klonen, pro Repo Abschnitt 3.
+6. CLI-Tools der Plugins und Repos (rg, fd, gh, lazygit, pandoc, poppler,
+   ImageMagick, tree-sitter, stylua, luacheck, …) mit einem Befehl, bevorzugt
+   per winget; liest die `docs/install.json` aller geklonten Plugins, daher
+   nach Schritt 5:
+   - Windows: `pwsh -File "$env:LOCALAPPDATA\nvim\scripts\install-tools\install-tools.ps1"`
+   - Linux/macOS/WSL: `bash ~/.config/nvim/scripts/install-tools/install-tools.sh`
+   Erst ansehen mit `-List` / `--list`; `-All` nimmt die grossen Pakete
+   (LibreOffice, Chrome, Ollama, OCR, Whisper) dazu. Liste und Optionen:
+   `scripts/install-tools/README.md`. `setup-devtools.js` bleibt fuer die
+   Hook-Toolchains (C++/MSVC, Tauri/WebView2); doppelt genannte Tools werden
+   von beiden uebersprungen, wenn sie schon da sind.
 
 ## 5. Schnelltest, ob alles greift
 
