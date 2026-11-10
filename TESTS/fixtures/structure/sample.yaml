@@ -1,0 +1,4 @@
+server:
+  tls:
+    files:
+      cert: a

@@ -1,0 +1,5 @@
+[server]
+host = "x"
+
+[server.tls]
+cert = "a"
