@@ -1,7 +1,12 @@
-fn walk(items: &[i32]) {
-    for item in items {
-        if *item > 1 {
-            println!("{}", item);
+struct Walker;
+
+impl Walker {
+    fn walk(&self, items: &[i32]) {
+        for item in items {
+            match *item {
+                1 => println!("one"),
+                _ => {}
+            }
         }
     }
 }

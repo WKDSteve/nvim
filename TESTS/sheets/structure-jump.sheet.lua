@@ -60,13 +60,20 @@ return {
       note = "lua table: the closing braces",
     },
     {
-      expect = "_G.__climb('sample.py', 4, 12, '[u') == '3,2,1'",
-      note = "python: if -> for -> def",
+      expect = "_G.__climb('sample.py', 5, 16, '[u') == '4,3,2'",
+      note = "python: if -> for -> def, a method in a class",
     },
-    { expect = "_G.__climb('sample.rs', 4, 12, '[u') == '3,2,1'", note = "rust: if -> for -> fn" },
     {
-      expect = "_G.__climb('sample.rs', 4, 12, ']u') == '5,6,7'",
-      note = "rust: the closing braces",
+      expect = "_G.__climb('sample.rs', 7, 16, '[u') == '6,5,4'",
+      note = "rust: match -> for -> fn, in an impl",
+    },
+    {
+      expect = "_G.__climb('sample.rs', 5, 8, '[u') == '4,3,3'",
+      note = "rust: from the for out of the fn to the impl",
+    },
+    {
+      expect = "_G.__climb('sample.rs', 7, 16, ']u') == '8,9,10'",
+      note = "rust: the end of the empty arm block, the match, the for",
     },
     {
       expect = "_G.__climb('sample.json', 4, 6, '[u') == '3,2,1'",
