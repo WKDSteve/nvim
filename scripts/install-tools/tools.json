@@ -1,5 +1,5 @@
 {
-  "$comment": "Extra manifest for install_tools.py. Plugin tools come from $REPOS_DIR/*/docs/install.json; this file adds a group (and missing install routes) to those, plus the tools no plugin spec declares and the dev toolchain. Keys of pkg: winget, scoop, apt, dnf, pacman, zypper, apk, brew. Keys of alt: npm, pip, cargo, url. os limits a tool to win/linux/mac; skip_wsl leaves a GUI program out inside WSL (it runs on the Windows side). reject: path fragments that do not count as found (the Microsoft Store python stub).",
+  "$comment": "Extra manifest for install_tools.py. Plugin tools come from $REPOS_DIR/*/docs/install.json; this file adds a group (and missing install routes) to those, plus the tools no plugin spec declares and the dev toolchain. Keys of pkg: winget, scoop, apt, dnf, pacman, zypper, apk, brew. Keys of alt: npm, pip, cargo, url. os limits a tool to win/linux/mac; skip_wsl leaves a GUI program out inside WSL (it runs on the Windows side). reject: path fragments that do not count as found (the Microsoft Store python stub). detect: msvc / webview2 for tools that are no command. fallback_for: only wanted while that tool is missing. winget_override: passed to winget --override. A pkg value may be a list of packages.",
   "groups": {
     "core": "Basis: Editor, Suche, Git, Laufzeiten - ohne die geht wenig",
     "plugins": "leichte Werkzeuge einzelner Plugins (PDF, Bilder, Rechtschreibung, ...)",
@@ -7,15 +7,16 @@
     "dev": "Toolchain fuer Tests, Lint, CI und Builds der eigenen Repos"
   },
   "default_group": "plugins",
+  "profiles": {
+    "$comment": "Stack profiles of the Claude setup (setup-claude-code asks for them; --profile). core is always part of a profile run. A tool's profiles field puts it in one.",
+    "names": ["core", "nvim", "cpp", "rust", "web", "tauri"],
+    "implies": { "tauri": ["rust", "web"] }
+  },
   "overrides": {
-    "git": { "group": "core" },
     "curl": { "group": "core" },
-    "rg": { "group": "core" },
-    "fd": { "group": "core" },
     "fzf": { "group": "core" },
-    "node": { "group": "core", "pkg": { "winget": "OpenJS.NodeJS.LTS" } },
+    "node": { "pkg": { "winget": "OpenJS.NodeJS.LTS" } },
     "chafa": { "pkg": { "winget": "hpjansson.Chafa" } },
-    "lua-language-server": { "group": "dev", "pkg": { "winget": "LuaLS.lua-language-server" } },
     "img2pdf": { "alt": { "pip": "img2pdf" } },
     "ffmpeg": { "group": "plugins" },
     "ffprobe": { "group": "plugins" },
@@ -32,7 +33,50 @@
   },
   "tools": [
     {
+      "$comment": "git, node, rg, fd and lua-language-server are declared by plugin specs too; they stand here as well so the Claude setup (profiles, run before the repos are cloned) knows them.",
+      "bin": "git",
+      "profiles": ["core"],
+      "group": "core",
+      "why": "Version control: every repo, the Claude hooks, several plugins (fileops, gitsuite, diff, rules).",
+      "used_by": ["Claude setup (profile core)"],
+      "pkg": { "winget": "Git.Git", "scoop": "git", "apt": "git", "dnf": "git", "pacman": "git", "zypper": "git", "apk": "git", "brew": "git" }
+    },
+    {
+      "bin": "node",
+      "profiles": ["core"],
+      "group": "core",
+      "why": "Node.js: the Claude hooks and setup scripts, the cspell sidecar of language.nvim, the web repos.",
+      "used_by": ["Claude setup (profile core)"],
+      "pkg": { "winget": "OpenJS.NodeJS.LTS", "scoop": "nodejs-lts", "apt": "nodejs", "dnf": "nodejs", "pacman": "nodejs", "zypper": "nodejs", "apk": "nodejs", "brew": "node" }
+    },
+    {
+      "bin": "rg",
+      "profiles": ["core"],
+      "group": "core",
+      "why": "ripgrep: fast text search for the pickers, the Claude tools and many plugins.",
+      "used_by": ["Claude setup (profile core)"],
+      "pkg": { "winget": "BurntSushi.ripgrep.MSVC", "scoop": "ripgrep", "apt": "ripgrep", "dnf": "ripgrep", "pacman": "ripgrep", "zypper": "ripgrep", "apk": "ripgrep", "brew": "ripgrep" }
+    },
+    {
+      "bin": "fd",
+      "bin_alternatives": ["fdfind"],
+      "profiles": ["core"],
+      "group": "core",
+      "why": "fd: fast file search (Debian/Ubuntu name it fdfind).",
+      "used_by": ["Claude setup (profile core)"],
+      "pkg": { "winget": "sharkdp.fd", "scoop": "fd", "apt": "fd-find", "dnf": "fd-find", "pacman": "fd", "zypper": "fd", "apk": "fd", "brew": "fd" }
+    },
+    {
+      "bin": "lua-language-server",
+      "profiles": ["nvim"],
+      "group": "dev",
+      "why": "Lua language server: the Lua checks of the Claude hooks and docmap.nvim's luals pass.",
+      "used_by": ["Claude setup (profile nvim)"],
+      "pkg": { "winget": "LuaLS.lua-language-server", "scoop": "lua-language-server", "pacman": "lua-language-server", "brew": "lua-language-server" }
+    },
+    {
       "bin": "nvim",
+      "profiles": ["nvim"],
       "group": "core",
       "why": "Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. Not via apt: Debian/Ubuntu ship a release too old for the config.",
       "used_by": ["nvim-config", "testing.nvim"],
@@ -168,6 +212,7 @@
     },
     {
       "bin": "stylua",
+      "profiles": ["nvim"],
       "group": "dev",
       "why": "Lua formatter of every .nvim repo (format gates, CI parity before push).",
       "used_by": ["all .nvim repos"],
@@ -176,6 +221,7 @@
     },
     {
       "bin": "luacheck",
+      "profiles": ["nvim"],
       "group": "dev",
       "why": "Lua linter of every .nvim repo (lint gates, CI parity before push).",
       "used_by": ["all .nvim repos"],
@@ -183,6 +229,7 @@
     },
     {
       "bin": "pnpm",
+      "profiles": ["web"],
       "group": "dev",
       "why": "Package manager of tasks-desktop, rules-desktop and the appkit UI.",
       "used_by": ["tasks-desktop", "rules-desktop", "appkit"],
@@ -191,6 +238,7 @@
     },
     {
       "bin": "cargo",
+      "profiles": ["rust"],
       "group": "dev",
       "why": "Rust toolchain via rustup (cargo, rustc, rustfmt, clippy) for all Rust repos.",
       "used_by": ["streamtap", "testing.nvim runner", "*-desktop"],
@@ -235,6 +283,7 @@
     },
     {
       "bin": "cmake",
+      "profiles": ["cpp"],
       "group": "dev",
       "why": "Build of ai-desktop (and whisper.cpp from source).",
       "used_by": ["ai-desktop"],
@@ -248,6 +297,45 @@
       "used_by": ["nvim-config", "lib.nvim", "workflows"],
       "pkg": { "winget": "Microsoft.PowerShell", "scoop": "pwsh", "brew": "powershell" },
       "alt": { "url": "https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-linux" }
+    },
+    {
+      "bin": "ninja",
+      "profiles": ["cpp"],
+      "group": "dev",
+      "why": "Build backend of the C++ projects (CMake generator).",
+      "used_by": ["C++ projects (Claude hooks, profile cpp)"],
+      "pkg": { "winget": "Ninja-build.Ninja", "scoop": "ninja", "apt": "ninja-build", "dnf": "ninja-build", "pacman": "ninja", "zypper": "ninja", "apk": "samurai", "brew": "ninja" }
+    },
+    {
+      "bin": "msvc",
+      "detect": "msvc",
+      "os": ["win"],
+      "profiles": ["cpp"],
+      "group": "heavy",
+      "why": "MSVC Build Tools (VC tools workload): the C++ compiler the cpp profile builds with on Windows; several GB.",
+      "used_by": ["C++ projects (Claude hooks, profile cpp)"],
+      "pkg": { "winget": "Microsoft.VisualStudio.2022.BuildTools" },
+      "winget_override": "--passive --wait --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended"
+    },
+    {
+      "bin": "clang-format",
+      "fallback_for": "msvc",
+      "profiles": ["cpp"],
+      "group": "heavy",
+      "why": "LLVM/clang: formatter of the C++ hooks, and the compiler when MSVC is not there (only installed then).",
+      "used_by": ["C++ projects (Claude hooks, profile cpp)"],
+      "pkg": { "winget": "LLVM.LLVM", "scoop": "llvm", "apt": ["clang", "clang-format"], "dnf": ["clang", "clang-tools-extra"], "pacman": "clang", "zypper": "clang", "apk": ["clang", "clang-extra-tools"], "brew": "llvm" },
+      "paths": { "win": ["$PROGRAMFILES\\LLVM\\bin\\clang-format.exe"] }
+    },
+    {
+      "bin": "webview2",
+      "detect": "webview2",
+      "os": ["win"],
+      "profiles": ["tauri"],
+      "group": "dev",
+      "why": "WebView2 runtime the Tauri apps render in (preinstalled on Windows 11).",
+      "used_by": ["docmap-desktop", "tasks-desktop", "rules-desktop"],
+      "pkg": { "winget": "Microsoft.EdgeWebView2Runtime" }
     },
     {
       "bin": "iscc",

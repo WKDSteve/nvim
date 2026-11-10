@@ -305,16 +305,21 @@ if ($manualPushRepos.Count -eq 0) {
 Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
 & (Join-Path $PSScriptRoot 'setup-git-signing.ps1')
 
+$installTools = Join-Path $PSScriptRoot '..\..\..\scripts\install-tools\install-tools.ps1'
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
-Write-Host "  Was auf dieser Maschine schon da ist:"
-node (Join-Path $PSScriptRoot 'setup-devtools.js') --status
 if ($isWorkstation) {
-    Write-Host "  Workstation (CrowdStrike Falcon): nichts Unsigniertes installieren. Mehrere winget-Pakete sind" -ForegroundColor Yellow
-    Write-Host "  unsignierte portable Binaries (u. a. ripgrep, fd, stylua). Im Zweifel leer lassen." -ForegroundColor Yellow
-}
-$profileAnswer = Read-Host '  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen'
-if ($profileAnswer) {
-    node (Join-Path $PSScriptRoot 'setup-devtools.js') --profile $profileAnswer
+    # install-tools refuses on the workstation anyway (EDR/Falcon); several packages are unsigned portable binaries
+    Write-Host "  Workstation (CrowdStrike Falcon): hier wird nichts installiert. Bewusst von Hand:" -ForegroundColor Yellow
+    Write-Host "  pwsh -File `"$installTools`" -Profile <profile> -Force" -ForegroundColor Yellow
+} else {
+    Write-Host "  Was auf dieser Maschine schon da ist:"
+    & $installTools -Status
+    $profileAnswer = Read-Host '  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen'
+    if ($profileAnswer) {
+        & $installTools -Profile ($profileAnswer -split '[,\s]+' | Where-Object { $_ })
+    }
+    Write-Host "  Die CLI-Tools der Plugins (pandoc, poppler, ImageMagick, ...) bringt nach dem Klonen der Repos:"
+    Write-Host "  pwsh -File `"$installTools`" -List   (dann ohne -List zum Installieren)"
 }
 
 Write-Host "`nFertig."

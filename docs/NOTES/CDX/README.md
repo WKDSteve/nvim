@@ -20,7 +20,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `check-hook.test.js`         | End-to-end-Test der Edition-Erkennung von `check-hook.js` (Wegwerf-Crates im Temp-Ordner, braucht rustfmt): `node check-hook.test.js` |
 | `check-stop.js`              | Stop-Hook: bei geaenderten Dateien `cargo clippy -D warnings` (Rust) bzw. `tsc --noEmit` (TS) |
 | `WORKFLOW.md`                | Anleitung: neuer Chat, neues Repo, neue Maschine |
-| `setup-devtools.js` + `tools.json` | Installiert fehlende Toolchains pro Profil (`nvim`, `cpp`, `rust`, `web`, `tauri`, oder `all` für alle) via winget/apt/brew. `node setup-devtools.js --profile nvim,rust --dry-run`; `node setup-devtools.js --status` zeigt je Profil, was schon installiert ist, und installiert nichts |
+| `../../../scripts/install-tools/` | Ersetzt `setup-devtools.js` + `tools.json`: installiert fehlende Toolchains pro Profil (`nvim`, `cpp`, `rust`, `web`, `tauri`, oder `all` für alle) und die CLI-Tools der Plugins, bevorzugt per winget. `install-tools.ps1 -Profile nvim,rust -DryRun`; `-Status` zeigt je Profil, was schon installiert ist, und installiert nichts. Siehe dortiges README |
 | `new-project-claude.js`      | Kopiert die Projekt-Vorlage aus `templates/<stack>/` (`CLAUDE.md` + `.claude/settings.json`) in ein Repo: `node new-project-claude.js rust [zielordner]` |
 | `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web` |
 | `KONZEPT-multi-stack.md`     | Begruendung/Architektur der drei Schichten |
@@ -67,7 +67,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 ## Drei Schichten (Multi-Stack)
 
 1. **Claude-Setup** (`setup-claude-code.*`): globale `CLAUDE.md` (stack-neutral) + `settings.json`.
-2. **Toolchains** (`setup-devtools.js`): Programme pro Profil installieren (winget; MSVC primaer, clang als Fallback). Gewaehlte Profile landen in `~/.claude/devtools.profile`.
+2. **Toolchains** (`scripts/install-tools`, `-Profile`): Programme pro Profil installieren (winget; MSVC primaer, clang als Fallback). Gewaehlte Profile landen in `~/.claude/devtools.profile` (`-Profile saved` nimmt sie wieder).
 3. **Projekt-Konfig** (`new-project-claude.js`): stack-spezifische `CLAUDE.md` + Allowlist pro Repo, im Repo versioniert.
 
 Neues Repo einrichten: `node $NVIM_CONFIG_DIR/docs/NOTES/CDX/new-project-claude.js <stack>` im Repo-Root, dann committen.
@@ -128,10 +128,12 @@ Ablauf (beide Skripte, gleiches Prinzip):
    `testing ci runner-guard install` (macht `runners.ps1 start|ensure` mit).
    Aus der Claude-App gestartet landet die User-Env-Var nur im App-Container:
    das Skript selbst in einem normalen Terminal laufen lassen.
-5. Optional: zeigt mit `node setup-devtools.js --status`, was schon
-   installiert ist, und fragt nach Toolchain-Profilen (`nvim,cpp,rust,web,tauri`,
-   `all` = alle, leer = ueberspringen). Auf der Workstation warnen Skript und
-   `setup-devtools.js` vor unsignierten Paketen und fragen immer (auch mit `--yes`).
+5. Optional: zeigt mit `scripts/install-tools/install-tools.ps1 -Status`, was
+   schon installiert ist, und fragt nach Toolchain-Profilen
+   (`nvim,cpp,rust,web,tauri`, `all` = alle, leer = ueberspringen). Fehlt
+   Python, fragt der Starter vorher, ob er es per winget installieren darf.
+   Auf der Workstation wird nichts installiert (mehrere Pakete sind
+   unsignierte portable Binaries); bewusst von Hand nur mit `-Force`.
 
 Danach Claude-Code-App/Terminal neu starten, damit die Env-Vars gezogen
 werden.
@@ -156,10 +158,10 @@ Secret-Manager-Eintrag.
 
 ## Bekannte Einschraenkungen
 
-- `setup-devtools` unter Linux/macOS ist ungetestet. `apt install neovim` liefert
-  auf Debian/Ubuntu oft eine veraltete Version - besser Neovim per brew,
-  Snap/AppImage oder Release-Tarball installieren. `rustup`, `stylua`,
-  `luacheck` gibt es dort nicht per apt (Hinweis wird ausgegeben).
+- `install-tools` ist unter Arch/WSL im Trockenlauf geprueft, unter macOS
+  ungetestet. Neovim wird unter Debian/Ubuntu bewusst nicht per apt
+  installiert (zu alt), das Skript nennt den Release-Link. `stylua` gibt es
+  dort nicht per apt.
 
 - Der Merge in `merge-claude-settings.js` ist bewusst simpel gehalten
   (Array-Union bei Permissions, Vorhandensein-Check bei Hooks ueber

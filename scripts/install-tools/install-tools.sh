@@ -8,6 +8,8 @@
 #   scripts/install-tools/install-tools.sh                 # core, plugins, dev
 #   scripts/install-tools/install-tools.sh --all --yes     # everything, no questions
 #   scripts/install-tools/install-tools.sh --only core,dev
+#   scripts/install-tools/install-tools.sh --status             # per Claude-setup profile
+#   scripts/install-tools/install-tools.sh --profile nvim,rust  # the stack profiles instead of groups
 #
 # Every argument is passed through to install_tools.py (--help lists them).
 set -euo pipefail

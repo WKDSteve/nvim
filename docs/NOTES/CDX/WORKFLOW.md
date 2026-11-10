@@ -60,10 +60,9 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    Es zeigt die Maschinenrolle an (Workstation: muss dort `workstation` sein).
    Am Ende zeigt das Skript, was schon installiert ist, und fragt nach
    Toolchain-Profilen (`nvim,cpp,rust,web,tauri`, oder `all` fuer alle). Auf
-   der Workstation im Zweifel leer lassen (unsignierte Pakete, Falcon).
-   Einzeln nachholen: `node setup-devtools.js --profile nvim,rust --dry-run`
-   (ohne `--dry-run` installiert es nach Rueckfrage); nur ansehen:
-   `node setup-devtools.js --status`.
+   der Workstation fragt es nicht (unsignierte Pakete, Falcon).
+   Einzeln nachholen: `scripts/install-tools/install-tools.ps1 -Profile nvim,rust -DryRun`
+   (ohne `-DryRun` installiert es nach Rueckfrage); nur ansehen: `-Status`.
 4. Claude-App/Terminal **neu starten** (Env-Vars greifen erst dann).
 5. Repos klonen, pro Repo Abschnitt 3.
 6. CLI-Tools der Plugins und Repos (rg, fd, gh, lazygit, pandoc, poppler,
@@ -74,9 +73,8 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    - Linux/macOS/WSL: `bash ~/.config/nvim/scripts/install-tools/install-tools.sh`
    Erst ansehen mit `-List` / `--list`; `-All` nimmt die grossen Pakete
    (LibreOffice, Chrome, Ollama, OCR, Whisper) dazu. Liste und Optionen:
-   `scripts/install-tools/README.md`. `setup-devtools.js` bleibt fuer die
-   Hook-Toolchains (C++/MSVC, Tauri/WebView2); doppelt genannte Tools werden
-   von beiden uebersprungen, wenn sie schon da sind.
+   `scripts/install-tools/README.md`. Dasselbe Skript wie die Profile aus
+   Schritt 3, nur nach Gruppen statt nach Stack-Profilen ausgewaehlt.
 
 ## 5. Schnelltest, ob alles greift
 

@@ -106,6 +106,84 @@ class InstallKindTest(unittest.TestCase):
         self.assertEqual(failed, ["cspell"])
 
 
+class ProfileTest(unittest.TestCase):
+    """The stack profiles that replaced setup-devtools.js."""
+
+    def setUp(self):
+        root = tempfile.mkdtemp(prefix="install-tools-noplugins-")
+        try:
+            self.tools, self.manifest, _ = it.collect(root)  # no plugin cloned: the Claude-setup case
+        finally:
+            shutil.rmtree(root)
+
+    def test_core_profile_stands_without_plugin_specs(self):
+        _, wanted, err = it.resolve_profiles("core", self.manifest)
+        self.assertIsNone(err)
+        bins = [t["bin"] for t in it.by_profiles(self.tools, wanted)]
+        self.assertEqual(sorted(bins), ["fd", "git", "node", "rg"])
+
+    def test_profiles_match_the_old_setup_devtools_table(self):
+        expected = {
+            "nvim": {"nvim", "stylua", "lua-language-server", "luacheck"},
+            "cpp": {"cmake", "ninja", "msvc", "clang-format"},
+            "rust": {"cargo"},
+            "web": {"pnpm"},
+            "tauri": {"webview2"},
+        }
+        for prof, bins in expected.items():
+            got = {t["bin"] for t in it.by_profiles(self.tools, {prof})}
+            self.assertEqual(got, bins, prof)
+
+    def test_tauri_implies_rust_and_web_plus_core(self):
+        _, wanted, _ = it.resolve_profiles("tauri", self.manifest)
+        self.assertEqual(wanted, {"core", "tauri", "rust", "web"})
+        _, wanted, _ = it.resolve_profiles("all", self.manifest)
+        self.assertEqual(wanted, set(self.manifest["profiles"]["names"]))
+
+    def test_unknown_profile_is_an_error(self):
+        _, _, err = it.resolve_profiles("nvim,foo", self.manifest)
+        self.assertIn("foo", err)
+
+    def test_saved_profiles_come_from_the_file(self):
+        d = tempfile.mkdtemp(prefix="install-tools-profile-")
+        old = it.PROFILE_FILE
+        it.PROFILE_FILE = os.path.join(d, "devtools.profile")
+        try:
+            self.assertIsNotNone(it.resolve_profiles("saved", self.manifest)[2])
+            with open(it.PROFILE_FILE, "w", encoding="utf-8") as f:
+                f.write("rust,web\n")
+            requested, wanted, err = it.resolve_profiles("saved", self.manifest)
+            self.assertIsNone(err)
+            self.assertEqual(requested, ["rust", "web"])
+            self.assertIn("core", wanted)
+        finally:
+            it.PROFILE_FILE = old
+            shutil.rmtree(d)
+
+    def test_clang_only_while_msvc_is_missing(self):
+        clang = self.tools["clang-format"]
+        old = it.DETECTORS["msvc"]
+        try:
+            it.DETECTORS["msvc"] = lambda: "C:\\VS"
+            self.assertEqual(it.fallback_not_needed(clang, self.tools), it.applies_here(self.tools["msvc"]))
+            it.DETECTORS["msvc"] = lambda: None
+            self.assertFalse(it.fallback_not_needed(clang, self.tools))
+        finally:
+            it.DETECTORS["msvc"] = old
+
+    def test_msvc_winget_call_carries_the_workload_override(self):
+        msvc = self.tools["msvc"]
+        calls = []
+        it.install_kind("winget", [(msvc, msvc["pkg"]["winget"])], False, lambda argv: calls.append(argv) or 0)
+        self.assertEqual(calls[0][-2], "--override")
+        self.assertIn("Microsoft.VisualStudio.Workload.VCTools", calls[0][-1])
+
+    def test_a_package_list_installs_every_package(self):
+        self.assertEqual(it.packages_of(["clang", "clang-format"]), ["clang", "clang-format"])
+        self.assertEqual(it.packages_of("llvm"), ["llvm"])
+        self.assertEqual(it.packages_of(None), [])
+
+
 class ShortTest(unittest.TestCase):
     def test_too_short_first_sentence_takes_the_second(self):
         self.assertTrue(it.short("Two things. The second one explains it.").startswith("Two things. The second"))

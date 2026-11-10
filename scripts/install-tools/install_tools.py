@@ -9,6 +9,10 @@ Route per missing tool: the system package manager (winget, then scoop on Window
 apt/dnf/pacman/zypper/apk, then brew elsewhere), else npm / pip / cargo, else a download link.
 Python standard library only; started by install-tools.ps1 / install-tools.sh.
 
+Two ways to pick tools: groups (core/plugins/heavy/dev, the default) or the stack profiles of
+the Claude setup (--profile nvim,cpp,rust,web,tauri; setup-claude-code calls --status and
+--profile). This replaced docs/NOTES/CDX/setup-devtools.js and its tools.json.
+
 Exit code: 0 nothing failed, 1 an install failed, 2 bad arguments or refused (workstation).
 """
 
@@ -120,7 +124,8 @@ def merge_tool(dst, src, owner):
     if not dst.get("why") and src.get("why"):
         dst["why"] = src["why"]
     dst["used_by"] = union(dst.get("used_by"), src.get("used_by") or ([owner] if owner else []))
-    for key in ("group", "os", "reject", "skip_wsl"):
+    dst["profiles"] = union(dst.get("profiles"), src.get("profiles"))
+    for key in ("group", "os", "reject", "skip_wsl", "detect", "fallback_for", "winget_override"):
         if src.get(key) and not dst.get(key):
             dst[key] = src[key]
     alt = dst.setdefault("alt", {})
@@ -172,8 +177,37 @@ def expand(path):
     return re.sub(r"\$([A-Za-z_][A-Za-z0-9_]*(?:\([Xx]86\))?)", repl, path)
 
 
+def has_msvc():
+    """MSVC with the VC tools, asked from vswhere (not on PATH; cl.exe is only there in a dev shell)."""
+    base = os.environ.get("ProgramFiles(x86)")
+    vswhere = os.path.join(base, "Microsoft Visual Studio", "Installer", "vswhere.exe") if base else ""
+    if not vswhere or not os.path.isfile(vswhere):
+        return None
+    try:
+        out = subprocess.run(
+            [vswhere, "-latest", "-products", "*", "-requires", "Microsoft.VisualStudio.Component.VC.Tools.x86.x64",
+             "-property", "installationPath"], capture_output=True, text=True, check=False).stdout.strip()
+    except OSError:
+        return None
+    return out or None
+
+
+def has_webview2():
+    for var in ("ProgramFiles(x86)", "ProgramFiles"):
+        base = os.environ.get(var)
+        d = os.path.join(base, "Microsoft", "EdgeWebView", "Application") if base else ""
+        if d and os.path.isdir(d):
+            return d
+    return None
+
+
+DETECTORS = {"msvc": has_msvc, "webview2": has_webview2}
+
+
 def find_tool(t):
     """Where the tool is, or None. PATH under every name first, then the literal paths."""
+    if t.get("detect") in DETECTORS:
+        return DETECTORS[t["detect"]]()
     reject = [r.lower() for r in t.get("reject") or []]
     for name in [t["bin"]] + as_list(t.get("bin_alternatives")):
         hit = shutil.which(name)
@@ -191,6 +225,17 @@ def applies_here(t):
         return False
     oses = t.get("os")
     return not oses or OS in oses
+
+
+def fallback_not_needed(t, tools):
+    """A fallback (clang for msvc) is only wanted while its primary is missing here."""
+    primary = tools.get(t.get("fallback_for") or "")
+    return bool(primary) and applies_here(primary) and bool(find_tool(primary))
+
+
+def packages_of(value):
+    """A pkg value is one package name or a list of them (apt: clang + clang-format)."""
+    return [p for p in value if p] if isinstance(value, list) else ([value] if value else [])
 
 
 # ---------------------------------------------------------------- routes
@@ -294,15 +339,17 @@ def selected(tools, groups):
     return sorted(out, key=lambda t: (GROUP_ORDER.index(t["group"]) if t["group"] in GROUP_ORDER else 99, t["bin"]))
 
 
-def print_list(rows, managers):
+def print_list(rows, managers, tools):
     print("%-20s %-8s %-8s %-48s %s" % ("tool", "group", "state", "route", "used by"))
     for t in rows:
         if not applies_here(t):
             state, route = "n/a", "(not for %s)" % ("wsl" if WSL else OS)
+        elif fallback_not_needed(t, tools):
+            state, route = "n/a", "(%s is there)" % t["fallback_for"]
         else:
             state = "ok" if find_tool(t) else "MISSING"
             kind, pkg = route_for(t, managers)
-            route = "%s %s" % (kind, pkg) if kind != "none" else "-- no route --"
+            route = "%s %s" % (kind, " ".join(packages_of(pkg))) if kind != "none" else "-- no route --"
         print("%-20s %-8s %-8s %-48s %s" % (t["bin"], t["group"], state, route[:48], ", ".join(t.get("used_by") or [])))
 
 
@@ -330,17 +377,17 @@ def markdown_lines(tools, manifest):
             if oses and "win" not in oses:
                 win = "nur Linux/macOS"
             elif pkg.get("winget"):
-                win = "winget `%s`" % pkg["winget"]
+                win = "winget `%s`" % " ".join(packages_of(pkg["winget"]))
             elif pkg.get("scoop"):
-                win = "scoop `%s`" % pkg["scoop"]
+                win = "scoop `%s`" % " ".join(packages_of(pkg["scoop"]))
             else:
                 win = next(("%s `%s`" % (k, alt[k]) for k in ("npm", "pip", "cargo") if alt.get(k)), None) \
                     or ("[Download](%s)" % alt["url"] if alt.get("url") else "-")
             if oses == ["win"]:
                 unix = "nur Windows"
             else:
-                apt = "apt `%s`" % pkg["apt"] if pkg.get("apt") else None
-                brew = "brew `%s`" % pkg["brew"] if pkg.get("brew") else None
+                apt = "apt `%s`" % " ".join(packages_of(pkg["apt"])) if pkg.get("apt") else None
+                brew = "brew `%s`" % " ".join(packages_of(pkg["brew"])) if pkg.get("brew") else None
                 other = next(("%s `%s`" % (k, alt[k]) for k in ("npm", "pip", "cargo") if alt.get(k)), None)
                 unix = ", ".join(x for x in (apt, brew) if x) or other or \
                     ("[Download](%s)" % alt["url"] if alt.get("url") else "-")
@@ -436,6 +483,11 @@ def install_kind(kind, items, yes, runner):
     if kind == "apt":
         runner((["sudo"] if needs_sudo() else []) + ["apt-get", "update"])
     for argv in commands_for(kind, [p for _, p in items], yes):
+        if kind == "winget":
+            # MSVC Build Tools: the workload goes in through the installer's own arguments
+            ov = next((t.get("winget_override") for t, p in items if p in argv and t.get("winget_override")), None)
+            if ov:
+                argv = argv + ["--override", ov]
         rc = runner(argv)
         if rc == 0:
             continue
@@ -451,11 +503,11 @@ def install_kind(kind, items, yes, runner):
     return failed
 
 
-def install(rows, managers, dry, yes):
+def install(rows, managers, dry, yes, tools=None):
     plan = {}  # kind -> [(tool, package)]
     links, unroutable = [], []
     for t in rows:
-        if not applies_here(t) or find_tool(t):
+        if not applies_here(t) or fallback_not_needed(t, tools or {}) or find_tool(t):
             continue
         kind, pkg = route_for(t, managers)
         if kind == "url":
@@ -463,7 +515,8 @@ def install(rows, managers, dry, yes):
         elif kind == "none":
             unroutable.append(t)
         else:
-            plan.setdefault(kind, []).append((t, pkg))
+            for p in packages_of(pkg):
+                plan.setdefault(kind, []).append((t, p))
 
     if not plan and not links and not unroutable:
         print("Alles da - nichts zu installieren.")
@@ -510,7 +563,8 @@ def install(rows, managers, dry, yes):
     if unroutable:
         print("Kein Weg auf %s: %s" % (OS, ", ".join(t["bin"] for t in unroutable)))
     if not dry:
-        still = [t["bin"] for t in rows if applies_here(t) and not find_tool(t)]
+        still = [t["bin"] for t in rows
+                 if applies_here(t) and not fallback_not_needed(t, tools or {}) and not find_tool(t)]
         print("Noch nicht im PATH dieses Prozesses: %s" % (", ".join(still) or "-"))
         print("(Neues Terminal oeffnen; danach in nvim :Lib deps status und :checkhealth,"
               " fuer die Runner scripts/runner_tools_check.ps1. LSP-Server bringt Mason/lsp.nvim.)")
@@ -523,7 +577,54 @@ def install(rows, managers, dry, yes):
 # ---------------------------------------------------------------- main
 
 def parse_groups(value):
-    return [g.strip() for g in re.split(r"[,\s]+", value or "") if g.strip()]
+    return [g.strip().lower() for g in re.split(r"[,\s]+", value or "") if g.strip()]
+
+
+PROFILE_FILE = os.path.join(os.path.expanduser("~"), ".claude", "devtools.profile")
+
+
+def resolve_profiles(value, manifest):
+    """--profile value -> (requested names, expanded set incl. core and implied) or an error text.
+    'all' = every profile, 'saved' = the choice remembered in ~/.claude/devtools.profile."""
+    spec = manifest.get("profiles") or {}
+    names = spec.get("names") or []
+    requested = parse_groups(value)
+    if requested == ["saved"]:
+        try:
+            with open(PROFILE_FILE, "r", encoding="utf-8") as f:
+                requested = parse_groups(f.read())
+        except OSError:
+            return None, None, "Keine gemerkten Profile (%s)." % PROFILE_FILE
+    if not requested:
+        return None, None, "Kein Profil angegeben (%s, all)." % ", ".join(names)
+    bad = [p for p in requested if p != "all" and p not in names]
+    if bad:
+        return None, None, "Unbekanntes Profil: %s (bekannt: %s, all)" % (", ".join(bad), ", ".join(names))
+    wanted = set(names) if "all" in requested else set(requested) | {"core"}
+    for p in list(wanted):
+        wanted.update((spec.get("implies") or {}).get(p) or [])
+    return requested, wanted, None
+
+
+def by_profiles(tools, wanted):
+    rows = [t for t in tools.values() if set(t.get("profiles") or []) & wanted]
+    return sorted(rows, key=lambda t: t["bin"])
+
+
+def print_status(tools, manifest):
+    """Per profile: what is here. Installs nothing (the Claude setup shows this before asking)."""
+    for prof in (manifest.get("profiles") or {}).get("names") or []:
+        rows = [t for t in by_profiles(tools, {prof}) if applies_here(t)]
+        if not rows:
+            continue
+        print("  %s" % prof)
+        for t in rows:
+            if fallback_not_needed(t, tools):
+                state, note = "ok   ", "  (nicht noetig: %s ist da)" % t["fallback_for"]
+            else:
+                state = "ok   " if find_tool(t) else "fehlt"
+                note = "  (Ersatz fuer %s)" % t["fallback_for"] if t.get("fallback_for") else ""
+            print("    %s  %s%s" % (state, t["bin"], note))
 
 
 def main(argv=None):
@@ -538,6 +639,9 @@ def main(argv=None):
     ap.add_argument("--yes", action="store_true", help="nicht nachfragen, Lizenzen von winget annehmen")
     ap.add_argument("--repos-dir", help="Wurzel der Repos (Default $REPOS_DIR)")
     ap.add_argument("--force", action="store_true", help="auch auf der Workstation installieren")
+    ap.add_argument("--profile", help="statt Gruppen die Stack-Profile des Claude-Setups"
+                    " (core,nvim,cpp,rust,web,tauri, all, saved = die gemerkten)")
+    ap.add_argument("--status", action="store_true", help="je Profil zeigen, was da ist (installiert nichts)")
     a = ap.parse_args(argv)
 
     groups = parse_groups(a.only) or (GROUP_ORDER if a.all else DEFAULT_GROUPS)
@@ -549,21 +653,37 @@ def main(argv=None):
 
     repos = repos_dir(a.repos_dir)
     tools, manifest, problems = collect(repos)
+    profile_mode = a.status or a.profile
     for p in problems:
-        print("Hinweis: %s" % p, file=sys.stderr)
+        # the profile tools all stand in tools.json: no plugin spec needed (the Claude setup runs before cloning)
+        if not (profile_mode and "REPOS_DIR" in p):
+            print("Hinweis: %s" % p, file=sys.stderr)
 
     if a.write_readme:
         return write_readme(tools, manifest)
     if a.markdown:
         sys.stdout.write(markdown_lines(tools, manifest))
         return 0
+    if a.status:
+        print_status(tools, manifest)
+        return 0
 
     managers = system_managers()
-    rows = selected(tools, groups)
+    requested = None
+    if a.profile:
+        requested, wanted, err = resolve_profiles(a.profile, manifest)
+        if err:
+            print(err)
+            return 2
+        rows = by_profiles(tools, wanted)
+        label = "Profile: %s" % ", ".join(sorted(wanted))
+    else:
+        rows = selected(tools, groups)
+        label = "Gruppen: %s" % ", ".join(groups)
     if a.list:
-        print("Repos: %s | System: %s | Paketmanager: %s | Gruppen: %s\n" % (
-            repos, OS, ", ".join(managers) or "-", ", ".join(groups)))
-        print_list(rows, managers)
+        print("Repos: %s | System: %s | Paketmanager: %s | %s\n" % (
+            repos, OS, ", ".join(managers) or "-", label))
+        print_list(rows, managers, tools)
         return 0
 
     role = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower()
@@ -573,7 +693,14 @@ def main(argv=None):
         return 2
     if not managers or managers == ["scoop?"]:
         print("Kein Paketmanager gefunden (winget/scoop/apt/dnf/pacman/zypper/apk/brew).")
-    return install(rows, managers, a.dry_run, a.yes)
+    print(label)
+    rc = install(rows, managers, a.dry_run, a.yes, tools)
+    if requested and parse_groups(a.profile) != ["saved"] and not a.dry_run and rc != 2:
+        os.makedirs(os.path.dirname(PROFILE_FILE), exist_ok=True)
+        with open(PROFILE_FILE, "w", encoding="utf-8", newline="") as f:
+            f.write(",".join(requested) + "\n")
+        print("Profile gemerkt in %s (wieder: --profile saved)" % PROFILE_FILE)
+    return rc
 
 
 if __name__ == "__main__":

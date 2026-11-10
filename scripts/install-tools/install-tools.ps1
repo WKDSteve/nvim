@@ -14,9 +14,14 @@
   pwsh -File scripts\install-tools\install-tools.ps1                # core, plugins, dev
   pwsh -File scripts\install-tools\install-tools.ps1 -All -Yes      # everything, no questions
   pwsh -File scripts\install-tools\install-tools.ps1 -Only core,dev
+  pwsh -File scripts\install-tools\install-tools.ps1 -Status                # per Claude-setup profile
+  pwsh -File scripts\install-tools\install-tools.ps1 -Profile nvim,rust     # the stack profiles instead of groups
 #>
 param(
     [switch] $List,
+    [switch] $Status,
+    # not $Profile: that would shadow the automatic $PROFILE; -Profile still works through the alias
+    [Alias('Profile')] [string[]] $Profiles,
     [switch] $Markdown,
     [switch] $WriteReadme,
     [switch] $DryRun,
@@ -51,7 +56,7 @@ function Find-Python {
 
 $python = Find-Python
 if (-not $python) {
-    $readOnly = $List -or $Markdown -or $WriteReadme -or $DryRun
+    $readOnly = $List -or $Status -or $Markdown -or $WriteReadme -or $DryRun
     $role = "$env:NVIM_MACHINE_ROLE".Trim().ToLower()
     if ($role -eq 'workstation' -and -not $Force) {
         Write-Host 'Python fehlt, und auf der Workstation wird nichts installiert (EDR/Falcon).' -ForegroundColor Red
@@ -62,8 +67,16 @@ if (-not $python) {
         Write-Host '  https://apps.microsoft.com/detail/9NBLGGH4NNS1'
         exit 2
     }
-    Write-Host 'Python fehlt - das Skript braucht es. Installiere es per winget (Python.Python.3.14).' -ForegroundColor Yellow
-    if ($readOnly) { Write-Host '(auch fuer -List/-DryRun noetig)' }
+    Write-Host 'Python fehlt - das Skript braucht es (winget Python.Python.3.14).' -ForegroundColor Yellow
+    if ($readOnly) { Write-Host '(auch fuer -List/-Status/-DryRun noetig)' }
+    if (-not $Yes) {
+        $answer = ''
+        try { $answer = Read-Host '  Python jetzt installieren? [j/N]' } catch { $answer = '' }
+        if ($answer -notmatch '^(j|y)') {
+            Write-Host '  Nicht installiert - ohne Python geht es hier nicht weiter.'
+            exit 2
+        }
+    }
     $wingetArgs = @('install', '-e', '--id', 'Python.Python.3.14', '--source', 'winget')
     if ($Yes) { $wingetArgs += @('--accept-package-agreements', '--accept-source-agreements') }
     & winget @wingetArgs
@@ -77,6 +90,8 @@ if (-not $python) {
 
 $pyArgs = @('-I', (Join-Path $here 'install_tools.py'))
 if ($List) { $pyArgs += '--list' }
+if ($Status) { $pyArgs += '--status' }
+if ($Profiles) { $pyArgs += @('--profile', ($Profiles -join ',')) }
 if ($Markdown) { $pyArgs += '--markdown' }
 if ($WriteReadme) { $pyArgs += '--write-readme' }
 if ($DryRun) { $pyArgs += '--dry-run' }

@@ -33,6 +33,8 @@ dem Start (winget/apt fragen danach selbst noch einmal).
 | `-ReposDir E:\repos` | `--repos-dir …` | Wurzel der Repos (Default `$REPOS_DIR`) |
 | `-WriteReadme` | `--write-readme` | die Liste unten neu erzeugen |
 | `-Force` | `--force` | auch auf der Workstation installieren |
+| `-Profile nvim,rust` | `--profile nvim,rust` | statt Gruppen die Stack-Profile (s. u.); `all`, `saved` = die gemerkten |
+| `-Status` | `--status` | je Profil zeigen, was da ist; installiert nichts |
 
 Auf der Workstation (`NVIM_MACHINE_ROLE=workstation`) wird ohne `-Force` nichts
 installiert, nur `-List` / `-DryRun` laufen (EDR/Falcon).
@@ -54,16 +56,30 @@ LSP-Server, Formatter und Linter aus Mason installiert lsp.nvim selbst
   Ein neues Tool kommt **in die `docs/install.json` des Plugins**, wenn ein
   Plugin es braucht, sonst hierher.
 
-Abgrenzung zu `docs/NOTES/CDX/setup-devtools.js` (Teil des Claude-Setups):
-das installiert die Toolchains, die die Claude-Hooks je Stack-Profil brauchen
-(auch MSVC Build Tools, LLVM, Ninja, WebView2). Einige Tools stehen in beiden
-Listen (git, node, rg, fd, nvim, stylua, luacheck, lua-language-server, rustup,
-pnpm, cmake), mit denselben winget-IDs; beide überspringen, was schon da ist.
+## Stack-Profile (Claude-Setup)
+
+Zweite Auswahl neben den Gruppen, für die Toolchains, die die Claude-Hooks je
+Stack brauchen. `setup-claude-code.ps1/.sh` zeigt `-Status` und fragt nach
+Profilen (früher `setup-devtools.js`, das in diesem Skript aufgegangen ist).
+
+| Profil | Tools |
+|---|---|
+| `core` (immer dabei) | git, node, rg, fd |
+| `nvim` | nvim, stylua, luacheck, lua-language-server |
+| `cpp` | cmake, ninja, MSVC Build Tools (Windows), LLVM/clang nur solange MSVC fehlt |
+| `rust` | rustup (cargo) |
+| `web` | pnpm |
+| `tauri` | WebView2 (Windows) + `rust` + `web` |
+
+Die Zuordnung steht als `profiles` an den Tools in `tools.json`; die gewählten
+Profile merkt sich `~/.claude/devtools.profile` (`-Profile saved`). Die
+Profil-Tools stehen alle selbst in `tools.json`, damit das Setup sie kennt,
+bevor die Plugin-Repos geklont sind.
 
 Die Logik steht einmal in [`install_tools.py`](install_tools.py) (nur
 Standardbibliothek); `install-tools.ps1` und `install-tools.sh` sorgen nur
-dafür, dass Python da ist (winget `Python.Python.3.14`, der Store-Stub zählt
-nicht; unter Linux der Paketmanager), und starten es. Unter Linux laufen
+dafür, dass Python da ist (winget `Python.Python.3.14` nach Rückfrage, der
+Store-Stub zählt nicht; unter Linux der Paketmanager), und starten es. Unter Linux laufen
 pip-Tools über `pipx` (PEP 668), unter WSL entfallen GUI-Programme, die auf
 der Windows-Seite laufen (WezTerm).
 
@@ -80,15 +96,15 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 |---|---|---|---|---|
 | `7z` | Archives: release packaging of the repos, extracting downloads. | release workflows | winget `7zip.7zip` | apt `7zip`, brew `sevenzip` |
 | `curl` (Pflicht) | Carries every provider's HTTP request and the streamed response (lib.nvim.net.curl shells out to it); witho... | ai.nvim, casedesk.nvim, diff.nvim, emojis.nvim, language.nvim, mdview.nvim, pdfport.nvim, runtime-analysis.nvim | winget `cURL.cURL` | apt `curl`, brew `curl` |
-| `fd` | Fastest live filesystem search for resolving a truncated path tail when the in-memory cache misses (falls b... | gopath.nvim, pickers.nvim | winget `sharkdp.fd` | apt `fd-find`, brew `fd` |
+| `fd` | Fastest live filesystem search for resolving a truncated path tail when the in-memory cache misses (falls b... | gopath.nvim, pickers.nvim, Claude setup (profile core) | winget `sharkdp.fd` | apt `fd-find`, brew `fd` |
 | `fzf` | Enables the fzf engine (an alternative matching/UI backend to the built-in picker engine). | pickers.nvim | winget `junegunn.fzf` | apt `fzf`, brew `fzf` |
 | `gh` | GitHub CLI: pickers.nvim's GitHub source, terminal.nvim's repo list, private reads of the runners and ci_st... | pickers.nvim, terminal.nvim, runners | winget `GitHub.cli` | apt `gh`, brew `gh` |
-| `git` | Backs the two opt-in git features: the ambient on_hold line-diff preview (argv-only git blame/git show, ful... | fileops.nvim | winget `Git.Git` | apt `git`, brew `git` |
+| `git` | Backs the two opt-in git features: the ambient on_hold line-diff preview (argv-only git blame/git show, ful... | fileops.nvim, Claude setup (profile core) | winget `Git.Git` | apt `git`, brew `git` |
 | `lazygit` | The git UI gitsuite.nvim opens in a float. | gitsuite.nvim | winget `JesseDuffield.lazygit` | apt `lazygit`, brew `lazygit` |
-| `node` | Keeps the persistent cspell sidecar alive (node/cspell_server.js), which makes buffer and live spell checks... | language.nvim | winget `OpenJS.NodeJS.LTS` | apt `nodejs`, brew `node` |
+| `node` | Keeps the persistent cspell sidecar alive (node/cspell_server.js), which makes buffer and live spell checks... | language.nvim, Claude setup (profile core) | winget `OpenJS.NodeJS.LTS` | apt `nodejs`, brew `node` |
 | `nvim` | Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. | nvim-config, testing.nvim | winget `Neovim.Neovim` | brew `neovim` |
 | `python` | Runs tools/*.py of every repo and the pip routes of this script (python3 on Windows is the Store stub, whic... | all repos, pdfport.nvim, media.nvim | winget `Python.Python.3.14` | apt `python3`, brew `python` |
-| `rg` (Pflicht) | Makes :Cases grep and the full-text search behind :Case similar fast on a large case tree. | casedesk.nvim, emojis.nvim, filetree.nvim, gopath.nvim, insights.nvim, markdown.nvim, pickers.nvim, replacer.nvim | winget `BurntSushi.ripgrep.MSVC` | apt `ripgrep`, brew `ripgrep` |
+| `rg` (Pflicht) | Makes :Cases grep and the full-text search behind :Case similar fast on a large case tree. | casedesk.nvim, emojis.nvim, filetree.nvim, gopath.nvim, insights.nvim, markdown.nvim, pickers.nvim, replacer.nvim, Claude setup (profile core) | winget `BurntSushi.ripgrep.MSVC` | apt `ripgrep`, brew `ripgrep` |
 | `tree-sitter` | nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI. | nvim-config, lib.nvim (parser_policy) | winget `tree-sitter.tree-sitter-cli` | brew `tree-sitter-cli` |
 | `zig` | A C compiler for nvim-treesitter's parser builds (any of zig, gcc, clang, cl counts). | nvim-config | winget `zig.zig` | apt `gcc`, brew `zig` |
 
@@ -123,8 +139,10 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | Tool | Wofür (aus der Spec) | Wer braucht es | Windows | Linux / macOS |
 |---|---|---|---|---|
 | `chrome` | The PDF engine for :Cases export: a headless Chromium prints the HTML pandoc produced via --print-to-pdf. | casedesk.nvim, hover.nvim, pdfport.nvim | winget `Google.Chrome` | apt `chromium`, brew `google-chrome` |
+| `clang-format` | LLVM/clang: formatter of the C++ hooks, and the compiler when MSVC is not there (only installed then). | C++ projects (Claude hooks, profile cpp) | winget `LLVM.LLVM` | apt `clang clang-format`, brew `llvm` |
 | `marker_single` | pdfport.nvim's ML PDF-to-markdown producer (marker-pdf, pulls PyTorch, several GB). | pdfport.nvim | pip `marker-pdf` | pip `marker-pdf` |
 | `mpv` | Two things, both optional. :Media window opens a real player window this plugin owns and can stop; and medi... | media.nvim | winget `shinchiro.mpv` | apt `mpv`, brew `mpv` |
+| `msvc` | MSVC Build Tools (VC tools workload): the C++ compiler the cpp profile builds with on Windows; several GB. | C++ projects (Claude hooks, profile cpp) | winget `Microsoft.VisualStudio.2022.BuildTools` | nur Windows |
 | `ollama` | Enables the ollama provider: local models, nothing leaves the machine. | ai.nvim, pdfport.nvim | winget `Ollama.Ollama` | brew `ollama` |
 | `soffice` | Turns an office document (doc/docx/odt and friends) under the cursor into a picture in the hover window ins... | hover.nvim, pdfport.nvim | winget `TheDocumentFoundation.LibreOffice` | apt `libreoffice`, brew `libreoffice` |
 | `tesseract` | :Case ocr reads the text out of a case's screenshots into <image>.ocr.md sidecars, which is what makes :Cas... | casedesk.nvim, images.nvim, media.nvim, pdfport.nvim | winget `UB-Mannheim.TesseractOCR` | apt `tesseract-ocr`, brew `tesseract` |
@@ -144,12 +162,14 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | `cmake` | Build of ai-desktop (and whisper.cpp from source). | ai-desktop | winget `Kitware.CMake` | apt `cmake`, brew `cmake` |
 | `iscc` | Inno Setup compiler for the ai-desktop installer. | ai-desktop | winget `JRSoftware.InnoSetup` | nur Windows |
 | `jq` | JSON in shell steps: docmap-desktop and the release workflows. | docmap-desktop, release workflows | winget `jqlang.jq` | apt `jq`, brew `jq` |
-| `lua-language-server` | Enables the opt-in luals enrichment pass: lua-language-server --doc output is merged into the IR, adding @c... | docmap.nvim | winget `LuaLS.lua-language-server` | apt `lua-language-server`, brew `lua-language-server` |
+| `lua-language-server` | Enables the opt-in luals enrichment pass: lua-language-server --doc output is merged into the IR, adding @c... | docmap.nvim, Claude setup (profile nvim) | winget `LuaLS.lua-language-server` | apt `lua-language-server`, brew `lua-language-server` |
 | `luacheck` | Lua linter of every .nvim repo (lint gates, CI parity before push). | all .nvim repos | scoop `luacheck` | apt `lua-check`, brew `luacheck` |
+| `ninja` | Build backend of the C++ projects (CMake generator). | C++ projects (Claude hooks, profile cpp) | winget `Ninja-build.Ninja` | apt `ninja-build`, brew `ninja` |
 | `pnpm` | Package manager of tasks-desktop, rules-desktop and the appkit UI. | tasks-desktop, rules-desktop, appkit | winget `pnpm.pnpm` | brew `pnpm` |
 | `pwsh` | PowerShell 7: workflow steps with shell: pwsh, the scripts of the nvim config, several plugin helpers. | nvim-config, lib.nvim, workflows | winget `Microsoft.PowerShell` | brew `powershell` |
 | `shellcheck` | Hygiene jobs: lints the shell scripts of the repos. | hygiene jobs | winget `koalaman.shellcheck` | apt `shellcheck`, brew `shellcheck` |
 | `stylua` | Lua formatter of every .nvim repo (format gates, CI parity before push). | all .nvim repos | winget `JohnnyMorganz.StyLua` | brew `stylua` |
+| `webview2` | WebView2 runtime the Tauri apps render in (preinstalled on Windows 11). | docmap-desktop, tasks-desktop, rules-desktop | winget `Microsoft.EdgeWebView2Runtime` | nur Windows |
 | `wezterm` | The terminal the Configs repo sets up; terminal.nvim's WezTerm backend. | Configs, terminal.nvim | winget `wez.wezterm` | brew `wezterm` |
 
 <!-- tools:end -->
