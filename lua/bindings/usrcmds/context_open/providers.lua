@@ -129,7 +129,7 @@ function M.gopath(_signals)
     {
       label = ("gopath: open %s (%s)"):format(what, res.kind or "?"),
       run = function()
-        gopath.commands.resolve_and_open("edit")
+        gopath.commands.goto_at_cursor("edit")
       end,
     },
   }
