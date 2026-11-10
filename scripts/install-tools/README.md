@@ -32,12 +32,24 @@ dem Start (winget/apt fragen danach selbst noch einmal).
 | `-Yes` | `--yes` | keine Rückfragen; winget-Lizenzen annehmen, apt/dnf `-y` |
 | `-ReposDir E:\repos` | `--repos-dir …` | Wurzel der Repos (Default `$REPOS_DIR`) |
 | `-WriteReadme` | `--write-readme` | die Liste unten neu erzeugen |
-| `-Force` | `--force` | auch auf der Workstation installieren |
+| `-Force` | `--force` | auf der Workstation auch Bau-Toolchains und `cargo install` |
 | `-Profile nvim,rust` | `--profile nvim,rust` | statt Gruppen die Stack-Profile (s. u.); `all`, `saved` = die gemerkten |
 | `-Status` | `--status` | je Profil zeigen, was da ist; installiert nichts |
 
-Auf der Workstation (`NVIM_MACHINE_ROLE=workstation`) wird ohne `-Force` nichts
-installiert, nur `-List` / `-DryRun` laufen (EDR/Falcon).
+**Workstation** (`NVIM_MACHINE_ROLE=workstation`): fertige Pakete werden
+installiert wie überall (lazygit für gitsuite.nvim, rg, pandoc, … per winget,
+scoop, npm, pip). Ausgelassen wird nur, was lokal **gebaut** würde, denn ein
+eigenes unsigniertes Programm meldet CrowdStrike Falcon:
+
+- die Bau-Toolchains (in `tools.json` `not_on_workstation`): rustup/cargo,
+  cargo-audit/-deny, MSVC, clang, cmake, ninja, Inno Setup, sowie tree-sitter-CLI
+  und zig, die nur Parser kompilieren (die Config kompiliert dort keine);
+- der Weg `cargo install` (ein Tool mit winget/scoop-Paket kommt trotzdem);
+- pip-Quellpakete: pip nimmt dort nur fertige Wheels (`--only-binary :all:`).
+
+`-List` und `-Status` zeigen solche Tools als „workstation: builds“. Eine
+bewusste Ausnahme geht mit `-Force`. Die eigenen Desktop-Apps installiert
+dieses Skript nirgends.
 
 Danach: neues Terminal öffnen (PATH), dann in nvim `:Lib deps status` und
 `:checkhealth`; für die Runner `scripts/runner_tools_check.ps1`.
@@ -105,8 +117,8 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | `nvim` | Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. | nvim-config, testing.nvim | winget `Neovim.Neovim` | brew `neovim` |
 | `python` | Runs tools/*.py of every repo and the pip routes of this script (python3 on Windows is the Store stub, whic... | all repos, pdfport.nvim, media.nvim | winget `Python.Python.3.14` | apt `python3`, brew `python` |
 | `rg` (Pflicht) | Makes :Cases grep and the full-text search behind :Case similar fast on a large case tree. | casedesk.nvim, emojis.nvim, filetree.nvim, gopath.nvim, insights.nvim, markdown.nvim, pickers.nvim, replacer.nvim, Claude setup (profile core) | winget `BurntSushi.ripgrep.MSVC` | apt `ripgrep`, brew `ripgrep` |
-| `tree-sitter` | nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI. | nvim-config, lib.nvim (parser_policy) | winget `tree-sitter.tree-sitter-cli` | brew `tree-sitter-cli` |
-| `zig` | A C compiler for nvim-treesitter's parser builds (any of zig, gcc, clang, cl counts). | nvim-config | winget `zig.zig` | apt `gcc`, brew `zig` |
+| `tree-sitter` (nicht auf der Workstation) | nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI. | nvim-config, lib.nvim (parser_policy) | winget `tree-sitter.tree-sitter-cli` | brew `tree-sitter-cli` |
+| `zig` (nicht auf der Workstation) | A C compiler for nvim-treesitter's parser builds (any of zig, gcc, clang, cl counts). | nvim-config | winget `zig.zig` | apt `gcc`, brew `zig` |
 
 ### plugins - leichte Werkzeuge einzelner Plugins (PDF, Bilder, Rechtschreibung, ...)
 
@@ -139,10 +151,10 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | Tool | Wofür (aus der Spec) | Wer braucht es | Windows | Linux / macOS |
 |---|---|---|---|---|
 | `chrome` | The PDF engine for :Cases export: a headless Chromium prints the HTML pandoc produced via --print-to-pdf. | casedesk.nvim, hover.nvim, pdfport.nvim | winget `Google.Chrome` | apt `chromium`, brew `google-chrome` |
-| `clang-format` | LLVM/clang: formatter of the C++ hooks, and the compiler when MSVC is not there (only installed then). | C++ projects (Claude hooks, profile cpp) | winget `LLVM.LLVM` | apt `clang clang-format`, brew `llvm` |
+| `clang-format` (nicht auf der Workstation) | LLVM/clang: formatter of the C++ hooks, and the compiler when MSVC is not there (only installed then). | C++ projects (Claude hooks, profile cpp) | winget `LLVM.LLVM` | apt `clang clang-format`, brew `llvm` |
 | `marker_single` | pdfport.nvim's ML PDF-to-markdown producer (marker-pdf, pulls PyTorch, several GB). | pdfport.nvim | pip `marker-pdf` | pip `marker-pdf` |
 | `mpv` | Two things, both optional. :Media window opens a real player window this plugin owns and can stop; and medi... | media.nvim | winget `shinchiro.mpv` | apt `mpv`, brew `mpv` |
-| `msvc` | MSVC Build Tools (VC tools workload): the C++ compiler the cpp profile builds with on Windows; several GB. | C++ projects (Claude hooks, profile cpp) | winget `Microsoft.VisualStudio.2022.BuildTools` | nur Windows |
+| `msvc` (nicht auf der Workstation) | MSVC Build Tools (VC tools workload): the C++ compiler the cpp profile builds with on Windows; several GB. | C++ projects (Claude hooks, profile cpp) | winget `Microsoft.VisualStudio.2022.BuildTools` | nur Windows |
 | `ollama` | Enables the ollama provider: local models, nothing leaves the machine. | ai.nvim, pdfport.nvim | winget `Ollama.Ollama` | brew `ollama` |
 | `soffice` | Turns an office document (doc/docx/odt and friends) under the cursor into a picture in the hover window ins... | hover.nvim, pdfport.nvim | winget `TheDocumentFoundation.LibreOffice` | apt `libreoffice`, brew `libreoffice` |
 | `tesseract` | :Case ocr reads the text out of a case's screenshots into <image>.ocr.md sidecars, which is what makes :Cas... | casedesk.nvim, images.nvim, media.nvim, pdfport.nvim | winget `UB-Mannheim.TesseractOCR` | apt `tesseract-ocr`, brew `tesseract` |
@@ -156,15 +168,15 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | Tool | Wofür (aus der Spec) | Wer braucht es | Windows | Linux / macOS |
 |---|---|---|---|---|
 | `actionlint` | Lints GitHub workflow files (streamtap hygiene job). | streamtap | winget `rhysd.actionlint` | brew `actionlint` |
-| `cargo` | Rust toolchain via rustup (cargo, rustc, rustfmt, clippy) for all Rust repos. | streamtap, testing.nvim runner, *-desktop | winget `Rustlang.Rustup` | apt `rustup`, brew `rustup` |
-| `cargo-audit` | Supply-chain job of the Rust repos (needs cargo first). | Rust repos | cargo `cargo-audit` | cargo `cargo-audit` |
-| `cargo-deny` | Supply-chain job of the Rust repos (needs cargo first). | Rust repos | cargo `cargo-deny` | cargo `cargo-deny` |
-| `cmake` | Build of ai-desktop (and whisper.cpp from source). | ai-desktop | winget `Kitware.CMake` | apt `cmake`, brew `cmake` |
-| `iscc` | Inno Setup compiler for the ai-desktop installer. | ai-desktop | winget `JRSoftware.InnoSetup` | nur Windows |
+| `cargo` (nicht auf der Workstation) | Rust toolchain via rustup (cargo, rustc, rustfmt, clippy) for all Rust repos. | streamtap, testing.nvim runner, *-desktop | winget `Rustlang.Rustup` | apt `rustup`, brew `rustup` |
+| `cargo-audit` (nicht auf der Workstation) | Supply-chain job of the Rust repos (needs cargo first). | Rust repos | cargo `cargo-audit` | cargo `cargo-audit` |
+| `cargo-deny` (nicht auf der Workstation) | Supply-chain job of the Rust repos (needs cargo first). | Rust repos | cargo `cargo-deny` | cargo `cargo-deny` |
+| `cmake` (nicht auf der Workstation) | Build of ai-desktop (and whisper.cpp from source). | ai-desktop | winget `Kitware.CMake` | apt `cmake`, brew `cmake` |
+| `iscc` (nicht auf der Workstation) | Inno Setup compiler for the ai-desktop installer. | ai-desktop | winget `JRSoftware.InnoSetup` | nur Windows |
 | `jq` | JSON in shell steps: docmap-desktop and the release workflows. | docmap-desktop, release workflows | winget `jqlang.jq` | apt `jq`, brew `jq` |
 | `lua-language-server` | Enables the opt-in luals enrichment pass: lua-language-server --doc output is merged into the IR, adding @c... | docmap.nvim, Claude setup (profile nvim) | winget `LuaLS.lua-language-server` | apt `lua-language-server`, brew `lua-language-server` |
 | `luacheck` | Lua linter of every .nvim repo (lint gates, CI parity before push). | all .nvim repos | scoop `luacheck` | apt `lua-check`, brew `luacheck` |
-| `ninja` | Build backend of the C++ projects (CMake generator). | C++ projects (Claude hooks, profile cpp) | winget `Ninja-build.Ninja` | apt `ninja-build`, brew `ninja` |
+| `ninja` (nicht auf der Workstation) | Build backend of the C++ projects (CMake generator). | C++ projects (Claude hooks, profile cpp) | winget `Ninja-build.Ninja` | apt `ninja-build`, brew `ninja` |
 | `pnpm` | Package manager of tasks-desktop, rules-desktop and the appkit UI. | tasks-desktop, rules-desktop, appkit | winget `pnpm.pnpm` | brew `pnpm` |
 | `pwsh` | PowerShell 7: workflow steps with shell: pwsh, the scripts of the nvim config, several plugin helpers. | nvim-config, lib.nvim, workflows | winget `Microsoft.PowerShell` | brew `powershell` |
 | `shellcheck` | Hygiene jobs: lints the shell scripts of the repos. | hygiene jobs | winget `koalaman.shellcheck` | apt `shellcheck`, brew `shellcheck` |

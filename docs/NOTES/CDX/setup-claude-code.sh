@@ -197,18 +197,17 @@ echo
 INSTALL_TOOLS="$SCRIPT_DIR/../../../scripts/install-tools/install-tools.sh"
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"
 if [ "$(printf '%s' "${NVIM_MACHINE_ROLE:-}" | tr '[:upper:]' '[:lower:]')" = "workstation" ]; then
-  echo "  Workstation (EDR/Falcon): hier wird nichts installiert. Bewusst von Hand:"
-  echo "  bash \"$INSTALL_TOOLS\" --profile <profile> --force"
-else
-  echo "  Was auf dieser Maschine schon da ist:"
-  bash "$INSTALL_TOOLS" --status || true
-  read -r -p "  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen: " PROFILES
-  if [ -n "$PROFILES" ]; then
-    bash "$INSTALL_TOOLS" --profile "$PROFILES" || true
-  fi
-  echo "  Die CLI-Tools der Plugins (pandoc, poppler, ImageMagick, ...) bringt nach dem Klonen der Repos:"
-  echo "  bash \"$INSTALL_TOOLS\" --list   (dann ohne --list zum Installieren)"
+  # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
+  echo "  Workstation (EDR/Falcon): fertige Pakete ja, nichts lokal Gebautes - Bau-Toolchains werden ausgelassen."
 fi
+echo "  Was auf dieser Maschine schon da ist:"
+bash "$INSTALL_TOOLS" --status || true
+read -r -p "  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen: " PROFILES
+if [ -n "$PROFILES" ]; then
+  bash "$INSTALL_TOOLS" --profile "$PROFILES" || true
+fi
+echo "  Die CLI-Tools der Plugins (lazygit, pandoc, poppler, ...) bringt nach dem Klonen der Repos:"
+echo "  bash \"$INSTALL_TOOLS\" --list   (dann ohne --list zum Installieren)"
 
 echo
 echo "Fertig."

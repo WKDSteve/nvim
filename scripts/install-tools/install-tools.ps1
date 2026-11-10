@@ -57,11 +57,7 @@ function Find-Python {
 $python = Find-Python
 if (-not $python) {
     $readOnly = $List -or $Status -or $Markdown -or $WriteReadme -or $DryRun
-    $role = "$env:NVIM_MACHINE_ROLE".Trim().ToLower()
-    if ($role -eq 'workstation' -and -not $Force) {
-        Write-Host 'Python fehlt, und auf der Workstation wird nichts installiert (EDR/Falcon).' -ForegroundColor Red
-        exit 2
-    }
+    # Python from winget is a prebuilt package: fine on the workstation too (only local builds are not)
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host 'Weder Python noch winget gefunden. winget kommt mit dem "App Installer" aus dem Microsoft Store:' -ForegroundColor Red
         Write-Host '  https://apps.microsoft.com/detail/9NBLGGH4NNS1'

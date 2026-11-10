@@ -308,18 +308,17 @@ Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von 
 $installTools = Join-Path $PSScriptRoot '..\..\..\scripts\install-tools\install-tools.ps1'
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
 if ($isWorkstation) {
-    # install-tools refuses on the workstation anyway (EDR/Falcon); several packages are unsigned portable binaries
-    Write-Host "  Workstation (CrowdStrike Falcon): hier wird nichts installiert. Bewusst von Hand:" -ForegroundColor Yellow
-    Write-Host "  pwsh -File `"$installTools`" -Profile <profile> -Force" -ForegroundColor Yellow
-} else {
-    Write-Host "  Was auf dieser Maschine schon da ist:"
-    & $installTools -Status
-    $profileAnswer = Read-Host '  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen'
-    if ($profileAnswer) {
-        & $installTools -Profile ($profileAnswer -split '[,\s]+' | Where-Object { $_ })
-    }
-    Write-Host "  Die CLI-Tools der Plugins (pandoc, poppler, ImageMagick, ...) bringt nach dem Klonen der Repos:"
-    Write-Host "  pwsh -File `"$installTools`" -List   (dann ohne -List zum Installieren)"
+    # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
+    Write-Host "  Workstation (CrowdStrike Falcon): fertige Pakete ja, nichts lokal Gebautes -" -ForegroundColor Yellow
+    Write-Host "  Bau-Toolchains (cpp, rust) werden hier ausgelassen." -ForegroundColor Yellow
 }
+Write-Host "  Was auf dieser Maschine schon da ist:"
+& $installTools -Status
+$profileAnswer = Read-Host '  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen'
+if ($profileAnswer) {
+    & $installTools -Profile ($profileAnswer -split '[,\s]+' | Where-Object { $_ })
+}
+Write-Host "  Die CLI-Tools der Plugins (lazygit, pandoc, poppler, ...) bringt nach dem Klonen der Repos:"
+Write-Host "  pwsh -File `"$installTools`" -List   (dann ohne -List zum Installieren)"
 
 Write-Host "`nFertig."

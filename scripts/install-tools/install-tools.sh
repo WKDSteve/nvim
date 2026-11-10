@@ -17,11 +17,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if ! command -v python3 >/dev/null 2>&1; then
-  role="$(printf '%s' "${NVIM_MACHINE_ROLE:-}" | tr '[:upper:]' '[:lower:]')"
-  if [ "$role" = "workstation" ]; then
-    echo "python3 fehlt, und auf der Workstation wird nichts installiert (EDR/Falcon)." >&2
-    exit 2
-  fi
+  # python3 from the package manager is prebuilt: fine on the workstation too (only local builds are not)
   sudo=""
   if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then sudo="sudo"; fi
   echo "python3 fehlt - das Skript braucht es. Installiere es ueber den Paketmanager."

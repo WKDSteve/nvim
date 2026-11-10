@@ -184,6 +184,53 @@ class ProfileTest(unittest.TestCase):
         self.assertEqual(it.packages_of(None), [])
 
 
+class WorkstationTest(unittest.TestCase):
+    """Prebuilt packages yes, nothing compiled locally (CrowdStrike Falcon)."""
+
+    def setUp(self):
+        root = tempfile.mkdtemp(prefix="install-tools-ws-")
+        try:
+            self.tools, _, _ = it.collect(root)
+        finally:
+            shutil.rmtree(root)
+        it.NO_LOCAL_BUILDS = True
+
+    def tearDown(self):
+        it.NO_LOCAL_BUILDS = False
+
+    def test_prebuilt_tools_stay_installable(self):
+        for b in ("lazygit", "nvim", "gh", "stylua", "pnpm"):
+            self.assertTrue(it.applies_here(self.tools[b]) or it.skip_reason(self.tools[b]) != "workstation: builds", b)
+        self.assertEqual(it.route_for(self.tools["lazygit"], ["winget"])[0], "winget")
+
+    def test_build_toolchains_are_left_out(self):
+        for b in ("cargo", "msvc", "cmake", "ninja", "tree-sitter", "zig", "iscc", "cargo-audit"):
+            t = self.tools[b]
+            if it.OS in (t.get("os") or [it.OS]):
+                self.assertEqual(it.skip_reason(t), "workstation: builds", b)
+
+    def test_cargo_is_no_route_there(self):
+        self.assertEqual(it.route_for({"alt": {"cargo": "typos-cli"}}, ["winget"]), ("none", ""))
+        it.NO_LOCAL_BUILDS = False
+        self.assertEqual(it.route_for({"alt": {"cargo": "typos-cli"}}, ["winget"]), ("cargo", "typos-cli"))
+
+    def test_pip_takes_wheels_only(self):
+        argv = it.commands_for("pip", ["codespell"], yes=False)[0]
+        self.assertTrue("--only-binary" in argv or "--pip-args=--only-binary=:all:" in argv)
+
+    def test_main_does_not_refuse_on_the_workstation(self):
+        old = os.environ.get("NVIM_MACHINE_ROLE")
+        os.environ["NVIM_MACHINE_ROLE"] = "workstation"
+        try:
+            rc = it.main(["--only", "core", "--dry-run", "--repos-dir", tempfile.gettempdir()])
+        finally:
+            if old is None:
+                del os.environ["NVIM_MACHINE_ROLE"]
+            else:
+                os.environ["NVIM_MACHINE_ROLE"] = old
+        self.assertEqual(rc, 0)
+
+
 class ShortTest(unittest.TestCase):
     def test_too_short_first_sentence_takes_the_second(self):
         self.assertTrue(it.short("Two things. The second one explains it.").startswith("Two things. The second"))

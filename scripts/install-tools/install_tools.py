@@ -13,7 +13,10 @@ Two ways to pick tools: groups (core/plugins/heavy/dev, the default) or the stac
 the Claude setup (--profile nvim,cpp,rust,web,tauri; setup-claude-code calls --status and
 --profile). This replaced docs/NOTES/CDX/setup-devtools.js and its tools.json.
 
-Exit code: 0 nothing failed, 1 an install failed, 2 bad arguments or refused (workstation).
+On the Tricentis workstation (NVIM_MACHINE_ROLE=workstation) prebuilt packages are installed as anywhere
+else; what would compile locally is left out (build toolchains, cargo install, pip source builds).
+
+Exit code: 0 nothing failed, 1 an install failed, 2 bad arguments or declined.
 """
 
 import argparse
@@ -125,7 +128,8 @@ def merge_tool(dst, src, owner):
         dst["why"] = src["why"]
     dst["used_by"] = union(dst.get("used_by"), src.get("used_by") or ([owner] if owner else []))
     dst["profiles"] = union(dst.get("profiles"), src.get("profiles"))
-    for key in ("group", "os", "reject", "skip_wsl", "detect", "fallback_for", "winget_override"):
+    for key in ("group", "os", "reject", "skip_wsl", "detect", "fallback_for", "winget_override",
+                "not_on_workstation"):
         if src.get(key) and not dst.get(key):
             dst[key] = src[key]
     alt = dst.setdefault("alt", {})
@@ -220,11 +224,26 @@ def find_tool(t):
     return None
 
 
-def applies_here(t):
+# Set by main() on the Tricentis workstation (NVIM_MACHINE_ROLE=workstation, without --force): prebuilt
+# third-party tools may be installed there, but nothing may be compiled locally (CrowdStrike Falcon reports
+# own unsigned builds). So build toolchains are left out, cargo install is no route, pip takes wheels only.
+NO_LOCAL_BUILDS = False
+
+
+def skip_reason(t):
+    """Why this tool is not for this machine, or None."""
     if WSL and t.get("skip_wsl"):
-        return False
+        return "not for wsl"
     oses = t.get("os")
-    return not oses or OS in oses
+    if oses and OS not in oses:
+        return "not for %s" % OS
+    if NO_LOCAL_BUILDS and t.get("not_on_workstation"):
+        return "workstation: builds"
+    return None
+
+
+def applies_here(t):
+    return skip_reason(t) is None
 
 
 def fallback_not_needed(t, tools):
@@ -263,6 +282,8 @@ def route_for(t, managers):
             return key, pkg[key]
     alt = t.get("alt") or {}
     for kind in ("npm", "pip", "cargo"):
+        if kind == "cargo" and NO_LOCAL_BUILDS:
+            continue  # cargo install compiles: an own unsigned binary
         if alt.get(kind):
             return kind, alt[kind]
     if alt.get("url"):
@@ -311,11 +332,14 @@ def commands_for(kind, packages, yes):
     if kind == "npm":
         return [(["sudo"] if npm_needs_sudo() else []) + ["npm", "install", "-g"] + pkgs]
     if kind == "pip":
+        # wheels only where nothing may be compiled: a source distribution would build native code locally
+        wheels = ["--only-binary", ":all:"] if NO_LOCAL_BUILDS else []
         if OS == "win":
             py = shutil.which("python") or shutil.which("py") or "python"
-            return [[py, "-m", "pip", "install", "--upgrade"] + pkgs]
+            return [[py, "-m", "pip", "install", "--upgrade"] + wheels + pkgs]
         # PEP 668: distro pythons refuse a global pip install; pipx gives each tool its own venv
-        return [["pipx", "install", p] for p in pkgs]
+        extra = ["--pip-args=--only-binary=:all:"] if NO_LOCAL_BUILDS else []
+        return [["pipx", "install"] + extra + [p] for p in pkgs]
     if kind == "cargo":
         return [["cargo", "install", "--locked"] + pkgs]
     return []
@@ -343,7 +367,7 @@ def print_list(rows, managers, tools):
     print("%-20s %-8s %-8s %-48s %s" % ("tool", "group", "state", "route", "used by"))
     for t in rows:
         if not applies_here(t):
-            state, route = "n/a", "(not for %s)" % ("wsl" if WSL else OS)
+            state, route = "n/a", "(%s)" % skip_reason(t)
         elif fallback_not_needed(t, tools):
             state, route = "n/a", "(%s is there)" % t["fallback_for"]
         else:
@@ -391,7 +415,8 @@ def markdown_lines(tools, manifest):
                 other = next(("%s `%s`" % (k, alt[k]) for k in ("npm", "pip", "cargo") if alt.get(k)), None)
                 unix = ", ".join(x for x in (apt, brew) if x) or other or \
                     ("[Download](%s)" % alt["url"] if alt.get("url") else "-")
-            name = "`%s`%s" % (t["bin"], " (Pflicht)" if t.get("required") else "")
+            name = "`%s`%s%s" % (t["bin"], " (Pflicht)" if t.get("required") else "",
+                                 " (nicht auf der Workstation)" if t.get("not_on_workstation") else "")
             out.append("| %s | %s | %s | %s | %s |" % (
                 name, md_cell(short(t.get("why"))), md_cell(", ".join(t.get("used_by") or [])), win, unix))
     return "\n".join(out).lstrip("\n") + "\n"
@@ -614,12 +639,16 @@ def by_profiles(tools, wanted):
 def print_status(tools, manifest):
     """Per profile: what is here. Installs nothing (the Claude setup shows this before asking)."""
     for prof in (manifest.get("profiles") or {}).get("names") or []:
-        rows = [t for t in by_profiles(tools, {prof}) if applies_here(t)]
+        # the workstation's left-out build toolchains are shown, so an empty cpp profile is explained
+        rows = [t for t in by_profiles(tools, {prof})
+                if applies_here(t) or skip_reason(t) == "workstation: builds"]
         if not rows:
             continue
         print("  %s" % prof)
         for t in rows:
-            if fallback_not_needed(t, tools):
+            if not applies_here(t):
+                state, note = "  -  ", "  (Workstation: wird nicht installiert, baut Programme)"
+            elif fallback_not_needed(t, tools):
                 state, note = "ok   ", "  (nicht noetig: %s ist da)" % t["fallback_for"]
             else:
                 state = "ok   " if find_tool(t) else "fehlt"
@@ -638,7 +667,8 @@ def main(argv=None):
     ap.add_argument("--skip", help="diese Gruppen auslassen")
     ap.add_argument("--yes", action="store_true", help="nicht nachfragen, Lizenzen von winget annehmen")
     ap.add_argument("--repos-dir", help="Wurzel der Repos (Default $REPOS_DIR)")
-    ap.add_argument("--force", action="store_true", help="auch auf der Workstation installieren")
+    ap.add_argument("--force", action="store_true",
+                    help="auf der Workstation auch Bau-Toolchains und cargo install (sonst dort ausgelassen)")
     ap.add_argument("--profile", help="statt Gruppen die Stack-Profile des Claude-Setups"
                     " (core,nvim,cpp,rust,web,tauri, all, saved = die gemerkten)")
     ap.add_argument("--status", action="store_true", help="je Profil zeigen, was da ist (installiert nichts)")
@@ -650,6 +680,10 @@ def main(argv=None):
         print("Unbekannte Gruppe: %s (erlaubt: %s)" % (", ".join(bad), ", ".join(GROUP_ORDER)))
         return 2
     groups = [g for g in groups if g not in parse_groups(a.skip)]
+
+    global NO_LOCAL_BUILDS
+    on_workstation = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower() == "workstation"
+    NO_LOCAL_BUILDS = on_workstation and not a.force
 
     repos = repos_dir(a.repos_dir)
     tools, manifest, problems = collect(repos)
@@ -686,11 +720,9 @@ def main(argv=None):
         print_list(rows, managers, tools)
         return 0
 
-    role = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower()
-    if role == "workstation" and not a.dry_run and not a.force:
-        print("NVIM_MACHINE_ROLE=workstation: hier wird nichts installiert (EDR/Falcon)."
-              " Nur --list / --dry-run, oder bewusst --force.")
-        return 2
+    if NO_LOCAL_BUILDS:
+        print("Workstation: fertige Pakete ja, nichts lokal Gebautes - Bau-Toolchains und cargo install"
+              " bleiben aus, pip nimmt nur Wheels (bewusste Ausnahme: --force).")
     if not managers or managers == ["scoop?"]:
         print("Kein Paketmanager gefunden (winget/scoop/apt/dnf/pacman/zypper/apk/brew).")
     print(label)

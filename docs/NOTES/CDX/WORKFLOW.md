@@ -60,7 +60,8 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    Es zeigt die Maschinenrolle an (Workstation: muss dort `workstation` sein).
    Am Ende zeigt das Skript, was schon installiert ist, und fragt nach
    Toolchain-Profilen (`nvim,cpp,rust,web,tauri`, oder `all` fuer alle). Auf
-   der Workstation fragt es nicht (unsignierte Pakete, Falcon).
+   der Workstation laesst es aus, was lokal baut (Bau-Toolchains, Falcon);
+   fertige Pakete wie lazygit kommen auch dort.
    Einzeln nachholen: `scripts/install-tools/install-tools.ps1 -Profile nvim,rust -DryRun`
    (ohne `-DryRun` installiert es nach Rueckfrage); nur ansehen: `-Status`.
 4. Claude-App/Terminal **neu starten** (Env-Vars greifen erst dann).

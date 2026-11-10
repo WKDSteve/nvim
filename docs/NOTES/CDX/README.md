@@ -132,8 +132,9 @@ Ablauf (beide Skripte, gleiches Prinzip):
    schon installiert ist, und fragt nach Toolchain-Profilen
    (`nvim,cpp,rust,web,tauri`, `all` = alle, leer = ueberspringen). Fehlt
    Python, fragt der Starter vorher, ob er es per winget installieren darf.
-   Auf der Workstation wird nichts installiert (mehrere Pakete sind
-   unsignierte portable Binaries); bewusst von Hand nur mit `-Force`.
+   Auf der Workstation kommen fertige Pakete wie ueberall; ausgelassen wird,
+   was lokal baut (Bau-Toolchains, `cargo install`, pip-Quellpakete), bewusste
+   Ausnahme mit `-Force`.
 
 Danach Claude-Code-App/Terminal neu starten, damit die Env-Vars gezogen
 werden.
