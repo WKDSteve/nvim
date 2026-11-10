@@ -2,18 +2,25 @@
 
 Diese Datei war bis 2026-11-10 die Handliste aller Live-Checks, die nur Stefan abnehmen kann. Nach zehn Tagen war sie zur
 Hälfte veraltet (30 der 70 Punkte schon erledigt, 20 weitere hatten inzwischen Testblätter). Die Liste wird darum nicht
-mehr hier geführt, sondern dort, wo die Checks ohnehin stehen:
+mehr hier geführt, sondern dort, wo die Checks ohnehin stehen: in den Tasks des Vaults.
 
-- **Live-Checks mit Testblatt** (der Maschinenteil läuft, dein Urteil fehlt): Abnahme-Ansicht von tasks-desktop, bzw.
-  `tasks list --sheet=inbox,manual`. Der Block `## Test sheets` jeder Task zeigt, was zu beurteilen und was von Hand zu tun ist.
-- **Alle offenen Live-Checks**, auch ohne Blatt (echte Konten, Mac, sauberes Konto, Alltagsnutzung über Tage):
-  `tasks list --tag=needs-live-test` (seit 2026-11-10 trägt jede Live-Check-Task diesen Tag).
-- **Stand, Einordnung und Lücken**: Bericht
-  `$REPOS_DIR/tasks-vault/testing.nvim/NOTES/Final-Checks-Analyse-2026-11-10.md` (je Check: automatisiert mit Blatt,
-  bleibt manuell, oder braucht ein Feature von testing.nvim mit Task).
+Die eine Liste aller offenen Live-Checks ist die **Abnahme-Ansicht von tasks-desktop** (`g a`). Sie ist eine Abfrage über
+den Vault und zeigt drei Gruppen, jede mit ihrer Anzahl:
 
-Sobald die Abnahme auch Tasks ohne Blatt zeigt (`tasks-desktop/abnahme-ansicht-auch-live-check-tasks-ohne-testblatt-needs-l`),
-ist sie die eine Liste.
+- **Wartet auf dein Urteil**: Das Testblatt ist maschinell grün, dein Urteil fehlt (`tasks list @abnahme-inbox`, gleich
+  `--sheet=inbox`).
+- **Von Hand, mit Testblatt**: `tasks list @abnahme-manual` (`--sheet=manual`). Der Block `## Test sheets` jeder Task
+  zeigt, was zu beurteilen und was von Hand zu tun ist.
+- **Von Hand, ohne Testblatt** (echte Konten, Mac, sauberes Konto, Alltagsnutzung über Tage): die offenen Tasks mit dem
+  Tag `needs-live-test` ohne Blatt, mit ihren Akzeptanz-Kästchen zum Abhaken (`tasks list @abnahme-by-hand`, gleich
+  `--tag=needs-live-test --sheet=none --status=open,doing,decision`).
+
+Im Dashboard von tasks.nvim zeigt das Listen-Menü (`gl`) dieselben drei Listen mit Anzahl. Alle Live-Checks, auch
+geparkte und blockierte: `tasks list --tag=needs-live-test`.
+
+Stand, Einordnung und Lücken stehen im Bericht
+`$REPOS_DIR/tasks-vault/testing.nvim/NOTES/Final-Checks-Analyse-2026-11-10.md` (je Check: automatisiert mit Blatt,
+bleibt manuell, oder braucht ein Feature von testing.nvim mit Task).
 
 Die übrigen Dateien in diesem Ordner sind Checklisten und Protokolle einzelner Runden, auf die Tasks verweisen; sie
 bleiben hier. `BINDINGS-RUNTIME-CHECKLIST.md` liest zudem der Code (`:Bindings`, `bindings_explorer/config.lua`).
