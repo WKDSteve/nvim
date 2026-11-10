@@ -34,9 +34,10 @@
     {
       "bin": "nvim",
       "group": "core",
-      "why": "Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it.",
+      "why": "Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. Not via apt: Debian/Ubuntu ship a release too old for the config.",
       "used_by": ["nvim-config", "testing.nvim"],
-      "pkg": { "winget": "Neovim.Neovim", "scoop": "neovim", "apt": "neovim", "dnf": "neovim", "pacman": "neovim", "zypper": "neovim", "apk": "neovim", "brew": "neovim" }
+      "pkg": { "winget": "Neovim.Neovim", "scoop": "neovim", "dnf": "neovim", "pacman": "neovim", "zypper": "neovim", "apk": "neovim", "brew": "neovim" },
+      "alt": { "url": "https://github.com/neovim/neovim/releases/latest" }
     },
     {
       "bin": "python",

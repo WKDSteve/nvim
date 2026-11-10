@@ -86,7 +86,7 @@ andere schaltet eine Funktion frei oder macht sie schneller.
 | `git` | Backs the two opt-in git features: the ambient on_hold line-diff preview (argv-only git blame/git show, ful... | fileops.nvim | winget `Git.Git` | apt `git`, brew `git` |
 | `lazygit` | The git UI gitsuite.nvim opens in a float. | gitsuite.nvim | winget `JesseDuffield.lazygit` | apt `lazygit`, brew `lazygit` |
 | `node` | Keeps the persistent cspell sidecar alive (node/cspell_server.js), which makes buffer and live spell checks... | language.nvim | winget `OpenJS.NodeJS.LTS` | apt `nodejs`, brew `node` |
-| `nvim` | Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. | nvim-config, testing.nvim | winget `Neovim.Neovim` | apt `neovim`, brew `neovim` |
+| `nvim` | Neovim itself; the plugins, the tasks/rules engines and testing.nvim all run on it. | nvim-config, testing.nvim | winget `Neovim.Neovim` | brew `neovim` |
 | `python` | Runs tools/*.py of every repo and the pip routes of this script (python3 on Windows is the Store stub, whic... | all repos, pdfport.nvim, media.nvim | winget `Python.Python.3.14` | apt `python3`, brew `python` |
 | `rg` (Pflicht) | Makes :Cases grep and the full-text search behind :Case similar fast on a large case tree. | casedesk.nvim, emojis.nvim, filetree.nvim, gopath.nvim, insights.nvim, markdown.nvim, pickers.nvim, replacer.nvim | winget `BurntSushi.ripgrep.MSVC` | apt `ripgrep`, brew `ripgrep` |
 | `tree-sitter` | nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI. | nvim-config, lib.nvim (parser_policy) | winget `tree-sitter.tree-sitter-cli` | brew `tree-sitter-cli` |

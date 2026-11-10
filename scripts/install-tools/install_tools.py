@@ -93,9 +93,14 @@ def repos_dir(arg):
     return os.path.dirname(os.path.dirname(os.path.dirname(HERE)))
 
 
+def as_list(v):
+    """A JSON list, or nothing: a bare string would iterate as characters (lib.nvim.deps rejects it too)."""
+    return v if isinstance(v, list) else []
+
+
 def union(a, b):
-    out = list(a or [])
-    for x in b or []:
+    out = list(as_list(a))
+    for x in as_list(b):
         if x not in out:
             out.append(x)
     return out
@@ -111,7 +116,7 @@ def merge_tool(dst, src, owner):
     dst["bin_alternatives"] = union(dst.get("bin_alternatives"), src.get("bin_alternatives"))
     paths = dst.setdefault("paths", {})
     for plat, lst in (src.get("paths") or {}).items():
-        paths[plat] = union(paths.get(plat), lst)
+        paths[plat] = union(paths.get(plat), lst)  # a non-list value is dropped by union
     if not dst.get("why") and src.get("why"):
         dst["why"] = src["why"]
     dst["used_by"] = union(dst.get("used_by"), src.get("used_by") or ([owner] if owner else []))
@@ -138,14 +143,16 @@ def collect(repos):
                 problems.append("%s: entry without bin" % spec)
                 continue
             merge_tool(tools.setdefault(t["bin"], {"bin": t["bin"]}), t, plugin)
+    if not tools:
+        problems.append("keine docs/install.json unter %s - REPOS_DIR setzen oder --repos-dir angeben;"
+                        " ohne sie fehlen alle Plugin-Tools" % repos)
     for t in manifest.get("tools") or []:
         merge_tool(tools.setdefault(t["bin"], {"bin": t["bin"]}), t, None)
     # overrides are deliberate choices of this manifest: their keys win
     for name, ov in (manifest.get("overrides") or {}).items():
         t = tools.get(name)
         if t is None:
-            problems.append("tools.json override for %s, but no spec declares it" % name)
-            continue
+            continue  # the plugin declaring it is not cloned here: nothing to override
         for k, v in ov.items():
             if isinstance(v, dict):
                 t.setdefault(k, {}).update(v)
@@ -168,11 +175,11 @@ def expand(path):
 def find_tool(t):
     """Where the tool is, or None. PATH under every name first, then the literal paths."""
     reject = [r.lower() for r in t.get("reject") or []]
-    for name in [t["bin"]] + list(t.get("bin_alternatives") or []):
+    for name in [t["bin"]] + as_list(t.get("bin_alternatives")):
         hit = shutil.which(name)
         if hit and not any(r in hit.lower() for r in reject):
             return hit
-    for p in (t.get("paths") or {}).get(OS, []):
+    for p in as_list((t.get("paths") or {}).get(OS)):
         p = expand(p)
         if os.path.isfile(p):
             return p
@@ -222,6 +229,18 @@ def needs_sudo():
     return OS != "win" and hasattr(os, "geteuid") and os.geteuid() != 0 and shutil.which("sudo")
 
 
+def npm_needs_sudo():
+    """A distro node installs globals under /usr: npm -g then fails with EACCES without sudo."""
+    if not needs_sudo() or not shutil.which("npm"):
+        return False
+    try:
+        prefix = subprocess.check_output(["npm", "config", "get", "prefix"], text=True).strip()
+    except (OSError, subprocess.CalledProcessError):
+        return False
+    target = os.path.join(prefix, "lib")
+    return bool(prefix) and not os.access(target if os.path.isdir(target) else prefix, os.W_OK)
+
+
 def commands_for(kind, packages, yes):
     """argv lists for one route kind and its packages (deduplicated, order kept)."""
     pkgs = list(dict.fromkeys(packages))
@@ -245,7 +264,7 @@ def commands_for(kind, packages, yes):
     if kind == "brew":
         return [["brew", "install"] + pkgs]
     if kind == "npm":
-        return [["npm", "install", "-g"] + pkgs]
+        return [(["sudo"] if npm_needs_sudo() else []) + ["npm", "install", "-g"] + pkgs]
     if kind == "pip":
         if OS == "win":
             py = shutil.which("python") or shutil.which("py") or "python"
@@ -407,6 +426,31 @@ def bootstrap_pipx(dry, yes, managers):
     return dry or bool(shutil.which("pipx"))
 
 
+SYSTEM_PMS = LINUX_PMS + ["brew", "scoop"]
+
+
+def install_kind(kind, items, yes, runner):
+    """Run one route kind; returns the bins that failed. A system manager that refuses the
+    combined command (one unknown name aborts apt/dnf/pacman for all) is retried per package."""
+    failed = []
+    if kind == "apt":
+        runner((["sudo"] if needs_sudo() else []) + ["apt-get", "update"])
+    for argv in commands_for(kind, [p for _, p in items], yes):
+        rc = runner(argv)
+        if rc == 0:
+            continue
+        print("    Exit %s" % rc)
+        pkgs = [p for _, p in items if p in argv]
+        if kind in SYSTEM_PMS and len(set(pkgs)) > 1:
+            print("    einzeln nachversuchen ...")
+            for p in dict.fromkeys(pkgs):
+                if runner(commands_for(kind, [p], yes)[0]) != 0:
+                    failed += [t["bin"] for t, q in items if q == p]
+        else:
+            failed += [t["bin"] for t, q in items if q in pkgs]
+    return failed
+
+
 def install(rows, managers, dry, yes):
     plan = {}  # kind -> [(tool, package)]
     links, unroutable = [], []
@@ -455,11 +499,7 @@ def install(rows, managers, dry, yes):
                     print("  %s fehlt (erst core/dev installieren, dann neues Terminal) - ausgelassen" % need)
                     failed += [t["bin"] for t, _ in items]
                     continue
-            for argv in commands_for(kind, [p for _, p in items], yes):
-                rc = run(argv, dry)
-                if rc != 0:
-                    print("    Exit %s" % rc)
-                    failed += [t["bin"] for t, p in items if p in argv]
+            failed += install_kind(kind, items, yes, lambda argv: run(argv, dry))
         refresh_path()
 
     print("\n== Ergebnis ==")
