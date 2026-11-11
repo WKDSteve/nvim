@@ -65,6 +65,7 @@ local specs = {
   "wkdbook_picker/wkdbook_picker_spec.lua",
   "native_repos/native_repos_spec.lua",
   "native_repos/workstation_spec.lua",
+  "git_hooks/git_hooks_spec.lua",
   "dialogs_spec.lua",
   "noice/routes_spec.lua",
   "plugins_nui_spec.lua",
@@ -101,6 +102,7 @@ local specs = {
   "sync/sync_assist_spec.lua",
   "sync/sync_busy_spec.lua",
   "sync/sync_picker_action_spec.lua",
+  "ui_statusline_testing_ci_spec.lua",
 }
 
 -- Optional filter: only the specs whose path contains one of the arguments.

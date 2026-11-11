@@ -194,13 +194,20 @@ echo "[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.
 bash "$SCRIPT_DIR/setup-git-signing.sh" || echo "  Signatur nicht eingerichtet (siehe oben)."
 
 echo
+INSTALL_TOOLS="$SCRIPT_DIR/../../../scripts/install-tools/install-tools.sh"
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"
+if [ "$(printf '%s' "${NVIM_MACHINE_ROLE:-}" | tr '[:upper:]' '[:lower:]')" = "workstation" ]; then
+  # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
+  echo "  Workstation (EDR/Falcon): fertige Pakete ja, nichts lokal Gebautes - Bau-Toolchains werden ausgelassen."
+fi
 echo "  Was auf dieser Maschine schon da ist:"
-node "$SCRIPT_DIR/setup-devtools.js" --status
+bash "$INSTALL_TOOLS" --status || true
 read -r -p "  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen: " PROFILES
 if [ -n "$PROFILES" ]; then
-  node "$SCRIPT_DIR/setup-devtools.js" --profile "$PROFILES"
+  bash "$INSTALL_TOOLS" --profile "$PROFILES" || true
 fi
+echo "  Die CLI-Tools der Plugins (lazygit, pandoc, poppler, ...) bringt nach dem Klonen der Repos:"
+echo "  bash \"$INSTALL_TOOLS\" --list   (dann ohne --list zum Installieren)"
 
 echo
 echo "Fertig."

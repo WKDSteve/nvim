@@ -474,22 +474,28 @@ Alle drei brauchen ImageMagick und schreiben **neben** die Quelle, nie darüber.
 
 ### M5 · Sprung zur umschließenden Struktur
 
-- [ ] `[u` setzt den Cursor auf den Kopf der Struktur, in der er steht; nochmal
+> **Stand 2026-11-10:** automatisiert als Testblatt `TESTS/sheets/structure-jump.sheet.lua` der Config
+> (config = "user", alle sechs Sprachen); rust-Lücke dabei behoben (`nvim@39b7ab454`).
+
+- [x] `[u` setzt den Cursor auf den Kopf der Struktur, in der er steht; nochmal
       gedrückt eine Ebene weiter raus. `]u` dasselbe abwärts, zum schließenden
       Ende.
-- [ ] In einer Funktion klettert es `for` → `if` → `function`; in einer
+- [x] In einer Funktion klettert es `for` → `if` → `function`; in einer
       Konfigurationstabelle Tabellenkopf um Tabellenkopf.
-- [ ] Prüfen in **mehreren Sprachen** — die Queries liegen in
+- [x] Prüfen in **mehreren Sprachen** — die Queries liegen in
       `after/queries/{lua,json,python,rust,toml,yaml}/textobjects.scm`, und eine
       fehlende Query fällt sonst erst im Alltag auf.
-- [ ] Es ist eine **Konfiguration**, kein Feature-Modul: `[b`/`]b` und `[s`/`]s`
+- [x] Es ist eine **Konfiguration**, kein Feature-Modul: `[b`/`]b` und `[s`/`]s`
       aus derselben Familie müssen unberührt weiter funktionieren.
 
 ---
 
 ### A · Source-Achse von `:Bindings check`
 
-- [ ] `:Bindings check` läuft und meldet die verbliebenen echten Befunde. Von
+> **Stand 2026-11-10:** der Lauf ist das Testblatt `TESTS/sheets/bindings-check.sheet.lua` der Config
+> (heute 63 Befunde, höchstens 100 verlangt); die Stichprobe bleibt ein Judge-Punkt in der Task.
+
+- [x] `:Bindings check` läuft und meldet die verbliebenen echten Befunde. Von
       ursprünglich 150 blieben nach zwei Werkzeugfixes **51** übrig — kommt eine
       wesentlich größere Zahl zurück, ist eher das Werkzeug verdächtig als die
       Config.

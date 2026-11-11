@@ -124,6 +124,22 @@ if (-not $tasksVault) {
     Write-Host "  TASKS_VAULT bereits gesetzt: $tasksVault"
 }
 
+# TASKS_MARKER_DOCS: Dokumente mit `<!-- GENERATED:plan ... -->`-Bloecken, die `tasks done` nach jedem Abschluss neu
+# erzeugt (kommagetrennt; die CLI hat kein `setup`). Das Mobile-Projektdokument liegt im tasks-vault; vorhandene
+# Eintraege bleiben, der Pfad wird nur ergaenzt.
+$markerDoc = if ($reposDir) { Join-Path $reposDir 'tasks-vault\ALL\ROADMAP\projects\mobile-integration-mobil-apps-der-familien.md' } else { $null }
+if ($markerDoc -and (Test-Path $markerDoc)) {
+    $cur = [Environment]::GetEnvironmentVariable('TASKS_MARKER_DOCS', 'User')
+    $have = @(($cur -split ',') | Where-Object { $_ })
+    if ($have | Where-Object { $_.Trim() -ieq $markerDoc }) {
+        Write-Host "  TASKS_MARKER_DOCS enthaelt bereits $markerDoc"
+    } else {
+        Set-UserEnvVar -name 'TASKS_MARKER_DOCS' -value (($have + $markerDoc) -join ',')
+    }
+} else {
+    Write-Host "  TASKS_MARKER_DOCS: Mobile-Projektdokument fehlt (tasks-vault pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
+}
+
 # NVIM_MACHINE_ROLE (workstation | unset = privater Rechner) wird hier nicht gesetzt: lua/machine.lua der nvim-Config
 # liest sie schon, und die Claude-Regeln (CLAUDE.global.md, Abschnitt Maschine) lesen dieselbe Variable. Gelesen wie
 # machine.lua: Prozess-Umgebung, lower(), nur bekannte Rollen. Ist sie dort leer, aber im User- oder Machine-Scope
@@ -289,16 +305,20 @@ if ($manualPushRepos.Count -eq 0) {
 Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von testing.nvim)"
 & (Join-Path $PSScriptRoot 'setup-git-signing.ps1')
 
+$installTools = Join-Path $PSScriptRoot '..\..\..\scripts\install-tools\install-tools.ps1'
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
-Write-Host "  Was auf dieser Maschine schon da ist:"
-node (Join-Path $PSScriptRoot 'setup-devtools.js') --status
 if ($isWorkstation) {
-    Write-Host "  Workstation (CrowdStrike Falcon): nichts Unsigniertes installieren. Mehrere winget-Pakete sind" -ForegroundColor Yellow
-    Write-Host "  unsignierte portable Binaries (u. a. ripgrep, fd, stylua). Im Zweifel leer lassen." -ForegroundColor Yellow
+    # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
+    Write-Host "  Workstation (CrowdStrike Falcon): fertige Pakete ja, nichts lokal Gebautes -" -ForegroundColor Yellow
+    Write-Host "  Bau-Toolchains (cpp, rust) werden hier ausgelassen." -ForegroundColor Yellow
 }
+Write-Host "  Was auf dieser Maschine schon da ist:"
+& $installTools -Status
 $profileAnswer = Read-Host '  Profile kommagetrennt (nvim,cpp,rust,web,tauri), all = alle, leer = ueberspringen'
 if ($profileAnswer) {
-    node (Join-Path $PSScriptRoot 'setup-devtools.js') --profile $profileAnswer
+    & $installTools -Profile ($profileAnswer -split '[,\s]+' | Where-Object { $_ })
 }
+Write-Host "  Die CLI-Tools der Plugins (lazygit, pandoc, poppler, ...) bringt nach dem Klonen der Repos:"
+Write-Host "  pwsh -File `"$installTools`" -List   (dann ohne -List zum Installieren)"
 
 Write-Host "`nFertig."

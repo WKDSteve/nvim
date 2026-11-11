@@ -200,7 +200,7 @@ local function gopath_import_candidates(bufnr)
             lnum = lnum,
             col = col,
             run = function()
-              gopath.commands.resolve_and_open("edit")
+              gopath.commands.goto_at_cursor("edit")
             end,
           }
         end

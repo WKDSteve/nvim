@@ -67,9 +67,13 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 ## Maschine: Workstation oder privater Rechner
 
 - `$NVIM_MACHINE_ROLE` (dieselbe Variable wie in `lua/machine.lua` der
-  nvim-Config): `workstation` = Tricentis-Workstation (dort darf nichts
-  Unsigniertes gebaut, installiert oder gestartet werden, EDR/Falcon; auch kein
-  Runner); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
+  nvim-Config): `workstation` = Tricentis-Workstation (dort darf nichts lokal
+  gebaut werden, und kein selbst gebautes, unsigniertes Programm installiert
+  oder gestartet, EDR/Falcon; auch kein Runner. Fertige Fremd-Tools aus
+  Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
+  scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
+  `scripts/install-tools` der nvim-Config, das Bau-Toolchains, `cargo install`
+  und pip-Quellpakete dort auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
   Tests, Runner). Groß-/Kleinschreibung egal. Lesen in PowerShell mit
   `$env:NVIM_MACHINE_ROLE`, in Bash mit `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in
   Bash nicht, dort kommt das Literal `:NVIM_MACHINE_ROLE` heraus). Jeder andere
@@ -81,9 +85,9 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 - Der Git-User `lavalue` (`bartl.stefan@pm.me`) bin ich auf der Workstation, bewusst
   anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
 - Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
-  Messungen auf der Workstation); `not-on-workstation` = nie dort (native
-  Programme bauen/installieren/starten, Runner, Tests und Builds der nativen
-  Apps). Ohne Tag: Code-Arbeit, läuft auf dem privaten Rechner.
+  Messungen auf der Workstation); `not-on-workstation` = nie dort (eigene native
+  Programme bauen/installieren/starten, Bau-Toolchains, Runner, Tests und Builds
+  der nativen Apps). Ohne Tag: Code-Arbeit, läuft auf dem privaten Rechner.
 - Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen, die
   Workstation, Falcon oder EDR betreffen) zuerst `NVIM_MACHINE_ROLE` lesen (wie
   oben) und in einer Zeile nennen („Maschine: privat“ bzw. „Workstation“). Passt der
@@ -127,5 +131,4 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 - Am Ende jeder Ausgabe gibst du eine laufende Liste aller Commits des Chats aus mit kurzer Beschreibung + welches Repository. Jedes bekomtm einen grünen Haken, wenn das Commit durch einen `ultracode`-Agenten reviewd wurden.
 - **Review nach Abschluss:** Sind die aktuellen Aufgaben abgeschlossen, reviewst du zu einem guten Zeitpunkt (nicht mitten in der Arbeit, sondern wenn der Stand stimmig ist) jedes Commit des Chats, das nicht reine Doku war, gleich selbst mit hohem Reasoning (`high` oder mehr), damit es einen grünen Haken bekommt. Gefundene Bugs, Security- und Performance-Probleme fixt du direkt (Fix-Commit, mit Test) und führst sie in der Commit-Liste mit; die Fix-Commits werden nicht nochmals reviewed. Nicht nachfragen, ob reviewed werden soll.
 - **Commits prüfen:** In Repos mit `scripts/test.sh` (testing.nvim) prüfst du einen Commit mit `scripts/test.sh ci commit <sha>` (eigener Git-Worktree, Vergleich mit dem Parent), nie mit einem Lauf im Arbeitsbaum, und lässt nie einen Commit aus, weil die Suite rot ist (`known-red` ist ein Ergebnis). Details: Abschnitt „Commits prüfen“ der `CLAUDE.md` des Repos (Vorlage `templates/nvim-plugin/CLAUDE.md`).
-- **Sofort prüfen, nicht am Ende:** Jeden Commit gleich nach dem Erstellen mit `scripts/test.sh ci commit <sha>` im Hintergrund prüfen und währenddessen weiterarbeiten (immer nur ein `ci commit` zur Zeit, der nächste startet, wenn der vorige fertig ist); das Urteil vor dem Push und im Review lesen, statt am Ende alle Commits auf einmal (`--range`) zu prüfen: jeder Commit braucht einen vollen Suite-Lauf plus den seiner Basis, mehrere am Stück dauern schnell 40 Minuten. Wird ein Commit danach umgeschrieben (Rebase, Amend) und sein Baum bleibt gleich, gilt das Urteil weiter; ändert sich der Baum, neu prüfen.
-- **Schnell prüfen, nicht jedes Mal alles:** Zwischenläufe beim Arbeiten mit `scripts/test.sh --changed` (nur die Specs, die die geänderten Dateien erreichen; wählt laut `testing.nvim/docs/CACHE.md` nie weniger als nötig). Einen Commit prüfst du mit `scripts/test.sh ci commit <sha> -- --cached` (Commit und Basis teilen den Cache). Die volle Suite ohne `--changed`/`--cached` läuft einmal vor dem Push; `--changed` ist kein CI-Gate.
+- **CI-Takt** (Regeln `CI-01` bis `CI-08` in `$RULES_VAULT/rulesets/arbeit/regeln/CI_TAKT.md`): je Commit sofort im Hintergrund `scripts/test.sh ci commit <sha> --quick -- --cached` und weiterarbeiten (eine `REGRESSION` sofort beheben; quick ist kein Beweis); einmal pro Push voll für den Endstand `scripts/test.sh ci commit HEAD --base=@{upstream} --wsl -- --cached` (ohne WSL ohne `--wsl`; ein Windows-Lauf legt den Beweis für den pre-push-Hook ab, sonst läuft dort nur `fast`), bei Rot mit `--range=@{upstream}..HEAD` eingrenzen; öffentliche Repos mit `land = true` landen per `testing ci land`; gebündelt pushen, fertig erst bei grüner CI je System (`scripts/test.sh ci remote`). Im Arbeitsbaum nur `scripts/test.sh --file <teil>`. Ein umgeschriebener Commit mit gleichem Baum behält sein Urteil.

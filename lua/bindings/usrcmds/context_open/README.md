@@ -39,7 +39,7 @@ is no single correct answer, so `context_open` asks.
 
 | Provider | Detects | Runs |
 |---|---|---|
-| `gopath` | `require("gopath").resolve()` — treesitter/LSP/path resolution under the cursor | `gopath.commands.resolve_and_open("edit")` (`gF`) |
+| `gopath` | `require("gopath").resolve()` — treesitter/LSP/path resolution under the cursor | `gopath.commands.goto_at_cursor("edit")` (`gF`) |
 | `markdown_table` | Cursor line inside a parsed GFM table (`markdown.tableview.parser`) | `:TableViewToggle` |
 | `images` | `images.resolve.under_cursor()` — a markdown image link or bare image filename | `images.hover()` |
 | `pdfport` | `<cfile>`/resolved path ends in `.pdf` and exists (pure filesystem check, no plugin dependency) | two candidates: `open.nvim`'s `default` handler (system PDF viewer) *and* `:PdfPort text` (extract to buffer) |
