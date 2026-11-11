@@ -103,6 +103,7 @@ local specs = {
   "sync/sync_busy_spec.lua",
   "sync/sync_picker_action_spec.lua",
   "ui_statusline_testing_ci_spec.lua",
+  "multicursor/multicursor_spec.lua",
 }
 
 -- Optional filter: only the specs whose path contains one of the arguments.
