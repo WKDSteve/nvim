@@ -507,6 +507,10 @@ def bootstrap_pipx(dry, yes, managers):
 
 SYSTEM_PMS = LINUX_PMS + ["brew", "scoop"]
 
+# winget exit codes for "installed already": 0x8A15002B (no newer version, UPDATE_NOT_APPLICABLE) and 0x8A150061
+# (package already installed). `winget install` of a package that is there returns one of them instead of 0.
+WINGET_ALREADY_THERE = (0x8A15002B, 0x8A150061)
+
 
 def install_kind(kind, items, yes, runner):
     """Run one route kind; returns the bins that failed. A system manager that refuses the
@@ -522,6 +526,11 @@ def install_kind(kind, items, yes, runner):
                 argv = argv + ["--override", ov]
         rc = runner(argv)
         if rc == 0:
+            continue
+        if kind == "winget" and (rc & 0xFFFFFFFF) in WINGET_ALREADY_THERE:
+            # The package is installed (a shell opened before it has no PATH entry yet); winget answers
+            # "no newer version" / "already installed" with a non-zero exit code, which is no failure here.
+            print("    schon installiert (winget Exit %s)" % rc)
             continue
         print("    Exit %s" % rc)
         pkgs = [p for _, p in items if p in argv]

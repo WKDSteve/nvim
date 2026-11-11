@@ -227,7 +227,8 @@
       "group": "dev",
       "why": "Lua linter of every .nvim repo (lint gates, CI parity before push).",
       "used_by": ["all .nvim repos"],
-      "pkg": { "scoop": "luacheck", "apt": "lua-check", "pacman": "luacheck", "brew": "luacheck" }
+      "pkg": { "scoop": "luacheck", "apt": "lua-check", "pacman": "luacheck", "brew": "luacheck" },
+      "alt": { "url": "https://github.com/lunarmodules/luacheck/releases/latest" }
     },
     {
       "bin": "pnpm",

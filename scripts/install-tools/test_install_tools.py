@@ -105,6 +105,19 @@ class InstallKindTest(unittest.TestCase):
         failed = it.install_kind("npm", items, True, lambda argv: 1)
         self.assertEqual(failed, ["cspell"])
 
+    def test_winget_already_installed_is_no_failure(self):
+        # winget answers "no newer version" (0x8A15002B) and "already installed" (0x8A150061) with a
+        # non-zero exit code; a negative (signed) code counts the same
+        items = [({"bin": "fd"}, "sharkdp.fd"), ({"bin": "rg"}, "BurntSushi.ripgrep.MSVC")]
+        codes = {"sharkdp.fd": 0x8A15002B, "BurntSushi.ripgrep.MSVC": 0x8A150061 - (1 << 32)}
+        failed = it.install_kind("winget", items, True, lambda argv: codes[argv[argv.index("--id") + 1]])
+        self.assertEqual(failed, [])
+
+    def test_winget_other_exit_codes_still_fail(self):
+        items = [({"bin": "fd"}, "sharkdp.fd")]
+        failed = it.install_kind("winget", items, True, lambda argv: 0x8A15005E)
+        self.assertEqual(failed, ["fd"])
+
 
 class ProfileTest(unittest.TestCase):
     """The stack profiles that replaced setup-devtools.js."""
