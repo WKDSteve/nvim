@@ -137,6 +137,15 @@ return function(H)
   mc.clear()
   ok(not has_local("c"), "and are gone after clear")
 
+  -- leaving the buffer drops the marks and the keys
+  fresh({ "foo foo" }, { 1, 0 })
+  mc.find_under()
+  local first_buf = vim.api.nvim_get_current_buf()
+  vim.cmd("enew!")
+  ok(not mc.active(), "BufLeave clears the marks")
+  vim.api.nvim_set_current_buf(first_buf)
+  ok(not has_local("c"), "...and the buffer-local keys")
+
   -- not on a word: nothing happens
   fresh({ "   " }, { 1, 1 })
   mc.find_under()

@@ -304,6 +304,16 @@ local function install_keys()
   bmap("<Esc>", function()
     clear()
   end)
+  -- Marks belong to one buffer: leaving it drops them (and the buffer-local keys with them).
+  api.nvim_create_autocmd("BufLeave", {
+    buffer = state.buf,
+    once = true,
+    callback = function()
+      if state and state.buf == api.nvim_get_current_buf() then
+        clear()
+      end
+    end,
+  })
 end
 
 ---The word under the cursor or the single-line visual selection: its text, start column, row.
