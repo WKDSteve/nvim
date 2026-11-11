@@ -98,7 +98,4 @@ return {
       note = "no error message on the way",
     },
   },
-  manual = {
-    "In daily work: watch whether a closed fold ever opens again on save; if it does, note the file and what else was open",
-  },
 }
