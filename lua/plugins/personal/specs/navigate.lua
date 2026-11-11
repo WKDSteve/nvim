@@ -796,7 +796,8 @@ return {
           -- active. `recent` shows the list form: one picker on two keys.
           command_history = { "<leader>:", desc = "Command History" },
           notifications = { "<leader>N", desc = "Notification History" },
-          cwd_files = { "<leader>ff", desc = "Find Files" },
+          -- <leader>ff and <leader><leader> (cwd files/grep) are bound below the setup()
+          -- call: inside WKDBook-Tricentis they search from its root (casedesk.picker_root).
           projects = { "<leader>pro", desc = "Projects" },
           recent = { { "<leader>fo", "<leader>old" }, desc = "Recent Files" },
           git_branches = { "<leader>gB", desc = "Git Branches" },
@@ -812,7 +813,6 @@ return {
           gh_pr_all = { "<leader>gP", desc = "GitHub Pull Requests (all)" },
           lines = { "<leader>cb", desc = "Buffer Lines" },
           grep_buffers = { "<leader>cB", desc = "Grep Open Buffers" },
-          cwd_grep = { "<leader><leader>", desc = "Grep" },
           commands = { "<leader>com", desc = "Commands" },
           keymaps = { "<leader>fk", desc = "Keymaps" },
           man = { "<leader>sM", desc = "Man Pages" },
@@ -966,6 +966,23 @@ return {
         --   },
         -- },
       })
+
+      -- Find files / grep in the cwd, except inside WKDBook-Tricentis: there the cwd
+      -- often sits in a case folder (filetree roots at it), so casedesk's
+      -- picker_root searches from the repo root instead. `<leader>cf` or
+      -- `:Pickers cwd files` keep the case-only search. Without casedesk.nvim these
+      -- are the plain cwd pickers.
+      local function cwd_picker(action)
+        return function()
+          local ok, picker_root = pcall(require, "casedesk.picker_root")
+          if ok then
+            return picker_root[action]()
+          end
+          vim.cmd("Pickers cwd " .. action)
+        end
+      end
+      vim.keymap.set("n", "<leader>ff", cwd_picker("files"), { desc = "Find Files" })
+      vim.keymap.set("n", "<leader><leader>", cwd_picker("grep"), { desc = "Grep" })
     end,
   },
 
