@@ -121,7 +121,10 @@ Ablauf, Zustände und Build-Befehle: `$REPOS_DIR/tasks-vault/TOOLS/machine-sync.
 `scripts/git-hooks/` enthält zwei Hooks: `pre-commit` (Warnung vor großen Dateien) und `commit-msg`
 (entfernt `Co-Authored-By:`-Trailer von Claude/Anthropic aus Commit-Nachrichten; Trailer echter Personen
 bleiben). Hooks liegen in `.git/hooks` und werden nicht mitgepusht, deshalb gilt: **auf jeder Maschine
-nach dem Klonen/Einrichten einmal** ausführen:
+nach dem Klonen/Einrichten einmal** ausführen. In Neovim am einfachsten mit `:MyGit hooks` (Repos auswählen,
+`<Tab>` markiert, `<CR>` installiert), `:MyGit hooks all` (alle unter `$REPOS_DIR`) oder `:MyGit hooks status` (nur
+ansehen); die manuellen Push-Repos bekommen dabei ihren `pre-push` automatisch (`lua/bindings/usrcmds/git_hooks/README.md`).
+Ohne Neovim:
 
 ```sh
 bash scripts/git-hooks/install.sh <repo> [<repo> ...]           # beide Hooks
@@ -130,8 +133,10 @@ bash scripts/git-hooks/install.sh --manual-push-only <repo> ...  # nur pre-push 
 ```
 
 Die Hooks sind Einzeiler, die das Skript aus diesem Checkout aufrufen (spätere Änderungen brauchen keine
-Neuinstallation). Ein fremder Hook gleichen Namens wird nie überschrieben, sondern gemeldet. Es wird
-kein globales `core.hooksPath` gesetzt. Tests: `bash scripts/git-hooks/test-commit-msg-no-claude-trailer.sh`,
+Neuinstallation). Ein fremder Hook gleichen Namens wird nie überschrieben, sondern gemeldet. Dieses Skript setzt
+kein globales `core.hooksPath`; `setup-claude-code.ps1` tut es für die globalen Hooks, deren Skripte nur an
+`<git-common-dir>/hooks/<name>` weiterreichen. Deshalb schreibt `install.sh` immer dorthin (`rev-parse
+--git-common-dir`) und nicht in den Ordner, den `--git-path hooks` bei gesetztem `core.hooksPath` nennt. Tests: `bash scripts/git-hooks/test-commit-msg-no-claude-trailer.sh`,
 `bash scripts/git-hooks/test-large-files.sh` und `bash scripts/git-hooks/test-pre-push-manual-only.sh`.
 Bereits bestehende Historie wird nicht verändert.
 

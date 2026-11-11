@@ -39,11 +39,15 @@ install_hook() {
 }
 
 for repo in "$@"; do
-  hooks="$(git -C "$repo" rev-parse --git-path hooks 2>/dev/null)" || {
+  # The repository's own hooks folder, not `--git-path hooks`: that follows core.hooksPath, which the
+  # global hooks of setup-claude-code.ps1 point at a folder shared by every repo (and whose scripts only hand
+  # over to <git-common-dir>/hooks/<name>). Installing there would hit all repos, or be skipped as foreign.
+  common="$(git -C "$repo" rev-parse --git-common-dir 2>/dev/null)" || {
     echo "skip: $repo is not a git repository" >&2
     status=1
     continue
   }
+  hooks="$common/hooks"
   case "$hooks" in /* | [A-Za-z]:*) ;; *) hooks="$repo/$hooks" ;; esac
   mkdir -p "$hooks"
   if [ "$only_manual_push" -eq 1 ]; then

@@ -134,6 +134,7 @@ require("startup.heartbeat").start()
 startup.setup_usercmds()
 require("bindings.usrcmds.plugin_repos").enable()
 require("bindings.usrcmds.native_repos").enable()
+require("bindings.usrcmds.git_hooks").enable()
 -- :DocMapAll and :RATelemetry* live in documentation.nvim / runtime-analysis
 -- .nvim themselves; see plugins/personal/specs/project.lua's opts.generate_all for the
 -- data this config supplies them.
