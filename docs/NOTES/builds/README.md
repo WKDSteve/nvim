@@ -9,6 +9,7 @@ Windows-Rechner aus dem Checkout zu bauen und für den eigenen Benutzer zu insta
 | [toolchain.md](toolchain.md) | Werkzeuge (Rust, MSVC, Node, Tauri CLI, CMake, MSYS2/MinGW-w64), erwartete Pfade, Umgebungsvariablen, Build-Ergebnis und Installationsort je App |
 | [start.md](start.md) | Installierte Apps starten, stoppen und prüfen (Befehle je App) |
 | [maintenance.md](maintenance.md) | Was hier und in der nvim-Config nachzuziehen ist, wenn sich in einem der nativen Repos etwas ändert |
+| [mdview.md](mdview.md) | mdview.nvim: Relay und Client selbst bauen (Workstation und privat), Werkzeuge, Prüfen, Fehlermeldungen |
 
 ## Der eine Befehl
 
@@ -34,8 +35,9 @@ Weitere Befehle: `:MyNative list` (Git- und Build-Stand), `:MyNative build [name
 unsignierte Programme meldet (ein Runner baut die nativen Apps in seinen CI-Jobs). `list`, `clone`, `pull`,
 `uninstall`, `runner stop|status` und `runner autostart off|status` bleiben erlaubt. Auch die lazy.nvim-`build`-Hooks
 bauen dort nichts Natives: nvim-treesitter führt kein `:TSUpdate` aus und installiert beim Start keine Injection-Parser (`:TSUpdate` und `:TSInstall` von Hand gehen), telescope-fzf-native wird nicht gebaut (Telescope lädt dann die `fzf`-Erweiterung nicht),
-mdview.nvim baut dort gar nicht, denn auch `npm run build` (wasm-pack) kompiliert und startet native Build-Skripte
-und lädt `wasm-bindgen.exe`/`wasm-opt.exe`; mdview nimmt dann seine Release-Dateien.
+mdview.nvim baut dort nicht über lazy (`npm run build` mit wasm-pack kompiliert und startet native Build-Skripte
+und lädt `wasm-bindgen.exe`/`wasm-opt.exe`). Von Hand bauen ist seit 2026-11-12 erlaubt und nötig, weil das Release
+hinter `main` liegt (`:MDView edit` fehlt dort): [mdview.md](mdview.md).
 
 **Fremde Bauwege, die `machine_guard` nicht abdeckt** (kommen aus anderen Paketen, nicht aus dieser Config): Mason
 (lsp.nvim) lädt Language-Server herunter und baut manche über cargo oder go; blink.cmp (lsp.nvim) lädt eine
