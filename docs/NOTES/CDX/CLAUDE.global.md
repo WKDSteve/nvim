@@ -28,9 +28,11 @@ Rust, C++, Web/Tauri) stehen in der `CLAUDE.md` des jeweiligen Repos
   Sitzungen gleichzeitig. Fremde uncommittete Änderungen nie committen,
   zurücksetzen, formatieren oder stashen (nur `pull --rebase --autostash`
   legt sie sofort zurück); nur eigene Dateien mit Pfad stagen
-  (nie `git add -A`/`.`, `commit -a`). Änderungen über viele Repos nur auf
-  sauberem Baum, je Repo Suite grün vor dem Commit; schmutzige Repos
-  auslassen, in der Task notieren und später nachziehen.
+  (nie `git add -A`/`.`, `commit -a`). Änderungen über viele Repos: ein
+  schmutziges Repo nicht auslassen, sondern dort in einem eigenen Worktree
+  arbeiten, committen, mit `ci commit` prüfen und `push HEAD:main`;
+  auslassen (in der Task notieren, später nachziehen) nur, wenn die fremde
+  Änderung genau in einer meiner Dateien liegt.
 
 ## Env-Variablen
 
@@ -131,4 +133,4 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 - Am Ende jeder Ausgabe gibst du eine laufende Liste aller Commits des Chats aus mit kurzer Beschreibung + welches Repository. Jedes bekomtm einen grünen Haken, wenn das Commit durch einen `ultracode`-Agenten reviewd wurden.
 - **Review nach Abschluss:** Sind die aktuellen Aufgaben abgeschlossen, reviewst du zu einem guten Zeitpunkt (nicht mitten in der Arbeit, sondern wenn der Stand stimmig ist) jedes Commit des Chats, das nicht reine Doku war, gleich selbst mit hohem Reasoning (`high` oder mehr), damit es einen grünen Haken bekommt. Gefundene Bugs, Security- und Performance-Probleme fixt du direkt (Fix-Commit, mit Test) und führst sie in der Commit-Liste mit; die Fix-Commits werden nicht nochmals reviewed. Nicht nachfragen, ob reviewed werden soll.
 - **Commits prüfen:** In Repos mit `scripts/test.sh` (testing.nvim) prüfst du einen Commit mit `scripts/test.sh ci commit <sha>` (eigener Git-Worktree, Vergleich mit dem Parent), nie mit einem Lauf im Arbeitsbaum, und lässt nie einen Commit aus, weil die Suite rot ist (`known-red` ist ein Ergebnis). Details: Abschnitt „Commits prüfen“ der `CLAUDE.md` des Repos (Vorlage `templates/nvim-plugin/CLAUDE.md`).
-- **CI-Takt** (Regeln `CI-01` bis `CI-08` in `$RULES_VAULT/rulesets/arbeit/regeln/CI_TAKT.md`): je Commit sofort im Hintergrund `scripts/test.sh ci commit <sha> --quick -- --cached` und weiterarbeiten (eine `REGRESSION` sofort beheben; quick ist kein Beweis); einmal pro Push voll für den Endstand `scripts/test.sh ci commit HEAD --base=@{upstream} --wsl -- --cached` (ohne WSL ohne `--wsl`; ein Windows-Lauf legt den Beweis für den pre-push-Hook ab, sonst läuft dort nur `fast`), bei Rot mit `--range=@{upstream}..HEAD` eingrenzen; öffentliche Repos mit `land = true` landen per `testing ci land`; gebündelt pushen, fertig erst bei grüner CI je System (`scripts/test.sh ci remote`). Im Arbeitsbaum nur `scripts/test.sh --file <teil>`. Ein umgeschriebener Commit mit gleichem Baum behält sein Urteil.
+- **CI-Takt** (Regeln `CI-01` bis `CI-10` in `$RULES_VAULT/rulesets/arbeit/regeln/CI_TAKT.md`): je Commit sofort im Hintergrund `scripts/test.sh ci commit <sha> --quick -- --cached` und weiterarbeiten (eine `REGRESSION` sofort beheben; quick ist kein Beweis); einmal pro Push voll für den Endstand `scripts/test.sh ci commit HEAD --base=@{upstream} --wsl -- --cached` (ohne WSL ohne `--wsl`; ein Windows-Lauf legt den Beweis für den pre-push-Hook ab, sonst läuft dort nur `fast`), bei Rot mit `--range=@{upstream}..HEAD` eingrenzen; öffentliche Repos mit `land = true` landen per `testing ci land`; gebündelt pushen, fertig erst bei grüner CI je System (`scripts/test.sh ci remote`). Im Arbeitsbaum nur `scripts/test.sh --file <teil>`. Ein umgeschriebener Commit mit gleichem Baum behält sein Urteil.
