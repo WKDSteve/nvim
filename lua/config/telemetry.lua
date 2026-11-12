@@ -152,6 +152,7 @@ end
 ---@field plugins table<string, Config.Telemetry.PluginOpts>
 ---@field lib_nvim table|false   # { profile_args?, timing? }, or false when lib.nvim is excluded
 ---@field extra Config.Telemetry.ExtraTarget[]
+---@field export { dir: fun(): string|nil }   # where `:RATelemetry export-all` writes without an argument
 
 ---Where `:RATelemetry export-all` writes without an argument: the vault archive
 ---`$REPOS_DIR/tasks-vault/_Telemetry/<PC|Workstation>/<YYYY-MM-DD>`. The machine is `Workstation` when
