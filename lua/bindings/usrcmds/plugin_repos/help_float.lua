@@ -28,7 +28,7 @@ function M.open(lines, ns_name)
     width = width + 2,
     height = #lines,
     style = "minimal",
-    border = "rounded",
+    border = require("config.ascii_look").border("rounded"),
     zindex = 250,
   })
   local ns = vim.api.nvim_create_namespace(ns_name)

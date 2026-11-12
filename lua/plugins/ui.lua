@@ -45,19 +45,8 @@ return {
     },
   },
 
-  {
-    "mg979/vim-visual-multi",
-    branch = "master",
-    event = "UIEnter", -- or "VeryLazy"
-    init = function()
-      vim.g.VM_default_mappings = 0
-      vim.g.VM_maps = {
-        ["Find Under"] = "<C-n>",
-        ["Find Subword Under"] = "<C-n>",
-        ["I BS"] = "", -- disable conflicting insert backspace
-      }
-    end,
-  },
+  -- `mg979/vim-visual-multi` left on 2026-11-11: only its <C-n> flow was used (word under the cursor, next
+  -- occurrence, change together); `lua/multicursor` does exactly that, mapped in bindings.mappings.
 
   -- `folke/zen-mode.nvim` (`:ZenMode`, pure defaults) left on 2026-09-19:
   -- ui.nvim's `ui.zen` is the distraction-free box now -- `:UI zen [on|off]`.

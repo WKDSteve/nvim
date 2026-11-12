@@ -102,7 +102,9 @@ local function hooks_dir(path)
   if stat and stat.type == "directory" then
     return path .. "/.git/hooks"
   end
-  local res = vim.system({ "git", "-C", path, "rev-parse", "--git-common-dir" }, { text = true }):wait()
+  local res = vim
+    .system({ "git", "-C", path, "rev-parse", "--git-common-dir" }, { text = true })
+    :wait()
   if res.code ~= 0 then
     return nil
   end
@@ -212,10 +214,13 @@ function M.status(only)
   end
 end
 
----Path of `install.sh` of this config.
+---Path of `install.sh` inside the config this module was loaded from (a worktree, a junctioned config or the CI
+---checkout finds its own copy, not the one under stdpath("config")).
 ---@return string
 function M.install_script()
-  return (vim.fn.stdpath("config") .. "/scripts/git-hooks/install.sh"):gsub("\\", "/")
+  local src = debug.getinfo(1, "S").source:sub(2)
+  local root = vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(src)))))
+  return (vim.fs.joinpath(root, "scripts", "git-hooks", "install.sh"):gsub("\\", "/"))
 end
 
 ---argv of the `install.sh` calls for `names`: one for pre-commit/commit-msg, one more for the manual-push repos.

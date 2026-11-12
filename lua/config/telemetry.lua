@@ -169,6 +169,24 @@ end
 ---whose spec sets `name = "reposcope"` -- `plugin[1]` is still the repo.
 ---@param opts? Config.Telemetry.Opts
 ---@return Config.Telemetry.Built
+---Where `:RATelemetry export-all` writes without an argument: the vault archive
+---`$REPOS_DIR/tasks-vault/_Telemetry/<PC|Workstation>/<YYYY-MM-DD>`. The machine is `Workstation` when
+---`NVIM_MACHINE_ROLE` says so, else `PC`. nil (the command then wants an argument, as it always did) without
+---`REPOS_DIR` or without the vault: a target that would create the vault by itself is no target.
+---@return string|nil
+function M.export_dir()
+  local repos = vim.env.REPOS_DIR
+  if not repos or repos == "" then
+    return nil
+  end
+  local archive = vim.fs.normalize(repos) .. "/tasks-vault/_Telemetry"
+  if vim.fn.isdirectory(archive) == 0 then
+    return nil
+  end
+  local machine = require("machine").is("workstation") and "Workstation" or "PC"
+  return ("%s/%s/%s"):format(archive, machine, os.date("%Y-%m-%d"))
+end
+
 function M.build(opts)
   opts = vim.tbl_extend("force", defaults, opts or {})
 
@@ -207,6 +225,7 @@ function M.build(opts)
   return {
     plugins = plugins,
     lib_nvim = lib_nvim,
+    export = { dir = M.export_dir },
     extra = {
       {
         namespace = "nvim-config",

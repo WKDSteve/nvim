@@ -7,8 +7,16 @@ local function spec(H)
 
   -- classify: marker present = ours, other content = foreign, no file = missing
   eq(hooks.classify(nil, "# large-files-hook"), "missing", "no file is missing")
-  eq(hooks.classify("#!/bin/sh\n# large-files-hook\n", "# large-files-hook"), "ok", "marker means ours")
-  eq(hooks.classify("#!/bin/sh\necho hi\n", "# large-files-hook"), "foreign", "other content is foreign")
+  eq(
+    hooks.classify("#!/bin/sh\n# large-files-hook\n", "# large-files-hook"),
+    "ok",
+    "marker means ours"
+  )
+  eq(
+    hooks.classify("#!/bin/sh\necho hi\n", "# large-files-hook"),
+    "foreign",
+    "other content is foreign"
+  )
 
   -- the manual-push repos expect pre-push as well, the others do not
   local function names(list)
@@ -58,7 +66,11 @@ local function spec(H)
     { "bash", "install.sh", "--manual-push-only", "B/tricentis-vault" },
     "manual-push call"
   )
-  eq(#hooks.plan_calls("bash", "install.sh", "B", { "lib.nvim" }), 1, "no second call without a manual repo")
+  eq(
+    #hooks.plan_calls("bash", "install.sh", "B", { "lib.nvim" }),
+    1,
+    "no second call without a manual repo"
+  )
 
   -- repos(): only folders with a .git
   local base = H.tmpdir()

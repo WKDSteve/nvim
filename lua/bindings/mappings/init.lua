@@ -32,6 +32,8 @@ function M.setup()
   require("bindings.mappings.execute").setup()
   require("bindings.mappings.general").setup()
   require("bindings.mappings.noice").setup()
+  -- <C-n>: mark the word, then the next occurrences, change them together (replaces vim-visual-multi).
+  require("multicursor").setup()
   require("bindings.mappings.screen_line").setup()
   require("bindings.mappings.sessions").setup()
   require("bindings.mappings.slots").setup()
