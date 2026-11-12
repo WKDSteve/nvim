@@ -153,22 +153,6 @@ end
 ---@field lib_nvim table|false   # { profile_args?, timing? }, or false when lib.nvim is excluded
 ---@field extra Config.Telemetry.ExtraTarget[]
 
----Build the `opts.telemetry` table for `runtime-analysis.nvim`'s own spec.
----
----Keyed by the FULL repo ("WKDSteve/dap.nvim"), not by a normalized name.
----The obvious-looking alternative -- `lazy.core.util.normname`, which strips
----"nvim-"/"vim-"/".nvim" and non-letters -- is actively wrong here, and
----silently so. It maps the *external* `mfussenegger/nvim-dap` and the
----*personal* `WKDSteve/dap.nvim` to the same key "dap", so nvim-dap's
----modules would be wrapped and reported under the "dap.nvim" namespace. With
----both loaded that is two instances writing one cache file: merged, wrong
----numbers, and nothing on screen saying so. (Verified, not hypothetical --
----firing a synthetic `LazyLoad` for "nvim-dap" produced exactly that
----instance.) The repo string is unique by construction and present on every
----personal spec; it also removes the need to special-case reposcope.nvim,
----whose spec sets `name = "reposcope"` -- `plugin[1]` is still the repo.
----@param opts? Config.Telemetry.Opts
----@return Config.Telemetry.Built
 ---Where `:RATelemetry export-all` writes without an argument: the vault archive
 ---`$REPOS_DIR/tasks-vault/_Telemetry/<PC|Workstation>/<YYYY-MM-DD>`. The machine is `Workstation` when
 ---`NVIM_MACHINE_ROLE` says so, else `PC`. nil (the command then wants an argument, as it always did) without
@@ -187,6 +171,22 @@ function M.export_dir()
   return ("%s/%s/%s"):format(archive, machine, os.date("%Y-%m-%d"))
 end
 
+---Build the `opts.telemetry` table for `runtime-analysis.nvim`'s own spec.
+---
+---Keyed by the FULL repo ("WKDSteve/dap.nvim"), not by a normalized name.
+---The obvious-looking alternative -- `lazy.core.util.normname`, which strips
+---"nvim-"/"vim-"/".nvim" and non-letters -- is actively wrong here, and
+---silently so. It maps the *external* `mfussenegger/nvim-dap` and the
+---*personal* `WKDSteve/dap.nvim` to the same key "dap", so nvim-dap's
+---modules would be wrapped and reported under the "dap.nvim" namespace. With
+---both loaded that is two instances writing one cache file: merged, wrong
+---numbers, and nothing on screen saying so. (Verified, not hypothetical --
+---firing a synthetic `LazyLoad` for "nvim-dap" produced exactly that
+---instance.) The repo string is unique by construction and present on every
+---personal spec; it also removes the need to special-case reposcope.nvim,
+---whose spec sets `name = "reposcope"` -- `plugin[1]` is still the repo.
+---@param opts? Config.Telemetry.Opts
+---@return Config.Telemetry.Built
 function M.build(opts)
   opts = vim.tbl_extend("force", defaults, opts or {})
 
