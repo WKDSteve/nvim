@@ -162,6 +162,11 @@ startup.now("ui_open", function()
   require("config.ui_open").setup()
 end)
 
+-- Sync, cheap: the ASCII look (fillchars, listchars, winborder) follows the ui.kit preset (see config/ascii_look.lua).
+startup.now("ascii_look", function()
+  require("config.ascii_look").setup()
+end)
+
 -- Sync, and it has to be: `declarative` shapes how the first buffer renders,
 -- the highlight groups must land before the first paint to avoid a visible
 -- flash, and vim.diagnostic.config() must precede the first LSP attach.
