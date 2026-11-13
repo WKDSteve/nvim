@@ -69,9 +69,13 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 ## Maschine: Workstation oder privater Rechner
 
 - `$NVIM_MACHINE_ROLE` (dieselbe Variable wie in `lua/machine.lua` der
-  nvim-Config): `workstation` = Tricentis-Workstation (dort darf nichts lokal
-  gebaut werden, und kein selbst gebautes, unsigniertes Programm installiert
-  oder gestartet, EDR/Falcon; auch kein Runner. Fertige Fremd-Tools aus
+  nvim-Config): `workstation` = Tricentis-Workstation (eigene Builds und selbst
+  gebaute Programme dürfen dort laufen, aber nichts, was CrowdStrike Falcon/EDR
+  als Angriff lesen kann: kein Code in fremde Prozesse injizieren, keine
+  Treiber, kein Zugriff auf Anmeldedaten oder fremden Prozessspeicher, keine
+  Prozess-Lawinen, keine Tarnung (umbenannte Systemprogramme, verschleierte
+  Skripte); im Zweifel erst als `on-workstation`-Handlauf prüfen; auch kein
+  Runner. Fertige Fremd-Tools aus
   Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
   scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
   `scripts/install-tools` der nvim-Config, das Bau-Toolchains, `cargo install`
@@ -87,9 +91,9 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 - Der Git-User `lavalue` (`bartl.stefan@pm.me`) bin ich auf der Workstation, bewusst
   anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
 - Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
-  Messungen auf der Workstation); `not-on-workstation` = nie dort (eigene native
-  Programme bauen/installieren/starten, Bau-Toolchains, Runner, Tests und Builds
-  der nativen Apps). Ohne Tag: Code-Arbeit, läuft auf dem privaten Rechner.
+  Messungen auf der Workstation); `not-on-workstation` = nie dort (was Falcon als
+  Angriff lesen kann, siehe oben, und Runner). Ohne Tag: Code-Arbeit, läuft auf
+  dem privaten Rechner.
 - Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen, die
   Workstation, Falcon oder EDR betreffen) zuerst `NVIM_MACHINE_ROLE` lesen (wie
   oben) und in einer Zeile nennen („Maschine: privat“ bzw. „Workstation“). Passt der
