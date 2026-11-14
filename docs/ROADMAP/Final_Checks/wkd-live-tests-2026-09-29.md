@@ -58,9 +58,9 @@ Build-Check, nicht zum interaktiven Durchklicken.
 - [x] Header-Nav bei 375px und 768px (echtes Handy/Tablet oder Android-Emulator) — kein
       horizontaler Scroll, `[ tui ]`-Link nicht abgeschnitten.
   - Notiz: auto 2026-11-13: wkd `tests/browser/site.browser.mjs` (wkd@c96ea71) grün, gegen `dist/` und gegen die Live-Seite; elf Seiten bei 375 und 768 px ohne Seitwärts-Scroll, beide Skins.
-- [ ] Kachel-Grid, Orbit, Tree, `/stack`, `ui.nvim`-Detailseite auf Mobile/Tablet — kein
+- [x] Kachel-Grid, Orbit, Tree, `/stack`, `ui.nvim`-Detailseite auf Mobile/Tablet — kein
       Overflow.
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`. Die Seiten selbst sind bei 375 und 768 px geprüft; Tree und Orbit werden dort noch nicht umgeschaltet.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.mobile-views` (wkd@9601d4d, grün gegen `dist/`): Grid, Tree, Orbit, Stack und die ui.nvim-Seite bei 375 und 768 px ohne Seitwärts-Scroll; das Blatt wird rot, wenn eine Seite breiter als der Schirm ist.
 - [ ] Kachel-Hover-Flyout (T2) auf einem echten Touch-Gerät antippen — sollte (bekannt)
       strukturell nicht erreichbar sein, nur zur Bestätigung.
   - Notiz: von Hand: Task `wkd/fight-auf-echten-geraeten`.
@@ -80,19 +80,19 @@ Build-Check, nicht zum interaktiven Durchklicken.
 
 ## T15 — Bug-Sweep (7 Fixes) + Folgefix `prefs.ts`
 
-- [ ] Skin-Präferenz auf `tui` stellen (z. B. einmal auf `/tui/` wechseln), dann zurück zur
+- [x] Skin-Präferenz auf `tui` stellen (z. B. einmal auf `/tui/` wechseln), dann zurück zur
       `modern`-Startseite, Tree-Ansicht öffnen, einen Plugin-Knoten anklicken — sollte zum
       `tui`-Skin führen (nicht zurück nach `modern`).
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
-- [ ] Dasselbe für die Orbit-Ansicht (Spoke anklicken statt Tree-Knoten).
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
-- [ ] Kategorie-Filter rein per Tastatur ansteuern (Tab zu einem Filter-Pill, nicht
+  - Notiz: auto 2026-11-14: Testblatt `wkd.skin-preference` (wkd@9601d4d, grün gegen `dist/`): jeder Knoten des Baums zeigt in den TUI-Skin, ein Klick landet dort.
+- [x] Dasselbe für die Orbit-Ansicht (Spoke anklicken statt Tree-Knoten).
+  - Notiz: auto 2026-11-14: Testblatt `wkd.skin-preference` (wkd@9601d4d, grün gegen `dist/`): jede Spoke zeigt in den TUI-Skin, ein Klick landet dort.
+- [x] Kategorie-Filter rein per Tastatur ansteuern (Tab zu einem Filter-Pill, nicht
       Maus-Hover) — Pill sollte die Neon-Hover-Farbe wechseln.
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
-- [ ] `tui`-Skin: `modern` als Präferenz speichern, dann `/tui/` aufrufen — gelber
+  - Notiz: auto 2026-11-14: Testblatt `wkd.filter-keyboard` (wkd@9601d4d, grün gegen `dist/`): die Pille unter dem Tastaturfokus bekommt eine neue Neon-Farbe (nie zweimal dieselbe), zeigt den Fokusring und filtert. Zu sehen ist die Neon-Farbe erst unter dem Zeiger, weil die fokussierte Pille immer die gewählte ist (in Tinte gezeichnet).
+- [x] `tui`-Skin: `modern` als Präferenz speichern, dann `/tui/` aufrufen — gelber
       Skin-Hinweisbalken erscheint, Sidebar/Footer bleiben an der richtigen Stelle (kein
       aufgeblähter Hinweisbalken, keine verschobene Fußzeile).
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.skin-preference` (wkd@9601d4d, grün gegen `dist/`): der Hinweisbalken erscheint unter der Statuszeile und ist unter 60 px hoch, Sidebar links, Kommandozeile unten.
 - [x] `scripts/pull-demos.sh` einmal laufen lassen — `public/demos/` sollte sauber neu
       befüllt werden (alte, nicht mehr im `demo-assets`-Branch vorhandene Dateien
       verschwinden).
@@ -133,7 +133,7 @@ Build-Check, nicht zum interaktiven Durchklicken.
   - Notiz: von Hand: Task `wkd/fight-am-bildschirm-abnehmen`.
 - [ ] Match endet nach 60 s (Timer-Ablauf) oder bei K. o. — Ergebnistext („You win." /
       „You lose." / „Draw.") stimmt mit dem tatsächlichen Verlauf überein.
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-result` (wkd@9601d4d, grün gegen `dist/`) deckt den K. o.: der Text nennt Ende und Sieger passend zu den Balken. Offen von Hand: ein Match über volle 60 s („Time up.“).
 - [ ] Rematch-Button startet ein neues Match; Level-Farbfilter (Tag/Dusk/Nacht) wirkt über
       mehrere Rematches hinweg sichtbar unterschiedlich (zufällig gewählt).
   - Notiz: von Hand: Task `wkd/fight-am-bildschirm-abnehmen`.
@@ -177,7 +177,7 @@ Build-Check, nicht zum interaktiven Durchklicken.
 - [ ] **Sieg/Niederlage-Zähler** zwischen den Health-Bars zählt nach einem gewonnenen/
       verlorenen Match hoch und bleibt auch nach Neuladen der Seite erhalten
       (`localStorage`).
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-result` (wkd@9601d4d, grün gegen `dist/`) deckt das Zählen: genau dieses Match wird gezählt, ein Rematch-Start zählt nichts. Offen: dass der Stand nach Neuladen der Seite bleibt, prüft das Blatt nicht.
 - [ ] **„FIGHT!"-Intro:** beim Start eines Matches (und jedem Rematch) fliegt „FIGHT!"
       groß ins Bild, kurz bevor die Steuerung aktiv wird. Dazu ein Sound — **das ist
       bewusst kein echtes „FIGHT!"-Voice-Sample, sondern ein synthetischer Platzhalter-
@@ -284,10 +284,10 @@ Plan und Phasenstatus: `../wkd/handovers/wkd_FightingGame_Implementierungsplan.m
 - [ ] **Code mit Tippfehler:** im Antwort- oder Einladungscode ein Zeichen ändern und
       „Connect"/„Create reply" klicken — „not valid", die Einladung bleibt, der richtige
       Code funktioniert danach.
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`. Geht auf einem Rechner: ein ungültiger Code muss „not valid“ melden.
-- [ ] **Leertaste auf Buttons:** nach einem Match Tab auf „Rematch" oder „Disconnect", Space
+  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-bad-code` (wkd@9601d4d, grün gegen `dist/`) deckt „not valid“ und dass die Einladung bleibt. Offen von Hand: „der richtige Code funktioniert danach“ braucht ein zweites Gerät (Task `wkd/fight-online-zwischen-zwei-geraeten`).
+- [x] **Leertaste auf Buttons:** nach einem Match Tab auf „Rematch" oder „Disconnect", Space
       löst sie aus (im laufenden Match bleibt Space der leichte Angriff).
-  - Notiz: bekommt ein Testblatt: Task `wkd/testblaetter-der-browser-engine-fuer-wkd`.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-result` (wkd@9601d4d, grün gegen `dist/`): Space auf dem fokussierten „Rematch“ startet ein neues Match, im laufenden Match beendet oder pausiert Space nichts. „Disconnect“ gibt es nur online (von Hand, Task `wkd/fight-online-zwischen-zwei-geraeten`).
 - [ ] **Spezial-Moves:** jeder der vier Kämpfer hat einen (`C`, Pad `Y`, Touch `S`):
       Samurai Mack Bodenwelle, Martial Hero Orb, Kenji Teleport hinter den Gegner, Ronin
       Pistole. Name steht neben dem Kämpfernamen und ist abgedunkelt, solange der Move
