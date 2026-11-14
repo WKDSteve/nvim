@@ -174,10 +174,10 @@ Build-Check, nicht zum interaktiven Durchklicken.
       müssen im Vollbild sichtbar/erreichbar bleiben (nicht unten aus dem Bild
       gedrängt).
   - Notiz: von Hand: Task `wkd/fight-am-bildschirm-abnehmen`.
-- [ ] **Sieg/Niederlage-Zähler** zwischen den Health-Bars zählt nach einem gewonnenen/
+- [x] **Sieg/Niederlage-Zähler** zwischen den Health-Bars zählt nach einem gewonnenen/
       verlorenen Match hoch und bleibt auch nach Neuladen der Seite erhalten
       (`localStorage`).
-  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-result` (wkd@9601d4d, grün gegen `dist/`) deckt das Zählen: genau dieses Match wird gezählt, ein Rematch-Start zählt nichts. Offen: dass der Stand nach Neuladen der Seite bleibt, prüft das Blatt nicht.
+  - Notiz: auto 2026-11-14: Testblatt `wkd.fight-result` (wkd@97fa991, grün gegen `dist/`): genau dieses Match wird gezählt, ein Rematch-Start zählt nichts, und nach Neuladen der Seite steht derselbe Stand; das Blatt wird rot, wenn der Speicher vor dem Neuladen geleert ist.
 - [ ] **„FIGHT!"-Intro:** beim Start eines Matches (und jedem Rematch) fliegt „FIGHT!"
       groß ins Bild, kurz bevor die Steuerung aktiv wird. Dazu ein Sound — **das ist
       bewusst kein echtes „FIGHT!"-Voice-Sample, sondern ein synthetischer Platzhalter-
