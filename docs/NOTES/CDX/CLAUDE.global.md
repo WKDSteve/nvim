@@ -69,17 +69,20 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
 ## Maschine: Workstation oder privater Rechner
 
 - `$NVIM_MACHINE_ROLE` (dieselbe Variable wie in `lua/machine.lua` der
-  nvim-Config): `workstation` = Tricentis-Workstation (eigene Builds und selbst
-  gebaute Programme dürfen dort laufen, aber nichts, was CrowdStrike Falcon/EDR
-  als Angriff lesen kann: kein Code in fremde Prozesse injizieren, keine
-  Treiber, kein Zugriff auf Anmeldedaten oder fremden Prozessspeicher, keine
-  Prozess-Lawinen, keine Tarnung (umbenannte Systemprogramme, verschleierte
-  Skripte); im Zweifel erst als `on-workstation`-Handlauf prüfen; auch kein
-  Runner. Fertige Fremd-Tools aus
+  nvim-Config): `workstation` = Tricentis-Workstation (dort darf gebaut werden,
+  auch mit Bau-Toolchains wie rustup, MSVC, CMake, `cargo build/test`, und
+  selbst gebaute Programme dürfen laufen, aber nichts, was CrowdStrike
+  Falcon/EDR als Angriff lesen kann: kein Code in fremde Prozesse injizieren,
+  keine Treiber, kein Zugriff auf Anmeldedaten oder fremden Prozessspeicher,
+  keine Prozess-Lawinen, keine Tarnung (umbenannte Systemprogramme,
+  verschleierte Skripte); im Zweifel erst als `on-workstation`-Handlauf prüfen;
+  auch kein Runner. **Ausnahme: die ai-Familie (`ai.nvim`, `ai-desktop` samt
+  Mobil-Variante) wird dort nie installiert, gebaut oder gestartet**, auch
+  nicht als Abhängigkeit eines anderen Plugins. Fertige Fremd-Tools aus
   Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
   scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
   `scripts/install-tools` der nvim-Config, das Bau-Toolchains, `cargo install`
-  und pip-Quellpakete dort auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
+  und pip-Quellpakete dort heute noch auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
   Tests, Runner). Groß-/Kleinschreibung egal. Lesen in PowerShell mit
   `$env:NVIM_MACHINE_ROLE`, in Bash mit `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in
   Bash nicht, dort kommt das Literal `:NVIM_MACHINE_ROLE` heraus). Jeder andere
@@ -92,7 +95,7 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
 - Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
   Messungen auf der Workstation); `not-on-workstation` = nie dort (was Falcon als
-  Angriff lesen kann, siehe oben, und Runner). Ohne Tag: Code-Arbeit, läuft auf
+  Angriff lesen kann, siehe oben, Runner und die ai-Familie). Ohne Tag: Code-Arbeit, läuft auf
   dem privaten Rechner.
 - Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen, die
   Workstation, Falcon oder EDR betreffen) zuerst `NVIM_MACHINE_ROLE` lesen (wie
