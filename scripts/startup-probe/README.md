@@ -99,11 +99,11 @@ nvim --headless --cmd "luafile scripts/startup-probe/probe.lua"
 `XDG_CONFIG_HOME` auf einen Ordner setzen, in dem `nvim` eine Junction auf den
 Worktree ist. Zwei Fallen, sonst sind die Zahlen um ein Vielfaches schlechter
 (Stoßsumme 5 bis 6 s statt ~1,2 s): (1) die ignorierte `lazy-lock.json` fehlt im
-Worktree, kopieren; (2) das getrackte `lua/plugins/github-stats/last_fetch.json`
-ist dort alt, `github_stats` startet beim Start einen Abruf über alle Repos und
-schreibt tausende Dateien nach `lua/plugins/github-stats/data/`. Für die Messung
-den Zeitstempel aus dem Haupt-Checkout hineinkopieren und danach
-`git checkout -- <Datei>` und `git clean -fd -- lua/plugins/github-stats/data`.
+Worktree, kopieren; (2) bis 2026-11-14 lag die Traffic-Historie von
+`github_stats` in der Config (`lua/plugins/github-stats/`), und ein Worktree mit
+altem `last_fetch.json` startete einen Abruf über alle Repos. Seitdem liegt sie im
+Daten-Repo `WKDSteve/github-stats-vault` (Remote-Modus, der Klon unter
+`stdpath("data")`); nvim zieht dort beim Start nur ein `git pull`.
 Die `where`-Sonde und eine laufende Last (parallele Sitzungen) verfälschen
 ebenfalls: ein Lauf mit `where` bei Last 100 % hatte den ersten Herzschlag erst
 bei 7,4 s.

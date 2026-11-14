@@ -52,7 +52,6 @@
         "build",
         "dist",
         "docs",
-        "github-stats",
         "node_modules",
         "vendor"
     ],
@@ -61,8 +60,7 @@
         "**/node_modules/**",
         "**/dist/**",
         "**/build/**",
-        "**/docs/**",
-        "**/plugins/github-stats/**"
+        "**/docs/**"
     ]
 }
 

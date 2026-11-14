@@ -8,8 +8,6 @@
 --- disabled -- is NOT decided here but in plugins.personal.core.source; this
 --- file only declares the specs. Registered from plugins/personal/init.lua.
 
-local machine = require("machine")
-
 --- The compose file names sandbox.nvim knows (its `util.compose_file`) plus the
 --- usual variants (`docker-compose.override.yml`, `compose.prod.yaml`), as
 --- autocmd patterns. They are matched by name because Neovim gives them the
@@ -114,40 +112,13 @@ return {
       require("github_stats").setup({
         -- Notify at startup whether a fetch was performed or not.
         -- notify_fetch = true,
-        -- Repositories tracked individually ("owner/repo"); the list replaces
-        -- the default one (a short list of the author's repositories).
-        -- An explicit list instead of `watch_users` auto-discovery, because every
-        -- repo costs one curl process per metric (4 metrics), spawned in a tight
-        -- synchronous loop: the list length bounds the spawn burst on machines
-        -- where process creation is slow (AV/EDR scanning each spawn).
-        repos = {
-          "WKDSteve/buffer-ctx.nvim",
-          "WKDSteve/cascade.nvim",
-          "WKDSteve/color_my_ascii.nvim",
-          "WKDSteve/debugging.nvim",
-          "WKDSteve/diff.nvim",
-          "WKDSteve/docmap.nvim",
-          "WKDSteve/emojis.nvim",
-          "WKDSteve/fileops.nvim",
-          "WKDSteve/filetree.nvim",
-          "WKDSteve/github_stats.nvim",
-          "WKDSteve/gopath.nvim",
-          "WKDSteve/hover.nvim",
-          "WKDSteve/language.nvim",
-          "WKDSteve/lib.nvim",
-          "WKDSteve/lsp.nvim",
-          "WKDSteve/markdown.nvim",
-          "WKDSteve/mdview.nvim",
-          "WKDSteve/cmdlog.nvim",
-          "WKDSteve/sandbox.nvim",
-          "WKDSteve/open.nvim",
-          "WKDSteve/pdfport.nvim",
-          "WKDSteve/pickers.nvim",
-          "WKDSteve/insights.nvim",
-          "WKDSteve/recommender.nvim",
-          "WKDSteve/replacer.nvim",
-          "WKDSteve/reposcope.nvim",
-        },
+        -- Where the history lives: the private data repository whose GitHub
+        -- Actions workflow collects once a day (github_stats.nvim's remote mode).
+        -- Every machine only clones it (stdpath("data")/github_stats.nvim-vault)
+        -- and pulls; nothing is fetched here and nothing is committed into this
+        -- config any more. The tracked repositories are its config.json:
+        -- edit it in the clone, then `:GithubStats sync`.
+        storage = { repo = "WKDSteve/github-stats-vault" },
         -- Where the GitHub token comes from: "env" | "file". Equals the default,
         -- set explicitly so the choice is visible here.
         token_source = "env",
@@ -176,9 +147,8 @@ return {
         -- "kit". The background cycle deliberately never shows one.
         -- Default: "auto".
         progress_style = "statusline",
-        -- Custom config directory.
-        -- config_dir = nil, -- string; default stdpath("config")/lua/plugins/github-stats
-        -- Custom data directory.
+        -- Custom config/data directory: setting either means local mode.
+        -- config_dir = nil, -- string
         -- data_dir = nil, -- string; default <config_dir>/data
         -- Where the per-repository digest for other programs is written. Local to
         -- one machine on purpose, hence a setup() option and not part of the
@@ -191,11 +161,10 @@ return {
         -- watch_users = {},
 
         background = {
-          -- Master switch of the silent background fetch cycle. "workstation"
-          -- only reads the already-committed data/ snapshots (the dashboard,
-          -- :GithubStatsShow, ... read from disk regardless); it just never runs
-          -- the fetch cycle itself. Default: true.
-          enabled = not machine.is("workstation"),
+          -- Master switch of the silent background cycle. In remote mode it
+          -- only pulls the data repository (start + hourly), never fetches,
+          -- so the workstation runs it too. Default: true.
+          enabled = true,
           -- Delay before the first cycle, in ms; keeps the fetch out of startup.
           -- initial_delay_ms = 1000,
         },
