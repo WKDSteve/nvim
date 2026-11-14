@@ -78,7 +78,14 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   verschleierte Skripte); im Zweifel erst als `on-workstation`-Handlauf prüfen;
   auch kein Runner. **Ausnahme: die ai-Familie (`ai.nvim`, `ai-desktop` samt
   Mobil-Variante) wird dort nie installiert, gebaut oder gestartet**, auch
-  nicht als Abhängigkeit eines anderen Plugins. Fertige Fremd-Tools aus
+  nicht als Abhängigkeit eines anderen Plugins. **Die nativen Desktop-Apps
+  (`tasks-`, `rules-`, `docmap-desktop` und ihre Hubs, Installer und
+  Autostart) sind dort gesperrt, bis
+  `appkit/edr-ausloeser-aus-allen-nativen-apps-entfernen` erledigt ist und ein
+  `on-workstation`-Handlauf sie freigibt**: tasks-desktop hat am 2026-10-27
+  und noch einmal danach Falcon ausgelöst, auch nach abgebrochener
+  Installation (ein Hub lief weiter). Bis dahin dort nur die Web-Variante
+  (`file://`). Fertige Fremd-Tools aus
   Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
   scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
   `scripts/install-tools` der nvim-Config, das Bau-Toolchains, `cargo install`
@@ -95,7 +102,8 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
 - Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
   Messungen auf der Workstation); `not-on-workstation` = nie dort (was Falcon als
-  Angriff lesen kann, siehe oben, Runner und die ai-Familie). Ohne Tag: Code-Arbeit, läuft auf
+  Angriff lesen kann, siehe oben, Runner, die ai-Familie und die nativen
+  Desktop-Apps bis zu ihrer Freigabe). Ohne Tag: Code-Arbeit, läuft auf
   dem privaten Rechner.
 - Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen, die
   Workstation, Falcon oder EDR betreffen) zuerst `NVIM_MACHINE_ROLE` lesen (wie
