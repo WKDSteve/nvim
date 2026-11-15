@@ -308,9 +308,8 @@ Write-Host "`n[git] Commit-Signatur (Geraete-Registry fuer den runner-guard von 
 $installTools = Join-Path $PSScriptRoot '..\..\..\scripts\install-tools\install-tools.ps1'
 Write-Host "`n[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) per winget installieren?"
 if ($isWorkstation) {
-    # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
-    Write-Host "  Workstation (CrowdStrike Falcon): fertige Pakete ja, nichts lokal Gebautes -" -ForegroundColor Yellow
-    Write-Host "  Bau-Toolchains (cpp, rust) werden hier ausgelassen." -ForegroundColor Yellow
+    # install-tools itself leaves out the ai family's tools there; build toolchains are allowed
+    Write-Host "  Workstation: Bau-Toolchains ja; die Tools der ai-Familie werden hier ausgelassen." -ForegroundColor Yellow
 }
 Write-Host "  Was auf dieser Maschine schon da ist:"
 & $installTools -Status

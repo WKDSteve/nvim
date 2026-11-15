@@ -132,9 +132,8 @@ Ablauf (beide Skripte, gleiches Prinzip):
    schon installiert ist, und fragt nach Toolchain-Profilen
    (`nvim,cpp,rust,web,tauri`, `all` = alle, leer = ueberspringen). Fehlt
    Python, fragt der Starter vorher, ob er es per winget installieren darf.
-   Auf der Workstation kommen fertige Pakete wie ueberall; ausgelassen wird,
-   was lokal baut (Bau-Toolchains, `cargo install`, pip-Quellpakete), bewusste
-   Ausnahme mit `-Force`.
+   Auf der Workstation kommt alles wie ueberall, auch die Bau-Toolchains;
+   ausgelassen werden nur die Tools der ai-Familie (ai.nvim, ai-desktop).
 
 Danach Claude-Code-App/Terminal neu starten, damit die Env-Vars gezogen
 werden.

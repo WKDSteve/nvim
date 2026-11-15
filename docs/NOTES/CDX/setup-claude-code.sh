@@ -197,8 +197,8 @@ echo
 INSTALL_TOOLS="$SCRIPT_DIR/../../../scripts/install-tools/install-tools.sh"
 echo "[optional] Dev-Toolchains (nvim/cpp/rust/web/tauri) installieren?"
 if [ "$(printf '%s' "${NVIM_MACHINE_ROLE:-}" | tr '[:upper:]' '[:lower:]')" = "workstation" ]; then
-  # install-tools itself leaves out what would compile locally there (build toolchains, cargo install)
-  echo "  Workstation (EDR/Falcon): fertige Pakete ja, nichts lokal Gebautes - Bau-Toolchains werden ausgelassen."
+  # install-tools itself leaves out the ai family's tools there; build toolchains are allowed
+  echo "  Workstation: Bau-Toolchains ja; die Tools der ai-Familie werden hier ausgelassen."
 fi
 echo "  Was auf dieser Maschine schon da ist:"
 bash "$INSTALL_TOOLS" --status || true
