@@ -194,4 +194,25 @@ if require("profile").is("enterprise") then
   plugins.modes(off)
 end
 
+-- ── WORKSTATION ────────────────────────────────────────────────────────────
+-- The ai family is never installed, built or started on the Tricentis
+-- workstation, not even as another plugin's dependency (global rule; see the
+-- machine section of docs/NOTES/CDX/CLAUDE.global.md). So ai.nvim is off there
+-- whatever the profile says; "disabled" wins over SOURCE "remote", so lazy
+-- neither clones nor loads it. Its soft users (pdfport.nvim's "ollama"/"claude"
+-- backends, language.nvim's engine "ai") fail cleanly without it, as under the
+-- enterprise profile. A copy installed before this rule stays in the data
+-- folder until `:Lazy clean`.
+local WORKSTATION_OFF = {
+  "ai.nvim",
+}
+
+if machine.is("workstation") then
+  local off = {} ---@type table<string, string>
+  for _, name in ipairs(WORKSTATION_OFF) do
+    off[name] = "disabled"
+  end
+  plugins.modes(off)
+end
+
 return plugins

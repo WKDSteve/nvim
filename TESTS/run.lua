@@ -78,6 +78,7 @@ local specs = {
   "bindings/gitsigns_refresh_spec.lua",
   "bindings/copy_ctrl_c_spec.lua",
   "profile/profile_spec.lua",
+  "profile/source_workstation_spec.lua",
   "startup/heartbeat_spec.lua",
   "repo_backup/repo_backup_spec.lua",
   "machine_once/machine_once_spec.lua",
