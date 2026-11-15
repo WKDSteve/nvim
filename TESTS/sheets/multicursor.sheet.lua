@@ -1,6 +1,6 @@
 -- Live check: the own `<C-n>` flow (`lua/multicursor`, replaces vim-visual-multi) in the installed config, pressed
 -- like a person would: mark the word and the next occurrences, take one back (`<C-p>`), skip one (`<C-x>`), then
--- `c`/`i`/`a`/`d` on every marked place at once, `u` as one undo step (a `c` included: deletion and typing), `<Esc>` clears. `foofoo` is no whole word
+-- `c`/`i`/`a`/`d` on every marked place at once, `u` as one undo step (a `c` included: deletion and typing), `<Esc>` clears and `x` is plain again. `foofoo` is no whole word
 -- and must never be marked. The buffer is a scratch buffer; nothing is written.
 return {
   id = "nvim-config.multicursor",
@@ -43,7 +43,9 @@ return {
       timeout = 3000,
       note = "<C-n> marks the word under the cursor",
     },
-    { input = "<C-n><C-n>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 2", timeout = 3000 },
+    { input = "<C-n>" },
     {
       wait = "require('multicursor').count() == 3",
       timeout = 3000,
@@ -55,7 +57,9 @@ return {
       timeout = 3000,
       note = "<C-p> takes back the last mark",
     },
-    { input = "<C-n><C-n>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 3", timeout = 3000 },
+    { input = "<C-n>" },
     {
       wait = "require('multicursor').count() == 4",
       timeout = 3000,
@@ -81,7 +85,11 @@ return {
 
     -- skip
     { lua = "_G.__reset()" },
-    { input = "<C-n><C-n><C-x>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 1", timeout = 3000 },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 2", timeout = 3000 },
+    { input = "<C-x>" },
     {
       wait = "require('multicursor').count() == 2",
       timeout = 3000,
@@ -96,14 +104,22 @@ return {
 
     -- insert before, append after
     { lua = "_G.__reset()" },
-    { input = "<C-n><C-n>iX<Esc>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 1", timeout = 3000 },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 2", timeout = 3000 },
+    { input = "iX<Esc>" },
     {
       wait = "_G.__lines() == 'Xfoo bar Xfoo|foo baz foofoo|end foo'",
       timeout = 3000,
       note = "i inserts before every mark",
     },
     { lua = "_G.__reset()" },
-    { input = "<C-n><C-n>aY<Esc>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 1", timeout = 3000 },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 2", timeout = 3000 },
+    { input = "aY<Esc>" },
     {
       wait = "_G.__lines() == 'fooY bar fooY|foo baz foofoo|end foo'",
       timeout = 3000,
@@ -112,7 +128,9 @@ return {
 
     -- Esc clears, the operators come back
     { lua = "_G.__reset()" },
-    { input = "<C-n><C-n>" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 1", timeout = 3000 },
+    { input = "<C-n>" },
     {
       wait = "require('multicursor').active()",
       timeout = 3000,
@@ -124,11 +142,24 @@ return {
       timeout = 3000,
       note = "<Esc> clears the marks",
     },
-    { input = "dw" },
     {
-      wait = "_G.__lines() == 'foo bar |foo baz foofoo|end foo'",
+      expect = "vim.tbl_isempty(vim.tbl_filter(function(m) return m.lhs:match('^[csiadx]$') ~= nil end, vim.api.nvim_buf_get_keymap(0, 'n')))",
+      note = "after <Esc> the operator keys are no longer taken by the marks",
+    },
+    -- `x`, not `dw`: the installed config maps the word motions, the check is only that the key is plain again
+    {
+      lua = [[
+        local row, col = unpack(vim.api.nvim_win_get_cursor(0))
+        local line = vim.api.nvim_get_current_line()
+        _G.__after_x = line:sub(1, col) .. line:sub(col + 2)
+        _G.__x_row = row
+      ]],
+    },
+    { input = "x" },
+    {
+      wait = "vim.api.nvim_buf_get_lines(0, _G.__x_row - 1, _G.__x_row, false)[1] == _G.__after_x",
       timeout = 3000,
-      note = "after <Esc> dw is the plain operator again (the cursor stays on the last mark)",
+      note = "x deletes one character again, as without marks",
     },
     { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
   },
