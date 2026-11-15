@@ -205,6 +205,11 @@ paying ~25 `isdirectory` probes. (Remote on the workstation is also why lazy's
 update checker is off there — otherwise it fetches ~116 repos on every start
 and freezes the UI for 60–90 s. See `lua/config/lazy/init.lua`.)
 
+On the workstation `ai.nvim` is also `"disabled"` (`WORKSTATION_OFF` in
+`core/source.lua`): the ai family is never installed there, whatever the
+profile. The `"enterprise"` profile (`ENTERPRISE_OFF`) turns it off on any
+machine.
+
 ---
 
 ## Commands
