@@ -1,0 +1,103 @@
+name: setup-sh
+
+# Manual only: runs docs/NOTES/CDX/setup-claude-code.sh once on macOS and on Linux, with a throwaway HOME and
+# no secrets, and checks what it leaves behind: the variables in a new shell, CLAUDE.md, settings.json, and the
+# pre-push hook of the vault, pushed through under the system shell (/bin/sh is the bash 3.2 of macOS; the
+# script itself is started with /bin/bash, also 3.2 there). tasks-vault is private, so a stand-in vault with a
+# one-step `fast` profile takes its place; testing.nvim and lib.nvim are the real public repos. Not covered here:
+# the global hooks (they come from the private vault) and a person's own machine.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  setup-sh:
+    name: setup-claude-code.sh (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, ubuntu-latest]
+    runs-on: ${{ matrix.os }}
+    env:
+      REPOS_DIR: ${{ github.workspace }}/repos
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          path: nvim
+      - uses: actions/checkout@v5
+        with:
+          repository: WKDSteve/testing.nvim
+          path: repos/testing.nvim
+      - uses: actions/checkout@v5
+        with:
+          repository: WKDSteve/lib.nvim
+          ref: ci-verified
+          path: repos/lib.nvim
+      - uses: rhysd/action-setup-vim@febef33995d6649302e9d88dda81e071b68f16a7 # v1
+        with:
+          neovim: true
+          version: v0.12.2
+
+      - name: Throwaway HOME, stand-in vault, bare remote
+        run: |
+          home="$RUNNER_TEMP/home"
+          mkdir -p "$home"
+          touch "$home/.bashrc" "$home/.zshrc"
+          echo "SETUP_HOME=$home" >> "$GITHUB_ENV"
+          vault="$REPOS_DIR/tasks-vault"
+          mkdir -p "$vault"
+          cd "$vault"
+          git init -q -b main
+          cat > .testing.lua <<EOF
+          return {
+            ci = {
+              default = "fast",
+              profiles = { fast = { "probe" } },
+              steps = { probe = { run = { "touch", "$RUNNER_TEMP/pre-push-ran" } } },
+            },
+          }
+          EOF
+          git add .testing.lua
+          git -c user.name=ci -c user.email=ci@example.invalid -c commit.gpgsign=false commit -q -m fixture
+          git init -q --bare "$RUNNER_TEMP/remote.git"
+          git remote add origin "$RUNNER_TEMP/remote.git"
+
+      - name: Run setup-claude-code.sh with /bin/bash
+        run: |
+          export HOME="$SETUP_HOME"
+          /bin/bash --version | head -1
+          printf '\n' | /bin/bash nvim/docs/NOTES/CDX/setup-claude-code.sh
+
+      - name: A new shell has the variables, the files are in place
+        run: |
+          export HOME="$SETUP_HOME"
+          for sh in bash zsh; do
+            command -v "$sh" > /dev/null || { echo "$sh: not installed, skipped"; continue; }
+            # shellcheck disable=SC2016 # expanded by the new shell, not here
+            got="$(env -u TESTING_TRUST_ROOTS "$sh" -ic 'printf %s "$TESTING_TRUST_ROOTS"' 2> /dev/null)"
+            echo "$sh: TESTING_TRUST_ROOTS=$got"
+            if [ "$got" != "$REPOS_DIR" ]; then
+              echo "::error::$sh: TESTING_TRUST_ROOTS is not set to REPOS_DIR in a new shell"
+              exit 1
+            fi
+          done
+          test -L "$HOME/.claude/CLAUDE.md" || { echo "::error::~/.claude/CLAUDE.md is no symlink"; exit 1; }
+          test -f "$HOME/.claude/settings.json" || { echo "::error::~/.claude/settings.json is missing"; exit 1; }
+          test "$(git config --global --get merge.ours.driver)" = true || { echo "::error::merge.ours.driver"; exit 1; }
+          test -x "$REPOS_DIR/tasks-vault/.git/hooks/pre-push" || { echo "::error::no pre-push hook in the vault"; exit 1; }
+
+      - name: The pre-push hook runs under the system shell
+        run: |
+          export HOME="$SETUP_HOME"
+          hook="$REPOS_DIR/tasks-vault/.git/hooks/pre-push"
+          head -1 "$hook"
+          # shellcheck disable=SC2016 # expanded by /bin/sh, not here
+          /bin/sh -c 'echo "sh: ${BASH_VERSION:-not bash}"'
+          cd "$REPOS_DIR/tasks-vault"
+          # Trust has to come from the TESTING_TRUST_ROOTS the script wrote, not from CI=true of the runner.
+          # shellcheck disable=SC2016
+          env -u CI -u GITHUB_ACTIONS /bin/sh -c '. "$HOME/.claude/env.sh" && git push origin main'
+          test -f "$RUNNER_TEMP/pre-push-ran" || { echo "::error::the pre-push hook did not run the fast profile"; exit 1; }
+          echo "pre-push ran the fast profile"
