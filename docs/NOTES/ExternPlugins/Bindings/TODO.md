@@ -34,7 +34,9 @@ siehe [Keymaps/Blink.md](Keymaps/Blink.md).
 - [x] ~~`folke/todo-comments.nvim`~~ — deinstalliert 2026-09-19, ersetzt durch
       insights.nvims `:Insights todos` (Keymaps `<leader>sT`/`<leader>ST` am
       insights-Spec); die beiden Blätter sind gelöscht
-- [x] `mg979/vim-visual-multi`
+- [x] ~~`mg979/vim-visual-multi`~~ — deinstalliert 2026-11-11, ersetzt durch
+      den eigenen `<C-n>`-Ablauf in `lua/multicursor` (Keymap in
+      `lua/bindings/mappings/init.lua`); die beiden Blätter sind gelöscht
 - [x] `nvzone/menu`
 - [x] `nvchad/ui`
 - [x] `nvim-neotest/neotest`

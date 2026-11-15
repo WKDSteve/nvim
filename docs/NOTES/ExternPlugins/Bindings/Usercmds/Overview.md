@@ -143,7 +143,7 @@ Die 80 waren, nach Eigentümer:
 
 **Erledigt am 2026-09-02**, nach derselben Regel. Sechs neue Blätter —
 [`Fugitive`](./Fugitive.md) (36 Commands), [`DapView`](./DapView.md) (11),
-[`Diffview`](./Diffview.md) (7), [`VisualMulti`](./VisualMulti.md) (7),
+[`Diffview`](./Diffview.md) (7), `VisualMulti` (7; vim-visual-multi ersetzt durch `lua/multicursor`, kein Blatt mehr),
 [`Neogit`](./Neogit.md) (4), [`DapVirtualText`](./DapVirtualText.md) (4) —
 und drei erweiterte: [`Dap`](./Dap.md) um nvim-daps eigene fünfzehn,
 [`Neotest`](./Neotest.md) um `:Neotest` und vim-tests sechs,

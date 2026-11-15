@@ -177,9 +177,11 @@ vergleicht jede Keymap-Zeile mit dem, was gerade registriert ist. Drei Sorten
 Tabelle beantworten diese Frage aber gar nicht — sie beschreiben etwas
 anderes:
 
-* **Abgeschaltete Plugin-Defaults.** `Keymaps/VisualMulti.md` listet, was
+* **Abgeschaltete Plugin-Defaults.** `Keymaps/VisualMulti.md` listete, was
   vim-visual-multi mitbringt und was diese Config mit
-  `VM_default_mappings = 0` abschaltet. Nie registriert, absichtlich.
+  `VM_default_mappings = 0` abschaltete. Nie registriert, absichtlich. (Das
+  Blatt ist mit dem Plugin am 2026-11-11 gegangen, ersetzt durch
+  `lua/multicursor`; das Muster gilt für jedes Blatt dieser Art.)
 * **Tasten einer fremden Oberfläche.** `Keymaps/Lazygit.md`s Spalte
   „Taste (in LazyGit)" nennt Tasten des LazyGit-TUI. Neovim registriert sie
   nie, egal ob LazyGit gerade läuft.
@@ -197,7 +199,7 @@ Solche Abschnitte sagen es selbst — als Zeile **direkt unter der
 
 Der Text nach dem Marker ist frei und für Menschen; gelesen wird nur der
 Marker selbst. Er gilt **bis zur nächsten Überschrift**, ein Blatt kann also
-eine unprüfbare Tabelle neben fünf gewöhnlichen haben — `VisualMulti.md` tut
+eine unprüfbare Tabelle neben fünf gewöhnlichen haben — `VisualMulti.md` tat
 genau das.
 
 **Nur die Live-Richtung ehrt ihn.** Die Zeilen werden weiter geparst,
