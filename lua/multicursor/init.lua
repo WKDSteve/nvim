@@ -146,10 +146,40 @@ local function bmap(lhs, rhs)
   state.keys[#state.keys + 1] = lhs
 end
 
+---@class Multicursor.Change
+---@field seq integer undo sequence number before the marked texts were deleted
+---@field spots integer[][] the marked ranges { row, col, end_row, end_col } before the deletion (0-based)
+
+---Put `lines` in place of every spot of a change, as one undo step together with the deletion. The deletion
+---(made before Insert mode) and the typing are two undo blocks, so `u` would bring back only the deleted words:
+---go back to the state before the deletion and make the whole change in one go. False when that state cannot be
+---reached (undo off), so the caller falls back to inserting at the anchors.
+---@param change Multicursor.Change
+---@param buf integer
+---@param lines string[]
+---@return boolean
+local function redo_change(change, buf, lines)
+  if
+    not pcall(vim.cmd, "silent undo " .. change.seq) or vim.fn.undotree(buf).seq_cur ~= change.seq
+  then
+    return false
+  end
+  for i = #change.spots, 1, -1 do
+    local s = change.spots[i]
+    pcall(api.nvim_buf_set_text, buf, s[1], s[2], s[3], s[4], lines)
+  end
+  local first = change.spots[1]
+  local row = first[1] + #lines - 1
+  local col = (#lines == 1 and first[2] or 0) + #lines[#lines] - 1
+  pcall(api.nvim_win_set_cursor, 0, { row + 1, math.max(col, 0) })
+  return true
+end
+
 ---Replace the text typed at the first anchor in every other anchor, bottom to top, as one undo step.
 ---@param anchors integer[] extmark ids (the first is where the typing happened)
 ---@param buf integer
-local function replay(anchors, buf)
+---@param change? Multicursor.Change set for `c`: the deletion before the typing belongs to the same undo step
+local function replay(anchors, buf, change)
   local first = anchors[1]
   local pos = api.nvim_buf_get_extmark_by_id(buf, ns, first, {})
   if not pos or #pos == 0 then
@@ -165,6 +195,9 @@ local function replay(anchors, buf)
     end
   end
   if #lines == 0 or (#lines == 1 and lines[1] == "") then
+    return
+  end
+  if change and redo_change(change, buf, lines) then
     return
   end
   local targets = {}
@@ -185,7 +218,8 @@ end
 
 ---@param anchors_at { [1]: integer, [2]: integer }[] first is the primary
 ---@param buf integer
-local function insert_at(anchors_at, buf)
+---@param change? Multicursor.Change
+local function insert_at(anchors_at, buf, change)
   local ids = {}
   for _, p in ipairs(anchors_at) do
     ids[#ids + 1] = api.nvim_buf_set_extmark(buf, ns, p[1], p[2], { right_gravity = false })
@@ -198,7 +232,7 @@ local function insert_at(anchors_at, buf)
     callback = function()
       vim.schedule(function()
         if api.nvim_buf_is_valid(buf) then
-          replay(ids, buf)
+          replay(ids, buf, change)
           for _, id in ipairs(ids) do
             pcall(api.nvim_buf_del_extmark, buf, ns, id)
           end
@@ -225,6 +259,7 @@ function M.edit(kind)
   clear()
 
   if kind == "d" or kind == "c" then
+    local seq = vim.fn.undotree(buf).seq_cur
     for i = #spots, 1, -1 do
       local s = spots[i]
       pcall(api.nvim_buf_set_text, buf, s[1], s[2], s[3], s[4], { "" })
@@ -241,7 +276,7 @@ function M.edit(kind)
       shifted[#shifted + 1] = { s[1], s[2] - removed }
       per_line[s[1]] = removed + (s[4] - s[2])
     end
-    insert_at(shifted, buf)
+    insert_at(shifted, buf, { seq = seq, spots = spots })
     return
   end
 

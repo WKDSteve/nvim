@@ -1,6 +1,6 @@
 -- Live check: the own `<C-n>` flow (`lua/multicursor`, replaces vim-visual-multi) in the installed config, pressed
 -- like a person would: mark the word and the next occurrences, take one back (`<C-p>`), skip one (`<C-x>`), then
--- `c`/`i`/`a`/`d` on every marked place at once, `u` as one undo step, `<Esc>` clears. `foofoo` is no whole word
+-- `c`/`i`/`a`/`d` on every marked place at once, `u` as one undo step (a `c` included: deletion and typing), `<Esc>` clears. `foofoo` is no whole word
 -- and must never be marked. The buffer is a scratch buffer; nothing is written.
 return {
   id = "nvim-config.multicursor",
@@ -39,19 +39,26 @@ return {
     -- mark, next, take back, mark again, change all
     { input = "<C-n>" },
     {
-      expect = "require('multicursor').count() == 1",
+      wait = "require('multicursor').count() == 1",
+      timeout = 3000,
       note = "<C-n> marks the word under the cursor",
     },
     { input = "<C-n><C-n>" },
     {
-      expect = "require('multicursor').count() == 3",
+      wait = "require('multicursor').count() == 3",
+      timeout = 3000,
       note = "<C-n> again marks the next occurrences",
     },
     { input = "<C-p>" },
-    { expect = "require('multicursor').count() == 2", note = "<C-p> takes back the last mark" },
+    {
+      wait = "require('multicursor').count() == 2",
+      timeout = 3000,
+      note = "<C-p> takes back the last mark",
+    },
     { input = "<C-n><C-n>" },
     {
-      expect = "require('multicursor').count() == 4",
+      wait = "require('multicursor').count() == 4",
+      timeout = 3000,
       note = "foofoo is skipped: four whole-word foo",
     },
     { input = "cqux<Esc>" },
@@ -61,19 +68,25 @@ return {
       note = "c changes every marked place",
     },
     {
-      expect = "not require('multicursor').active()",
+      wait = "not require('multicursor').active()",
+      timeout = 3000,
       note = "the marks are gone after the change",
     },
     { input = "u" },
     {
-      expect = "_G.__lines() == 'foo bar foo|foo baz foofoo|end foo'",
+      wait = "_G.__lines() == 'foo bar foo|foo baz foofoo|end foo'",
+      timeout = 3000,
       note = "one u undoes the whole change",
     },
 
     -- skip
     { lua = "_G.__reset()" },
     { input = "<C-n><C-n><C-x>" },
-    { expect = "require('multicursor').count() == 2", note = "<C-x> skips the current occurrence" },
+    {
+      wait = "require('multicursor').count() == 2",
+      timeout = 3000,
+      note = "<C-x> skips the current occurrence",
+    },
     { input = "d" },
     {
       wait = "_G.__lines() == ' bar foo| baz foofoo|end foo'",
@@ -100,12 +113,21 @@ return {
     -- Esc clears, the operators come back
     { lua = "_G.__reset()" },
     { input = "<C-n><C-n>" },
-    { expect = "require('multicursor').active()", note = "marks are active" },
+    {
+      wait = "require('multicursor').active()",
+      timeout = 3000,
+      note = "marks are active",
+    },
     { input = "<Esc>" },
-    { expect = "not require('multicursor').active()", note = "<Esc> clears the marks" },
+    {
+      wait = "not require('multicursor').active()",
+      timeout = 3000,
+      note = "<Esc> clears the marks",
+    },
     { input = "dw" },
     {
-      expect = "_G.__lines() == 'foo bar |foo baz foofoo|end foo'",
+      wait = "_G.__lines() == 'foo bar |foo baz foofoo|end foo'",
+      timeout = 3000,
       note = "after <Esc> dw is the plain operator again (the cursor stays on the last mark)",
     },
     { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
