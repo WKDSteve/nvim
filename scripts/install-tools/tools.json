@@ -1,5 +1,5 @@
 {
-  "$comment": "Extra manifest for install_tools.py. Plugin tools come from $REPOS_DIR/*/docs/install.json; this file adds a group (and missing install routes) to those, plus the tools no plugin spec declares and the dev toolchain. Keys of pkg: winget, scoop, apt, dnf, pacman, zypper, apk, brew. Keys of alt: npm, pip, cargo, url. os limits a tool to win/linux/mac; skip_wsl leaves a GUI program out inside WSL (it runs on the Windows side). reject: path fragments that do not count as found (the Microsoft Store python stub). detect: msvc / webview2 for tools that are no command. fallback_for: only wanted while that tool is missing. winget_override: passed to winget --override. not_on_workstation: a build toolchain (compiler, cargo, installer builder) - on the Tricentis workstation nothing is compiled locally (EDR), so it is skipped there; prebuilt third-party tools are fine. A pkg value may be a list of packages.",
+  "$comment": "Extra manifest for install_tools.py. Plugin tools come from $REPOS_DIR/*/docs/install.json; this file adds a group (and missing install routes) to those, plus the tools no plugin spec declares and the dev toolchain. Keys of pkg: winget, scoop, apt, dnf, pacman, zypper, apk, brew. Keys of alt: npm, pip, cargo, url. os limits a tool to win/linux/mac; skip_wsl leaves a GUI program out inside WSL (it runs on the Windows side). reject: path fragments that do not count as found (the Microsoft Store python stub). detect: msvc / webview2 for tools that are no command. fallback_for: only wanted while that tool is missing. winget_override: passed to winget --override. used_by also decides the workstation: a tool only the ai family (ai.nvim, ai-desktop) uses is never installed there. A pkg value may be a list of packages.",
   "groups": {
     "core": "Basis: Editor, Suche, Git, Laufzeiten - ohne die geht wenig",
     "plugins": "leichte Werkzeuge einzelner Plugins (PDF, Bilder, Rechtschreibung, ...)",
@@ -109,7 +109,6 @@
     },
     {
       "bin": "tree-sitter",
-      "not_on_workstation": true,
       "group": "core",
       "why": "nvim-treesitter (branch main) compiles every parser with the tree-sitter CLI.",
       "used_by": ["nvim-config", "lib.nvim (parser_policy)"],
@@ -118,7 +117,6 @@
     },
     {
       "bin": "zig",
-      "not_on_workstation": true,
       "bin_alternatives": ["gcc", "cc", "clang", "cl"],
       "group": "core",
       "why": "A C compiler for nvim-treesitter's parser builds (any of zig, gcc, clang, cl counts).",
@@ -241,7 +239,6 @@
     },
     {
       "bin": "cargo",
-      "not_on_workstation": true,
       "profiles": ["rust"],
       "group": "dev",
       "why": "Rust toolchain via rustup (cargo, rustc, rustfmt, clippy) for all Rust repos.",
@@ -251,7 +248,6 @@
     },
     {
       "bin": "cargo-audit",
-      "not_on_workstation": true,
       "group": "dev",
       "why": "Supply-chain job of the Rust repos (needs cargo first).",
       "used_by": ["Rust repos"],
@@ -259,7 +255,6 @@
     },
     {
       "bin": "cargo-deny",
-      "not_on_workstation": true,
       "group": "dev",
       "why": "Supply-chain job of the Rust repos (needs cargo first).",
       "used_by": ["Rust repos"],
@@ -289,11 +284,10 @@
     },
     {
       "bin": "cmake",
-      "not_on_workstation": true,
       "profiles": ["cpp"],
       "group": "dev",
-      "why": "Build of ai-desktop (and whisper.cpp from source).",
-      "used_by": ["ai-desktop"],
+      "why": "CMake: builds the C++ projects (profile cpp) and ai-desktop (whisper.cpp from source).",
+      "used_by": ["C++ projects (Claude hooks, profile cpp)", "ai-desktop"],
       "pkg": { "winget": "Kitware.CMake", "scoop": "cmake", "apt": "cmake", "dnf": "cmake", "pacman": "cmake", "zypper": "cmake", "apk": "cmake", "brew": "cmake" },
       "paths": { "win": ["$PROGRAMFILES\\CMake\\bin\\cmake.exe"] }
     },
@@ -307,7 +301,6 @@
     },
     {
       "bin": "ninja",
-      "not_on_workstation": true,
       "profiles": ["cpp"],
       "group": "dev",
       "why": "Build backend of the C++ projects (CMake generator).",
@@ -316,7 +309,6 @@
     },
     {
       "bin": "msvc",
-      "not_on_workstation": true,
       "detect": "msvc",
       "os": ["win"],
       "profiles": ["cpp"],
@@ -328,7 +320,6 @@
     },
     {
       "bin": "clang-format",
-      "not_on_workstation": true,
       "fallback_for": "msvc",
       "profiles": ["cpp"],
       "group": "heavy",
@@ -349,7 +340,6 @@
     },
     {
       "bin": "iscc",
-      "not_on_workstation": true,
       "os": ["win"],
       "group": "dev",
       "why": "Inno Setup compiler for the ai-desktop installer.",

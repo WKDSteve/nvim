@@ -13,8 +13,9 @@ Two ways to pick tools: groups (core/plugins/heavy/dev, the default) or the stac
 the Claude setup (--profile nvim,cpp,rust,web,tauri; setup-claude-code calls --status and
 --profile). This replaced docs/NOTES/CDX/setup-devtools.js and its tools.json.
 
-On the Tricentis workstation (NVIM_MACHINE_ROLE=workstation) prebuilt packages are installed as anywhere
-else; what would compile locally is left out (build toolchains, cargo install, pip source builds).
+On the Tricentis workstation (NVIM_MACHINE_ROLE=workstation) everything is installed as anywhere else,
+build toolchains included; only the tools that serve the ai family alone (ai.nvim, ai-desktop) are left out,
+and no installer is fetched and run through iex.
 
 Exit code: 0 nothing failed, 1 an install failed, 2 bad arguments or declined.
 """
@@ -128,8 +129,7 @@ def merge_tool(dst, src, owner):
         dst["why"] = src["why"]
     dst["used_by"] = union(dst.get("used_by"), src.get("used_by") or ([owner] if owner else []))
     dst["profiles"] = union(dst.get("profiles"), src.get("profiles"))
-    for key in ("group", "os", "reject", "skip_wsl", "detect", "fallback_for", "winget_override",
-                "not_on_workstation"):
+    for key in ("group", "os", "reject", "skip_wsl", "detect", "fallback_for", "winget_override"):
         if src.get(key) and not dst.get(key):
             dst[key] = src[key]
     alt = dst.setdefault("alt", {})
@@ -224,13 +224,21 @@ def find_tool(t):
     return None
 
 
-# Set by main() on the Tricentis workstation (NVIM_MACHINE_ROLE=workstation, without --force): prebuilt
-# third-party tools may be installed there, but nothing may be compiled locally (CrowdStrike Falcon reports
-# own unsigned builds). So build toolchains are left out, cargo install is no route, pip takes wheels only.
-NO_LOCAL_BUILDS = False
-# Also set by main(), independent of --force: on the workstation no installer is fetched and run through
-# iex (irm get.scoop.sh | iex is "code from the net started directly", a Falcon trigger of its own).
+# Set by main() on the Tricentis workstation (NVIM_MACHINE_ROLE=workstation). Building is allowed there
+# (build toolchains, cargo install, pip source builds), but two things stay out: no installer is fetched
+# and run through iex (irm get.scoop.sh | iex is "code from the net started directly", a CrowdStrike
+# Falcon trigger of its own), and the ai family is never installed there (AI_FAMILY).
 ON_WORKSTATION = False
+
+# The ai family: never installed, built or started on the workstation, not even as another plugin's
+# dependency. A tool whose every declarer is one of these is left out there; a tool another repo needs too
+# stays (cmake builds the C++ projects as well).
+AI_FAMILY = ("ai.nvim", "ai-desktop", "ai-mobile")
+
+
+def only_for_ai_family(t):
+    used_by = as_list(t.get("used_by"))
+    return bool(used_by) and all(u in AI_FAMILY for u in used_by)
 
 
 def skip_reason(t):
@@ -240,8 +248,8 @@ def skip_reason(t):
     oses = t.get("os")
     if oses and OS not in oses:
         return "not for %s" % OS
-    if NO_LOCAL_BUILDS and t.get("not_on_workstation"):
-        return "workstation: builds"
+    if ON_WORKSTATION and only_for_ai_family(t):
+        return "workstation: ai family"
     return None
 
 
@@ -285,8 +293,6 @@ def route_for(t, managers):
             return key, pkg[key]
     alt = t.get("alt") or {}
     for kind in ("npm", "pip", "cargo"):
-        if kind == "cargo" and NO_LOCAL_BUILDS:
-            continue  # cargo install compiles: an own unsigned binary
         if alt.get(kind):
             return kind, alt[kind]
     if alt.get("url"):
@@ -335,14 +341,11 @@ def commands_for(kind, packages, yes):
     if kind == "npm":
         return [(["sudo"] if npm_needs_sudo() else []) + ["npm", "install", "-g"] + pkgs]
     if kind == "pip":
-        # wheels only where nothing may be compiled: a source distribution would build native code locally
-        wheels = ["--only-binary", ":all:"] if NO_LOCAL_BUILDS else []
         if OS == "win":
             py = shutil.which("python") or shutil.which("py") or "python"
-            return [[py, "-m", "pip", "install", "--upgrade"] + wheels + pkgs]
+            return [[py, "-m", "pip", "install", "--upgrade"] + pkgs]
         # PEP 668: distro pythons refuse a global pip install; pipx gives each tool its own venv
-        extra = ["--pip-args=--only-binary=:all:"] if NO_LOCAL_BUILDS else []
-        return [["pipx", "install"] + extra + [p] for p in pkgs]
+        return [["pipx", "install", p] for p in pkgs]
     if kind == "cargo":
         return [["cargo", "install", "--locked"] + pkgs]
     return []
@@ -419,7 +422,7 @@ def markdown_lines(tools, manifest):
                 unix = ", ".join(x for x in (apt, brew) if x) or other or \
                     ("[Download](%s)" % alt["url"] if alt.get("url") else "-")
             name = "`%s`%s%s" % (t["bin"], " (Pflicht)" if t.get("required") else "",
-                                 " (nicht auf der Workstation)" if t.get("not_on_workstation") else "")
+                                 " (nicht auf der Workstation)" if only_for_ai_family(t) else "")
             out.append("| %s | %s | %s | %s | %s |" % (
                 name, md_cell(short(t.get("why"))), md_cell(", ".join(t.get("used_by") or [])), win, unix))
     return "\n".join(out).lstrip("\n") + "\n"
@@ -655,15 +658,15 @@ def by_profiles(tools, wanted):
 def print_status(tools, manifest):
     """Per profile: what is here. Installs nothing (the Claude setup shows this before asking)."""
     for prof in (manifest.get("profiles") or {}).get("names") or []:
-        # the workstation's left-out build toolchains are shown, so an empty cpp profile is explained
+        # the workstation's left-out ai-family tools are shown, so a missing one is explained
         rows = [t for t in by_profiles(tools, {prof})
-                if applies_here(t) or skip_reason(t) == "workstation: builds"]
+                if applies_here(t) or skip_reason(t) == "workstation: ai family"]
         if not rows:
             continue
         print("  %s" % prof)
         for t in rows:
             if not applies_here(t):
-                state, note = "  -  ", "  (Workstation: wird nicht installiert, baut Programme)"
+                state, note = "  -  ", "  (Workstation: wird nicht installiert, nur fuer die ai-Familie)"
             elif fallback_not_needed(t, tools):
                 state, note = "ok   ", "  (nicht noetig: %s ist da)" % t["fallback_for"]
             else:
@@ -683,8 +686,6 @@ def main(argv=None):
     ap.add_argument("--skip", help="diese Gruppen auslassen")
     ap.add_argument("--yes", action="store_true", help="nicht nachfragen, Lizenzen von winget annehmen")
     ap.add_argument("--repos-dir", help="Wurzel der Repos (Default $REPOS_DIR)")
-    ap.add_argument("--force", action="store_true",
-                    help="auf der Workstation auch Bau-Toolchains und cargo install (sonst dort ausgelassen)")
     ap.add_argument("--profile", help="statt Gruppen die Stack-Profile des Claude-Setups"
                     " (core,nvim,cpp,rust,web,tauri, all, saved = die gemerkten)")
     ap.add_argument("--status", action="store_true", help="je Profil zeigen, was da ist (installiert nichts)")
@@ -697,9 +698,8 @@ def main(argv=None):
         return 2
     groups = [g for g in groups if g not in parse_groups(a.skip)]
 
-    global NO_LOCAL_BUILDS, ON_WORKSTATION
+    global ON_WORKSTATION
     ON_WORKSTATION = (os.environ.get("NVIM_MACHINE_ROLE") or "").strip().lower() == "workstation"
-    NO_LOCAL_BUILDS = ON_WORKSTATION and not a.force
 
     repos = repos_dir(a.repos_dir)
     tools, manifest, problems = collect(repos)
@@ -736,9 +736,9 @@ def main(argv=None):
         print_list(rows, managers, tools)
         return 0
 
-    if NO_LOCAL_BUILDS:
-        print("Workstation: fertige Pakete ja, nichts lokal Gebautes - Bau-Toolchains und cargo install"
-              " bleiben aus, pip nimmt nur Wheels (bewusste Ausnahme: --force).")
+    if ON_WORKSTATION:
+        print("Workstation: Bau-Toolchains ja; die Tools der ai-Familie (%s) bleiben aus, und scoop wird"
+              " nicht per iex eingerichtet." % ", ".join(AI_FAMILY))
     if not managers or managers == ["scoop?"]:
         print("Kein Paketmanager gefunden (winget/scoop/apt/dnf/pacman/zypper/apk/brew).")
     print(label)

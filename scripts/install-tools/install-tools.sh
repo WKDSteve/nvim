@@ -17,7 +17,7 @@ set -euo pipefail
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 if ! command -v python3 >/dev/null 2>&1; then
-  # python3 from the package manager is prebuilt: fine on the workstation too (only local builds are not)
+  # python3 from the package manager is prebuilt: fine on the workstation too
   sudo=""
   if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1; then sudo="sudo"; fi
   echo "python3 fehlt - das Skript braucht es. Installiere es ueber den Paketmanager."

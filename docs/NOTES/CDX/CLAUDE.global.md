@@ -88,8 +88,8 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   (`file://`). Fertige Fremd-Tools aus
   Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
   scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
-  `scripts/install-tools` der nvim-Config, das Bau-Toolchains, `cargo install`
-  und pip-Quellpakete dort heute noch auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
+  `scripts/install-tools` der nvim-Config, das dort auch die Bau-Toolchains
+  installiert und nur die Tools der ai-Familie auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
   Tests, Runner). Groß-/Kleinschreibung egal. Lesen in PowerShell mit
   `$env:NVIM_MACHINE_ROLE`, in Bash mit `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in
   Bash nicht, dort kommt das Literal `:NVIM_MACHINE_ROLE` heraus). Jeder andere

@@ -198,7 +198,7 @@ class ProfileTest(unittest.TestCase):
 
 
 class WorkstationTest(unittest.TestCase):
-    """Prebuilt packages yes, nothing compiled locally (CrowdStrike Falcon)."""
+    """Building is allowed there; the ai family and the scoop bootstrap through iex are not."""
 
     def setUp(self):
         root = tempfile.mkdtemp(prefix="install-tools-ws-")
@@ -206,14 +206,12 @@ class WorkstationTest(unittest.TestCase):
             self.tools, _, _ = it.collect(root)
         finally:
             shutil.rmtree(root)
-        it.NO_LOCAL_BUILDS = True
+        it.ON_WORKSTATION = True
 
     def tearDown(self):
-        it.NO_LOCAL_BUILDS = False
         it.ON_WORKSTATION = False
 
     def test_no_scoop_bootstrap_through_iex(self):
-        it.ON_WORKSTATION = True
         calls = []
         old_which, old_run = it.shutil.which, it.run
         it.shutil.which = lambda name: None if name == "scoop" else old_which(name)
@@ -228,23 +226,40 @@ class WorkstationTest(unittest.TestCase):
 
     def test_prebuilt_tools_stay_installable(self):
         for b in ("lazygit", "nvim", "gh", "stylua", "pnpm"):
-            self.assertTrue(it.applies_here(self.tools[b]) or it.skip_reason(self.tools[b]) != "workstation: builds", b)
+            self.assertTrue(it.applies_here(self.tools[b]) or not it.skip_reason(self.tools[b]).startswith("workstation"), b)
         self.assertEqual(it.route_for(self.tools["lazygit"], ["winget"])[0], "winget")
 
-    def test_build_toolchains_are_left_out(self):
-        for b in ("cargo", "msvc", "cmake", "ninja", "tree-sitter", "zig", "iscc", "cargo-audit"):
+    def test_build_toolchains_are_installable(self):
+        for b in ("cargo", "msvc", "cmake", "ninja", "tree-sitter", "zig", "cargo-audit"):
             t = self.tools[b]
             if it.OS in (t.get("os") or [it.OS]):
-                self.assertEqual(it.skip_reason(t), "workstation: builds", b)
+                self.assertIsNone(it.skip_reason(t), b)
 
-    def test_cargo_is_no_route_there(self):
-        self.assertEqual(it.route_for({"alt": {"cargo": "typos-cli"}}, ["winget"]), ("none", ""))
-        it.NO_LOCAL_BUILDS = False
+    def test_cargo_install_is_a_route(self):
         self.assertEqual(it.route_for({"alt": {"cargo": "typos-cli"}}, ["winget"]), ("cargo", "typos-cli"))
 
-    def test_pip_takes_wheels_only(self):
+    def test_pip_may_build_from_source(self):
         argv = it.commands_for("pip", ["codespell"], yes=False)[0]
-        self.assertTrue("--only-binary" in argv or "--pip-args=--only-binary=:all:" in argv)
+        self.assertNotIn("--only-binary", argv)
+        self.assertNotIn("--pip-args=--only-binary=:all:", argv)
+
+    def test_tools_of_the_ai_family_alone_are_left_out(self):
+        self.assertEqual(it.skip_reason({"bin": "x", "used_by": ["ai-desktop"]}), "workstation: ai family")
+        self.assertEqual(it.skip_reason({"bin": "x", "used_by": ["ai.nvim", "ai-desktop"]}), "workstation: ai family")
+        self.assertIsNone(it.skip_reason({"bin": "x", "used_by": ["ai.nvim", "media.nvim"]}))
+        self.assertIsNone(it.skip_reason({"bin": "x"}))
+        if it.OS == "win":
+            self.assertEqual(it.skip_reason(self.tools["iscc"]), "workstation: ai family")
+        it.ON_WORKSTATION = False
+        self.assertIsNone(it.skip_reason({"bin": "x", "used_by": ["ai-desktop"]}))
+
+    def test_an_ai_plugin_spec_does_not_reach_the_workstation(self):
+        root = make_repos({"ai.nvim": [{"bin": "whisper-cli", "pkg": {"winget": "W.W"}}]})
+        try:
+            tools, _, _ = it.collect(root)
+        finally:
+            shutil.rmtree(root)
+        self.assertEqual(it.skip_reason(tools["whisper-cli"]), "workstation: ai family")
 
     def test_main_does_not_refuse_on_the_workstation(self):
         old = os.environ.get("NVIM_MACHINE_ROLE")

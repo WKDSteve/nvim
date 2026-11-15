@@ -29,8 +29,7 @@ param(
     [string[]] $Only,
     [string[]] $Skip,
     [switch] $Yes,
-    [string] $ReposDir,
-    [switch] $Force
+    [string] $ReposDir
 )
 
 $ErrorActionPreference = 'Stop'
@@ -57,7 +56,7 @@ function Find-Python {
 $python = Find-Python
 if (-not $python) {
     $readOnly = $List -or $Status -or $Markdown -or $WriteReadme -or $DryRun
-    # Python from winget is a prebuilt package: fine on the workstation too (only local builds are not)
+    # Python from winget is a prebuilt package: fine on the workstation too
     if (-not (Get-Command winget -ErrorAction SilentlyContinue)) {
         Write-Host 'Weder Python noch winget gefunden. winget kommt mit dem "App Installer" aus dem Microsoft Store:' -ForegroundColor Red
         Write-Host '  https://apps.microsoft.com/detail/9NBLGGH4NNS1'
@@ -96,7 +95,6 @@ if ($Only) { $pyArgs += @('--only', ($Only -join ',')) }
 if ($Skip) { $pyArgs += @('--skip', ($Skip -join ',')) }
 if ($Yes) { $pyArgs += '--yes' }
 if ($ReposDir) { $pyArgs += @('--repos-dir', $ReposDir) }
-if ($Force) { $pyArgs += '--force' }
 
 & $python @pyArgs
 exit $LASTEXITCODE
