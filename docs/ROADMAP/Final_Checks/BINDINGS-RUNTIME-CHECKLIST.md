@@ -431,7 +431,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 ### ui.nvim
 
 - [x] `<leader>bc` -- ui.nvim: close buffer(s), count-aware _(auto 2026-10-29: ui.nvim/TESTS/keymaps_feedkeys_spec.lua grün)_
-- [ ] `<leader>bq` -- ui.nvim: close every listed buffer in the current tab, flashed first
+- [x] `<leader>bq` -- ui.nvim: close every listed buffer in the current tab, flashed first _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
 - [x] `<leader>tl` -- ui.nvim: move buffer one position left in the tabline _(auto 2026-10-29: ui.nvim/TESTS/keymaps_feedkeys_spec.lua grün)_
 - [x] `<leader>tr` -- ui.nvim: move buffer one position right in the tabline _(auto 2026-10-29: ui.nvim/TESTS/keymaps_feedkeys_spec.lua grün)_
 - [x] `<leader>tt` -- ui.nvim: move current buffer into a new tab _(auto 2026-10-29: ui.nvim/TESTS/keymaps_feedkeys_spec.lua grün)_
@@ -1436,7 +1436,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :KitPreview
 
-- [ ] `:KitPreview` -- ui.kit: live theme playground
+- [x] `:KitPreview` -- ui.kit: live theme playground _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
 
 ### :LastSession
 
@@ -2315,7 +2315,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Theme
 
-- [ ] `:Theme` -- Show the current colorscheme, or switch to one
+- [x] `:Theme` -- Show the current colorscheme, or switch to one _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
 
 ### :ToggleLintFormatOnSave
 
@@ -2360,26 +2360,26 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :UI
 
-- [ ] `:UI status` -- Show the current UI configuration
+- [x] `:UI status` -- Show the current UI configuration _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
 - [x] `:UI variant` -- Show the current statusline variant, or switch to one _(auto 2026-10-29: ui.nvim/TESTS/variants_spec.lua grün)_
 - [x] `:UI tabline-style` -- Show the current tabline style, or switch to one _(auto 2026-10-29: ui.nvim/TESTS/tabline_styles_spec.lua grün)_
-- [ ] `:UI themes` -- List every colorscheme, the active one marked
+- [x] `:UI themes` -- List every colorscheme, the active one marked _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
 - [x] `:UI slots` -- Numbered slots: list, run, add, edit, move, clear, panel, bar _(auto 2026-10-29: ui.nvim/TESTS/slots_api_spec.lua grün)_
-- [ ] `:UI theme` -- Show the current colorscheme, or switch to one
+- [x] `:UI theme` -- Show the current colorscheme, or switch to one _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
 - [x] `:UI help` -- Print the long help text _(auto 2026-10-29: ui.nvim/TESTS/slots_api_spec.lua grün)_
-- [ ] `:UI tabline-styles` -- List all tabline styles
-- [ ] `:UI toggle` -- Switch between the two configured themes
-- [ ] `:UI keys` -- List the mappings under a prefix
-- [ ] `:UI picker` -- Open the visual theme picker with live preview
-- [ ] `:UI modules` -- List the available statusline segments
-- [ ] `:UI progress` -- Show what is running now
-- [ ] `:UI variants` -- List all statusline variants
-- [ ] `:UI zen` -- Toggle the zen box
-- [ ] `:UI winpick` -- Pick a window by letter and jump to it
-- [ ] `:UI notify` -- Toggle notify toasts, open or clear the history
+- [x] `:UI tabline-styles` -- List all tabline styles _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
+- [x] `:UI toggle` -- Switch between the two configured themes _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
+- [x] `:UI keys` -- List the mappings under a prefix _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
+- [x] `:UI picker` -- Open the visual theme picker with live preview _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
+- [x] `:UI modules` -- List the available statusline segments _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
+- [x] `:UI progress` -- Show what is running now _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
+- [x] `:UI variants` -- List all statusline variants _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
+- [x] `:UI zen` -- Toggle the zen box _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
+- [x] `:UI winpick` -- Pick a window by letter and jump to it _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
+- [x] `:UI notify` -- Toggle notify toasts, open or clear the history _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
 - [x] `:UI context` -- Same command as sticky, older name _(auto 2026-10-29: ui.nvim/TESTS/context_spec.lua grün)_
-- [ ] `:UI color` -- Open the colour picker, optionally on a colour
-- [ ] `:UI screenkey` -- Toggle the screenkey HUD
+- [x] `:UI color` -- Open the colour picker, optionally on a colour _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
+- [x] `:UI screenkey` -- Toggle the screenkey HUD _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-floats.sheet.lua)_
 - [x] `:UI transparency` -- Toggle transparency (on/off to set it) _(auto 2026-10-29: ui.nvim/TESTS/bugfix_regressions_spec.lua grün)_
 - [x] `:UI sticky` -- The sticky context: toggle, depth, line cap, jump _(auto 2026-10-29: ui.nvim/TESTS/context_spec.lua grün)_
 
@@ -2626,5 +2626,5 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:Testing cache clear` -- Delete the result cache of the project (it is regenerable: costs time, never correctness)
 - [ ] `:Testing init` -- Generate .testing.lua, TESTS/minimal_init.lua, scripts/test.sh and a CI job (never overwrites)
 - [ ] `:Testing migrate` -- Plan the move of a plugin repo to testing.nvim (dry-run; `apply` writes into a clean git tree)
-- [ ] `:UI kit-presets` -- List all popup/toast presets
+- [x] `:UI kit-presets` -- List all popup/toast presets _(auto 2026-11-16: ui.nvim/TESTS/sheets/ui-bindings-commands.sheet.lua)_
 - [x] `:UI kit-preset` -- Show or switch the popup/toast border and colors _(auto 2026-10-29: ui.nvim/TESTS/kit_preset_cmd_spec.lua grün)_
