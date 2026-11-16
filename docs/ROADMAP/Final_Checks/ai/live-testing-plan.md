@@ -11,6 +11,20 @@
 > Rest (Env-Vars, `OLLAMA_HOST`-Bug, Schritt-für-Schritt-Anleitungen) ist
 > weiterhin Stand 2026-09-14 und noch nicht erneut gegen die Maschine
 > verifiziert.
+>
+> **Update 2026-11-16 (Sortierung gegen den Code):** Was ohne echten Anbieter
+> prüfbar ist, läuft jetzt als Testblatt in der Suite von ai.nvim
+> (`TESTS/sheets/`, gestartet von `TESTS/ai/sheets_spec.lua`, ein Ersatz-Provider
+> statt Netz): `ai-completion-ghost`, `ai-completion-modes`, `ai-quick-keys`.
+> Für claude/openai/gemini gibt es Live-Blätter (`ai-live-claude`,
+> `ai-live-openai`, `ai-live-gemini`: available, ask, stream, falscher Key), die
+> nur von Hand mit echten Keys laufen:
+> `testing sheets run --live --sheet ai.live-<id> --root <ai.nvim>`.
+> Der `OLLAMA_HOST`-Bug ist behoben. In der Checkliste unten ist jeder Punkt
+> abgehakt (mit Beleg) oder als Handlauf markiert. Das Blatt `ai-quick-keys`
+> hat einen echten Bug gefunden: `<leader>as` hat seinen Kontext (Auswahl,
+> Diagnostics) im gerade geöffneten Panel gelesen und deshalb nie welchen
+> gesendet (behoben in ai.nvim `da79e8b`).
 
 ---
 
@@ -49,6 +63,11 @@ Default `llama3.1:8b-q5_K_M` passt gut); ein größeres Modell (13B+) wird auf
 ---
 
 ## Ein echter Bug, der Ollama-Tests sofort blockiert
+
+> **Erledigt (geprüft 2026-11-16):** `ollama.lua` liest jetzt `AI_OLLAMA_HOST`,
+> nie `OLLAMA_HOST` (`lua/ai/providers/ollama.lua`, Kommentar und `host()`),
+> belegt von `TESTS/ai/providers_ollama_spec.lua` („honors AI_OLLAMA_HOST over
+> the default“). Der Text unten ist der Stand 2026-09-14.
 
 Auf dieser Maschine ist `OLLAMA_HOST=0.0.0.0:11434` systemweit gesetzt (das
 ist Ollamas **eigene** Bind-Adressen-Variable für den Server, üblich z. B.
@@ -279,9 +298,10 @@ Scoping/Design-Blocker mehr, im Unterschied zum Stand 2026-09-14.
 Diese Dinge sind **bekannt** und **kein neuer Bug** — beim Testen nicht
 verwirren lassen:
 
-- `ui/panel.lua` macht pro Stream-Chunk ein volles `set_lines()` statt
-  inkrementell anzuhängen — bei langen Antworten evtl. spürbares Ruckeln,
-  aber kein Korrektheitsproblem (Review-Finding, bewusst zurückgestellt).
+- ~~`ui/panel.lua` macht pro Stream-Chunk ein volles `set_lines()` statt
+  inkrementell anzuhängen~~ — überholt (2026-11-16): `panel.append` schreibt
+  nur noch die laufende Zeile und neue Zeilen (`set_last_line` +
+  `append_lines`), belegt von `TESTS/ai/panel_spec.lua`.
 - `ai-desktop`s `ollama_client.cpp` öffnet pro Request eine neue TCP-Verbindung
   zu Ollama statt sie wiederzuverwenden — bei sehr kurzen, aufeinander-
   folgenden Requests minimal langsamer, kein Korrektheitsproblem.
@@ -361,31 +381,35 @@ Update einmal Neovim neu starten, damit die neue Lazy-Spec zieht.
 
 ## Checkliste zum Abhaken
 
-- [ ] `ANTHROPIC_API_KEY` gesetzt
-- [ ] `OLLAMA_HOST`-Bug umgangen/gefixt
-- [ ] Ollama-Daemon läuft, mind. ein Modell gepullt
-- [ ] ai-desktop gebaut und läuft
-- [ ] `claude`: available/ask/stream/Fehlerpfad ✅
-- [ ] `openai`: available/ask/stream/Fehlerpfad ✅
+Stand 2026-11-16: `[x]` mit Beleg ist erledigt oder läuft als Testblatt in der
+Suite von ai.nvim; offene Punkte brauchen echte Keys, Dienste oder Stefans Auge
+(Handlauf, auf dem privaten Rechner, nie auf der Workstation).
+
+- [ ] `ANTHROPIC_API_KEY` gesetzt _(Handlauf-Vorbereitung: am 2026-11-16 weiterhin nicht gesetzt; `OPENAI_API_KEY` ist gesetzt)_
+- [x] `OLLAMA_HOST`-Bug umgangen/gefixt _(erledigt, geprüft 2026-11-16: ai.nvim `lua/ai/providers/ollama.lua` liest `AI_OLLAMA_HOST`; Spec `TESTS/ai/providers_ollama_spec.lua`)_
+- [ ] Ollama-Daemon läuft, mind. ein Modell gepullt _(Handlauf-Vorbereitung: `ollama` ist installiert, Dienst und Modelle ungeprüft)_
+- [ ] ai-desktop gebaut und läuft _(Handlauf-Vorbereitung: `build/ai-desktop.exe` liegt vor, starten und `/health` prüfen)_
+- [ ] `claude`: available/ask/stream/Fehlerpfad ✅ _(Blatt `ai-live-claude`, läuft nur mit `--live` und `ANTHROPIC_API_KEY`)_
+- [ ] `openai`: available/ask/stream/Fehlerpfad ✅ _(Blatt `ai-live-openai`, läuft nur mit `--live`)_
 - [ ] `gemini`: available/ask/stream/Fehlerpfad/Safety-Block ✅ (`GEMINI_API_KEY`
-      nötig, bislang nie live getestet)
-- [ ] `ollama`: available/ask/stream/Fehlerpfad ✅
-- [ ] `ai-desktop`: available/ask/stream/Fehlerpfad (inkl. ai-desktop-intern) ✅
-- [ ] `auto`-Resolution mit mind. 2 unterschiedlichen Verfügbarkeits-
-      Kombinationen getestet
-- [ ] `<leader>aia`/`<leader>ais`/`<leader>aie` in normal + visual mode
-- [ ] ai-desktop-Dashboard im Browser geöffnet, SSE + Decision-Flow beobachtet
+      nötig, bislang nie live getestet) _(Blatt `ai-live-gemini`; der Safety-Block bleibt ein Handlauf)_
+- [ ] `ollama`: available/ask/stream/Fehlerpfad ✅ _(Handlauf: Daemon an/aus, `AI_OLLAMA_HOST` statt `OLLAMA_HOST`)_
+- [ ] `ai-desktop`: available/ask/stream/Fehlerpfad (inkl. ai-desktop-intern) ✅ _(Handlauf)_
+- [x] `auto`-Resolution mit mind. 2 unterschiedlichen Verfügbarkeits-
+      Kombinationen getestet _(auto 2026-11-16: ai.nvim/TESTS/ai/providers_spec.lua, `resolve('auto', order)`: erstes verfügbares, keins verfügbar, nie außerhalb der Order)_
+- [x] `<leader>aia`/`<leader>ais`/`<leader>aie` in normal + visual mode _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-quick-keys.sheet.lua, mit dem Standard-Präfix `<leader>a`; Auswahl und Diagnostics im Request. Fand den Kontext-Bug von `<leader>as`, behoben in `da79e8b`)_
+- [ ] ai-desktop-Dashboard im Browser geöffnet, SSE + Decision-Flow beobachtet _(machbar als Playwright-E2E in ai-desktop, dort noch nicht abgedeckt; bis dahin Handlauf)_
 - [ ] Notiert, welche der "bekannten Eigenheiten" (Abschnitt 10) in der
       Praxis tatsächlich störend auffallen (Grundlage für Priorisierung
-      der Follow-up-Tasks)
-- [ ] Completion: manueller Trigger zeigt Ghost-Text ✅
-- [ ] Completion: `<Tab>` akzeptiert korrekt (Text + Cursor-Position) ✅
-- [ ] Completion: `<C-]>` verwirft ohne Texteinfügung ✅
-- [ ] Completion: Tippen verwirft eine gezeigte Suggestion automatisch ✅
+      der Follow-up-Tasks) _(Handlauf, beim Ollama-/ai-desktop-Lauf; das Panel-Ruckeln ist überholt)_
+- [x] Completion: manueller Trigger zeigt Ghost-Text ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua)_
+- [x] Completion: `<Tab>` akzeptiert korrekt (Text + Cursor-Position) ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua, ein- und dreizeilig)_
+- [x] Completion: `<C-]>` verwirft ohne Texteinfügung ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua)_
+- [x] Completion: Tippen verwirft eine gezeigte Suggestion automatisch ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua)_
 - [ ] Completion: `<Tab>` mit offenem Completion-Menü navigiert das Menü,
-      greift nicht in Ghost-Text ein ✅
-- [ ] Completion: mind. 2 verschiedene Provider ausprobiert, Qualität notiert
-- [ ] Completion: `trigger = "auto"` einmal ausprobiert (idealerweise gegen
-      `ollama`), danach zurück auf `"manual"` gestellt
-- [ ] Completion: `:checkhealth ai` zeigt die neue Sektion korrekt
-- [ ] Completion: `enable = false` deaktiviert die Feature tatsächlich vollständig
+      greift nicht in Ghost-Text ein ✅ _(eingebautes Menü: auto 2026-11-16, ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua; mit blink.cmp der echten Config: Handlauf)_
+- [ ] Completion: mind. 2 verschiedene Provider ausprobiert, Qualität notiert _(Handlauf, echte Provider)_
+- [x] Completion: `trigger = "auto"` einmal ausprobiert (idealerweise gegen
+      `ollama`), danach zurück auf `"manual"` gestellt _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-modes.sheet.lua, eine Anfrage nach der Tipp-Pause; die Config steht auf `"manual"`, `lua/plugins/personal/specs/ai.lua`)_
+- [x] Completion: `:checkhealth ai` zeigt die neue Sektion korrekt _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-modes.sheet.lua, manual/auto mit Kostenwarnung/disabled)_
+- [x] Completion: `enable = false` deaktiviert die Feature tatsächlich vollständig _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-modes.sheet.lua, keine Tasten, `<Tab>` ist ein Tab)_
