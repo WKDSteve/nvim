@@ -9,7 +9,9 @@
   for a person, for `:MyPlugins runner` and for a Claude Code session that needs a CI run.
 
   Actions:
-    status  one line per runner: <repo> <local: running|stopped> <github: online|offline|missing> [busy]
+    status  one line per runner: <repo> <local: running|stopped> <github: online|offline|missing> [busy];
+            then an `env:` line for each runner whose .env lacks a setting or that runs with an older .env than the
+            one there now (scripts/runner_env.ps1 -Check; exit 1 for those as well)
     start   start the runners that are not running (detached, hidden window); returns at once
     ensure  start, then wait until GitHub reports each one online (-WaitSeconds, default 90)
             start and ensure run the tool check first when a runner is about to be started and warn about
@@ -105,6 +107,11 @@ switch ($Action) {
     $ok = $true
     $remotes = Get-RemoteMany $names
     foreach ($n in $names) { if (-not (Show $n $remotes[$n])) { $ok = $false } }
+    # A runner reads .env only at its start: one that runs since before the last change builds without the
+    # cargo job limit and waits 30 s for its worker. Only the lines that are not ok are shown.
+    $envReport = @(& (Join-Path $PSScriptRoot 'runner_env.ps1') -Root $Root -Name $names -Check)
+    if ($LASTEXITCODE -ne 0) { $ok = $false }
+    $envReport | Where-Object { $_ -notmatch '^ok\s' } | ForEach-Object { [Console]::WriteLine("env: $_") }
     exit ([int] (-not $ok))
   }
   'stop' {
@@ -155,6 +162,8 @@ switch ($Action) {
     foreach ($e in Get-ChildItem Env: | Where-Object { $_.Name -match '^[A-Z0-9_]+_NVIM_DIR$' }) { $overrides[$e.Name] = $e.Value }
     try {
       foreach ($k in @($overrides.Keys)) { Remove-Item "Env:$k" }
+      # Record the .env each runner starts with, so `status` can tell when it runs with an older one.
+      if ($toStart.Count -gt 0) { & (Join-Path $PSScriptRoot 'runner_env.ps1') -Root $Root -Name $toStart -Started }
       foreach ($n in $toStart) {
         # (the list from above: asking the process table again for every runner is a CIM query each)
         # The runner takes the PATH of this process: scoop shims (stylua, luacheck, gh), Git and nvim must be on it.

@@ -19,12 +19,27 @@
     3.7 times slower, browser tests of other repositories red at their 30 s limit). Four per job keep a
     lone build reasonably fast and a crowd of them near the core count.
 
+  -Started records the .env a runner is started with (a copy, .env.started); `runners.ps1 start|ensure` calls it
+  right before it starts the runner. The time of the .env says nothing: `testing ci runner-guard install`
+  rewrites the .env of every runner on each start, changed or not.
+
+  -Check writes nothing and tells, one line per runner:
+    missing  a setting is not in its .env
+    restart  its listener runs with an older .env than the one there now (stop and ensure once no job runs)
+    unknown  its listener was not started by runners.ps1 (no record, or the record is younger than the listener):
+             what it read is not known; counts as ok, a restart through runners.ps1 makes it known
+    ok       otherwise, also a runner that does not run (it reads the .env at its start)
+  Exit 1 when a runner is "missing" or "restart". `runners.ps1 status` runs it.
+
 .EXAMPLE
   pwsh scripts/runner_env.ps1 -Root $env:USERPROFILE\actions-runners -Name tasks.nvim,appkit
+  pwsh scripts/runner_env.ps1 -Root $env:USERPROFILE\actions-runners -Name tasks.nvim,appkit -Check
 #>
 param(
   [Parameter(Mandatory)] [string] $Root,
-  [Parameter(Mandatory)] [string[]] $Name
+  [Parameter(Mandatory)] [string[]] $Name,
+  [switch] $Check,
+  [switch] $Started
 )
 
 $ErrorActionPreference = 'Stop'
@@ -33,9 +48,80 @@ $settings = @(
   @{ Name = 'GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT'; Value = '300'; Says = 'waits 300 s for its worker' },
   @{ Name = 'CARGO_BUILD_JOBS'; Value = '4'; Says = 'builds with 4 cargo jobs' }
 )
-
 # `pwsh -File` hands a list over as one string with commas.
-foreach ($n in @($Name | ForEach-Object { $_ -split ',' })) {
+$names = @($Name | ForEach-Object { $_ -split ',' })
+
+function Read-Text([string] $path) {
+  if (Test-Path $path -PathType Leaf) { return [System.IO.File]::ReadAllText($path) }
+  return $null
+}
+
+if ($Started) {
+  foreach ($n in $names) {
+    $dir = Join-Path $Root $n
+    $text = Read-Text (Join-Path $dir '.env')
+    if ($null -eq $text) { $text = '' }
+    [System.IO.File]::WriteAllText((Join-Path $dir '.env.started'), $text, [System.Text.UTF8Encoding]::new($false))
+  }
+  exit 0
+}
+
+# Start time of each running listener by runner name. RUNNER_ENV_LISTENERS ("name=<ISO time>;...") stands in for
+# the process table in the spec, which has no runner process to look at.
+function Get-ListenerStarts {
+  $starts = @{}
+  if ($env:RUNNER_ENV_LISTENERS) {
+    foreach ($pair in $env:RUNNER_ENV_LISTENERS -split ';') {
+      $k, $v = $pair -split '=', 2
+      $starts[$k] = [datetime]::Parse($v, [cultureinfo]::InvariantCulture, [System.Globalization.DateTimeStyles]::AdjustToUniversal)
+    }
+    return $starts
+  }
+  # One process query for all runners; a listener belongs to the runner whose folder holds its executable.
+  $root = (Resolve-Path $Root).Path.ToLowerInvariant().TrimEnd('\') + '\'
+  foreach ($p in Get-CimInstance Win32_Process -Filter "Name = 'Runner.Listener.exe'") {
+    if (-not $p.ExecutablePath) { continue }
+    $exe = $p.ExecutablePath.ToLowerInvariant()
+    if (-not $exe.StartsWith($root)) { continue }
+    $starts[$exe.Substring($root.Length).Split('\')[0]] = $p.CreationDate.ToUniversalTime()
+  }
+  return $starts
+}
+
+if ($Check) {
+  $bad = 0
+  $listeners = Get-ListenerStarts
+  foreach ($n in $names) {
+    $dir = Join-Path $Root $n
+    $text = Read-Text (Join-Path $dir '.env')
+    $lines = if ($null -ne $text) { @($text -split "`r?`n") } else { @() }
+    $missing = @($settings | Where-Object { $s = $_; @($lines | Where-Object { $_ -like "$($s.Name)=*" }).Count -eq 0 } | ForEach-Object { $_.Name })
+    $record = Join-Path $dir '.env.started'
+    # The record is written just before the start; a listener older than it was not started with it.
+    $known = $listeners.ContainsKey($n) -and (Test-Path $record -PathType Leaf) -and
+      $listeners[$n] -ge (Get-Item $record).LastWriteTimeUtc.AddSeconds(-5)
+    if ($missing.Count -gt 0) {
+      $bad++
+      Write-Output "missing  $n lacks $($missing -join ', ') in .env (runners.ps1 start writes it)"
+    }
+    elseif (-not $listeners.ContainsKey($n)) {
+      Write-Output "ok       $n (not running; reads .env at its start)"
+    }
+    elseif (-not $known) {
+      Write-Output "unknown  $n was not started by runners.ps1: what it read from .env is not known (restart it through runners.ps1 to know)"
+    }
+    elseif ((Read-Text $record) -ne $text) {
+      $bad++
+      Write-Output "restart  $n runs with an older .env than the one there now (stop and ensure once no job runs)"
+    }
+    else {
+      Write-Output "ok       $n"
+    }
+  }
+  exit ([int] ($bad -gt 0))
+}
+
+foreach ($n in $names) {
   $path = Join-Path (Join-Path $Root $n) '.env'
   # One .env that cannot be written costs that runner its settings, not the start of the others.
   try {
