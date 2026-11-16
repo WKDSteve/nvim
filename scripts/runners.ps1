@@ -12,7 +12,9 @@
     status  one line per runner: <repo> <local: running|stopped> <github: online|offline|missing> [busy];
             then an `env:` line for each runner whose .env lacks a setting or that runs with an older .env than the
             one there now (scripts/runner_env.ps1 -Check; exit 1 for those as well)
-    start   start the runners that are not running (detached, hidden window); returns at once
+    start   start the runners that are not running (detached, hidden window); returns at once. Detached means
+            outside this shell's process tree and job objects (WMI Win32_Process.Create), so a runner started from a
+            Claude Code session outlives the session
     ensure  start, then wait until GitHub reports each one online (-WaitSeconds, default 90)
             start and ensure run the tool check first when a runner is about to be started and warn about
             MISSING/WARN lines (they never stop the start; -SkipCheck leaves the check out)
@@ -93,6 +95,28 @@ function Get-RemoteMany([string[]] $list) {
   return $answers
 }
 
+# Starts a program outside the process tree and the job objects of this shell, hidden, with the environment of this
+# process (PATH, without the *_NVIM_DIR overrides the caller took out). Start-Process is not enough: its child stays in
+# the job of whoever started this script, and a Claude Code session ends its job when it stops or goes idle, which took
+# every runner it had started down with it, silently and mid-job (2026-11-16: the runners of the 22:42 and 04:52 starts
+# died together at 00:27 and 05:31:12, within minutes of the starting session going idle; tasks-vault
+# ALL/runner-gehen-still-offline). Win32_Process.Create lets WMI create the process (parent WmiPrvSE, no job), in the
+# same desktop session; EnvironmentVariables replaces the environment WMI would take from the registry.
+function Start-Detached([string] $Exe, [string] $Dir) {
+  $envList = [string[]] @(Get-ChildItem Env: | ForEach-Object { "$($_.Name)=$($_.Value)" })
+  $startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{
+    ShowWindow = [uint16] 0  # SW_HIDE: run.cmd is a console program, its window stays hidden
+    EnvironmentVariables = $envList
+  }
+  $r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
+    CommandLine = "cmd.exe /d /c `"`"$Exe`"`""
+    CurrentDirectory = $Dir
+    ProcessStartupInformation = $startup
+  }
+  if ($r.ReturnValue -ne 0) { throw "Win32_Process.Create failed for ${Exe}: return value $($r.ReturnValue)" }
+  return $r.ProcessId
+}
+
 function Show([string] $name, $remote) {
   $local = if (Get-Listener $name) { 'running' } else { 'stopped' }
   if ($null -eq $remote) { $remote = (Get-RemoteMany @($name))[$name] }
@@ -167,8 +191,8 @@ switch ($Action) {
       foreach ($n in $toStart) {
         # (the list from above: asking the process table again for every runner is a CIM query each)
         # The runner takes the PATH of this process: scoop shims (stylua, luacheck, gh), Git and nvim must be on it.
-        Start-Process -FilePath (Join-Path $Root "$n\run.cmd") -WorkingDirectory (Join-Path $Root $n) -WindowStyle Hidden
-        Write-Output "$n started"
+        $runnerPid = Start-Detached -Exe (Join-Path $Root "$n\run.cmd") -Dir (Join-Path $Root $n)
+        Write-Output "$n started (pid $runnerPid)"
       }
     }
     finally {

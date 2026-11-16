@@ -329,6 +329,9 @@ Headless equivalent for agents and scripts (no Neovim, hidden window, waits unti
 `pwsh scripts/runners.ps1 status|start|ensure|stop [repo...|all]` (`ensure` is what a Claude Code session runs before
 it waits for a CI result of a private repo; see `docs/NOTES/CDX/templates/PROMPT`). The repos with a runner are listed in
 `runner.lua` (`REPOS`) and implied by the folders under `%USERPROFILE%\actions-runners` for the script.
+`start`/`ensure` start each runner through WMI (`Win32_Process.Create`), outside the caller's process tree and job
+objects: a runner started with `Start-Process` from a Claude Code session died with that session (silently, mid-job).
+A runner started in the editor (`:MyPlugins runner start`, a terminal split) still ends with Neovim.
 `pwsh scripts/runners.ps1 check` looks at the tools the workflows rely on (`ensure`/`start` warn before starting).
 Code: `runner.lua`; spec: `TESTS/plugin_repos/runner_spec.lua`.
 
