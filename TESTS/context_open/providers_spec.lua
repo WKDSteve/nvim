@@ -59,8 +59,11 @@ return function(H)
   })
 
   local ok_run, err = pcall(function()
-    local P = package.loaded["bindings.usrcmds.context_open.providers"]
-      or require("bindings.usrcmds.context_open.providers")
+    -- From this spec's own tree: a runner may already hold another checkout's copy (the installed config) in
+    -- package.loaded or ahead on the runtimepath.
+    local here = vim.fs.normalize(vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p"))
+    local root = vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(here)))
+    local P = dofile(root .. "/lua/bindings/usrcmds/context_open/providers.lua")
 
     local function labels(list)
       return vim.tbl_map(function(c)
