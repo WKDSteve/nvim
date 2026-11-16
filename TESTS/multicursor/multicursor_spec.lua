@@ -142,9 +142,31 @@ return function(H)
   mc.find_under()
   local first_buf = vim.api.nvim_get_current_buf()
   vim.cmd("enew!")
+  -- decided after the tick (see the float below)
+  vim.wait(100, function()
+    return not mc.active()
+  end)
   ok(not mc.active(), "BufLeave clears the marks")
   vim.api.nvim_set_current_buf(first_buf)
   ok(not has_local("c"), "...and the buffer-local keys")
+
+  -- a float opened and closed again in one tick (ui.nvim's menu warm-up at idle after startup) is no leaving
+  fresh({ "foo foo" }, { 1, 0 })
+  mc.find_under()
+  mc.find_under()
+  local float_buf = vim.api.nvim_create_buf(false, true)
+  local float = vim.api.nvim_open_win(
+    float_buf,
+    true,
+    { relative = "editor", row = 1, col = 1, width = 10, height = 1 }
+  )
+  vim.api.nvim_win_close(float, true)
+  vim.wait(100, function()
+    return not mc.active()
+  end)
+  eq(mc.count(), 2, "the marks survive a float that came and went")
+  ok(has_local("c"), "...and so do the keys")
+  mc.clear()
 
   -- not on a word: nothing happens
   fresh({ "   " }, { 1, 1 })

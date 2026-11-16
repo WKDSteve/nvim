@@ -1010,6 +1010,7 @@ return {
   -- },
 
   {
+
     "WKDSteve/filetree.nvim",
     event = "VeryLazy", -- must load AFTER the tree plugin's config function runs
     dependencies = {
@@ -1027,7 +1028,8 @@ return {
         -- installed.
         -- Values: "auto" | "neotree" | "nvimtree" | "netrw" | "oil" | "mini_files".
         -- Default: "auto" (first available, in that order).
-        adapter = "neotree",
+        adapter = "native",
+        -- adapter = "neotree",
         -- Show notifier.debug(...) messages (troubleshooting).
         -- debug = false,
         -- Hide common clutter (.git, node_modules, ...) from the tree.

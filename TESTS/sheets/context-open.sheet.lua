@@ -60,6 +60,19 @@ return {
       expect = "_G.__offers(11, 10):find('notes.md', 1, true)",
       note = "a Markdown link to a file: gopath opens it",
     },
+    {
+      expect = "_G.__offers(11, 10):find('mdview: render notes.md', 1, true)",
+      note = "a Markdown link to a file: mdview renders it in the browser",
+    },
+    {
+      expect = "_G.__offers(15, 9):find('media: play clip.mp4', 1, true)"
+        .. " and _G.__offers(15, 9):find('hover: preview (video)', 1, true)",
+      note = "a video link: media.nvim plays it, hover.nvim previews it",
+    },
+    {
+      expect = "not _G.__offers(15, 9):find('split', 1, true)",
+      note = "a video is never offered as a text buffer",
+    },
     -- M-o on `../structure/sample.lua:12`: several candidates, the chooser, the first (gopath) picked.
     { lua = "vim.api.nvim_win_set_cursor(0, { 13, 8 })" },
     { input = "<M-o>" },
@@ -111,7 +124,7 @@ return {
   },
   manual = {
     "Try M-o and M-O on real targets in daily work (URL in a table cell, image, PDF, Markdown link, media file, path:line) and note what surprises",
-    "List the plugins added since context_open was built that deserve a provider (one task each); a media file today only gets split/vsplit/tab",
+    "List the plugins added since context_open was built that deserve a provider (one task each)",
     "Bring the provider table of lua/bindings/usrcmds/context_open/README.md up to date with the result",
   },
 }

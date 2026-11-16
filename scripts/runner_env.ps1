@@ -77,8 +77,11 @@ function Get-ListenerStarts {
     }
     return $starts
   }
+  # The runners are Windows services' processes; pwsh elsewhere (the spec job on Linux) has no Get-CimInstance and
+  # no runner to find, so nothing is running there.
+  if (-not (Get-Command Get-CimInstance -ErrorAction SilentlyContinue)) { return $starts }
   # One process query for all runners; a listener belongs to the runner whose folder holds its executable.
-  $root = (Resolve-Path $Root).Path.ToLowerInvariant().TrimEnd('\') + '\'
+  $root =(Resolve-Path $Root).Path.ToLowerInvariant().TrimEnd('\') + '\'
   foreach ($p in Get-CimInstance Win32_Process -Filter "Name = 'Runner.Listener.exe'") {
     if (-not $p.ExecutablePath) { continue }
     $exe = $p.ExecutablePath.ToLowerInvariant()
@@ -99,7 +102,7 @@ if ($Check) {
     $record = Join-Path $dir '.env.started'
     # The record is written just before the start; a listener older than it was not started with it.
     $known = $listeners.ContainsKey($n) -and (Test-Path $record -PathType Leaf) -and
-      $listeners[$n] -ge (Get-Item $record).LastWriteTimeUtc.AddSeconds(-5)
+      $listeners[$n] -ge (Get-Item -LiteralPath $record -Force).LastWriteTimeUtc.AddSeconds(-5)
     if ($missing.Count -gt 0) {
       $bad++
       Write-Output "missing  $n lacks $($missing -join ', ') in .env (runners.ps1 start writes it)"

@@ -92,6 +92,7 @@ local specs = {
   "neotree/event_handlers_spec.lua",
   "neotree/job_handle_close_spec.lua",
   "blink/path_guard_spec.lua",
+  "context_open/providers_spec.lua",
   "ui_open/debug_export_spec.lua",
   "sync/sync_classify_spec.lua",
   "sync/sync_state_scope_spec.lua",
