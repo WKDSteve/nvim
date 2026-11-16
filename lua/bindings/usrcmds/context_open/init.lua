@@ -1,7 +1,7 @@
 ---@module 'bindings.usrcmds.context_open'
 --- `M-o` / `M-O` / `:ContextOpen` -- one dispatcher unifying "open the thing
 --- under the cursor" across gopath.nvim (gF), markdown.nvim (TableView),
---- images.nvim, pdfport.nvim and open.nvim, instead of a different keymap
+--- images.nvim, pdfport.nvim, media.nvim, hover.nvim, mdview.nvim and open.nvim, instead of a different keymap
 --- per plugin. See README.md for the full design and an extension guide.
 ---
 --- `M.open()`  (M-o, bare `:ContextOpen`): resolve every provider
@@ -112,7 +112,7 @@ end
 ---@return nil
 function M.enable()
   composer.verb("ContextOpen", {
-    desc = "Open whatever is under the cursor (gopath/markdown/images/pdfport/open.nvim, unified)",
+    desc = "Open whatever is under the cursor (gopath/markdown/images/pdfport/media/hover/mdview/open.nvim, unified)",
     default = function()
       M.open()
     end,
