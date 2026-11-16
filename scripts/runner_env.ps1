@@ -102,7 +102,7 @@ if ($Check) {
     $record = Join-Path $dir '.env.started'
     # The record is written just before the start; a listener older than it was not started with it.
     $known = $listeners.ContainsKey($n) -and (Test-Path $record -PathType Leaf) -and
-      $listeners[$n] -ge (Get-Item $record).LastWriteTimeUtc.AddSeconds(-5)
+      $listeners[$n] -ge (Get-Item -LiteralPath $record -Force).LastWriteTimeUtc.AddSeconds(-5)
     if ($missing.Count -gt 0) {
       $bad++
       Write-Output "missing  $n lacks $($missing -join ', ') in .env (runners.ps1 start writes it)"
