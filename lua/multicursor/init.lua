@@ -19,6 +19,7 @@ local M = {}
 
 local api = vim.api
 local ns = api.nvim_create_namespace("multicursor")
+local leave_group = "multicursor_leave"
 
 ---@class Multicursor.State
 ---@field buf integer
@@ -294,6 +295,7 @@ function clear()
   end
   local s = state
   state = nil
+  pcall(api.nvim_del_augroup_by_name, leave_group)
   if api.nvim_buf_is_valid(s.buf) then
     pcall(api.nvim_buf_clear_namespace, s.buf, ns, 0, -1)
     for _, lhs in ipairs(s.keys) do
@@ -339,14 +341,19 @@ local function install_keys()
   bmap("<Esc>", function()
     clear()
   end)
-  -- Marks belong to one buffer: leaving it drops them (and the buffer-local keys with them).
+  -- Marks belong to one buffer: leaving it drops them (and the buffer-local keys with them). Decided after the
+  -- tick, not in BufLeave itself: a float that is opened and closed again in one go also fires BufLeave here
+  -- (ui.nvim's menu warm-up does exactly that at idle after startup), and that is no leaving at all.
+  local buf = state.buf
   api.nvim_create_autocmd("BufLeave", {
-    buffer = state.buf,
-    once = true,
+    group = api.nvim_create_augroup(leave_group, { clear = true }),
+    buffer = buf,
     callback = function()
-      if state and state.buf == api.nvim_get_current_buf() then
-        clear()
-      end
+      vim.schedule(function()
+        if state and state.buf == buf and api.nvim_get_current_buf() ~= buf then
+          clear()
+        end
+      end)
     end,
   })
 end
