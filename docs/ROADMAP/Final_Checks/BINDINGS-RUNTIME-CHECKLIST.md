@@ -362,36 +362,36 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### pickers
 
-- [ ] `<leader>chf` -- [pickers] checklists: find files
-- [ ] `<leader>chg` -- [pickers] checklists: live grep
-- [ ] `<leader>mlf` -- [pickers] notes_lua: find files
-- [ ] `<leader>mlg` -- [pickers] notes_lua: live grep
-- [ ] `<leader>mnf` -- [pickers] notes: find files
-- [ ] `<leader>mng` -- [pickers] notes: live grep
-- [ ] `<leader>mns` -- [pickers] notes: smart (grep + find)
-- [ ] `<leader>mvf` -- [pickers] notes_nvim: find files
-- [ ] `<leader>mvg` -- [pickers] notes_nvim: live grep
-- [ ] `<leader>pbf` -- [pickers] plugins_book: find files
-- [ ] `<leader>pbg` -- [pickers] plugins_book: live grep
-- [ ] `<leader>pbs` -- [pickers] plugins_book: smart (grep + find)
-- [ ] `<leader>spf` -- [pickers] spickzettel: find files
-- [ ] `<leader>spg` -- [pickers] spickzettel: live grep
-- [ ] `<leader>wkf` -- [pickers] wkdbooks: find files
-- [ ] `<leader>wkg` -- [pickers] wkdbooks: live grep
-- [ ] `<leader>wks` -- [pickers] wkdbooks: smart (grep + find)
-- [ ] `<leader>wlf` -- [pickers] wkdbooks_lua: find files
-- [ ] `<leader>wlg` -- [pickers] wkdbooks_lua: live grep
-- [ ] `<leader>wvf` -- [pickers] wkdbooks_nvim: find files
-- [ ] `<leader>wvg` -- [pickers] wkdbooks_nvim: live grep
-- [ ] `<leader>fc` -- pickers: Find files in nvim config
-- [ ] `<leader>gc` -- pickers: Grep in nvim config
-- [ ] `<leader>CF` -- pickers: Smart (grep + find) in nvim config
-- [ ] `<leader>mp` -- pickers: Find files in CWD; add grep=<pattern> to filter by content
-- [ ] `<leader>li` -- pickers: Live grep in CWD
-- [ ] `<leader>CW` -- pickers: Smart (grep + find) in CWD
-- [ ] `<leader>dp` -- pickers: Dir: navigate (alias / depth / path)
-- [ ] `<leader>.` -- pickers: File explorer / browser (active engine)
-- [ ] `<leader>fb` -- pickers: Find files in interactively picked folder
+- [x] `<leader>chf` -- [pickers] checklists: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>chg` -- [pickers] checklists: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mlf` -- [pickers] notes_lua: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mlg` -- [pickers] notes_lua: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mnf` -- [pickers] notes: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mng` -- [pickers] notes: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mns` -- [pickers] notes: smart (grep + find) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mvf` -- [pickers] notes_nvim: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mvg` -- [pickers] notes_nvim: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>pbf` -- [pickers] plugins_book: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>pbg` -- [pickers] plugins_book: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>pbs` -- [pickers] plugins_book: smart (grep + find) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>spf` -- [pickers] spickzettel: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>spg` -- [pickers] spickzettel: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wkf` -- [pickers] wkdbooks: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wkg` -- [pickers] wkdbooks: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wks` -- [pickers] wkdbooks: smart (grep + find) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wlf` -- [pickers] wkdbooks_lua: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wlg` -- [pickers] wkdbooks_lua: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wvf` -- [pickers] wkdbooks_nvim: find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>wvg` -- [pickers] wkdbooks_nvim: live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>fc` -- pickers: Find files in nvim config _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>gc` -- pickers: Grep in nvim config _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>CF` -- pickers: Smart (grep + find) in nvim config _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>mp` -- pickers: Find files in CWD; add grep=<pattern> to filter by content _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>li` -- pickers: Live grep in CWD _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>CW` -- pickers: Smart (grep + find) in CWD _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>dp` -- pickers: Dir: navigate (alias / depth / path) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
+- [x] `<leader>.` -- pickers: File explorer / browser (active engine) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-snacks.sheet.lua)_
+- [x] `<leader>fb` -- pickers: Find files in interactively picked folder _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
 
 ### runtime-analysis
 
@@ -661,19 +661,19 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :ChecklistsFileGrep
 
-- [ ] `:ChecklistsFileGrep` -- [pickers coll] :ChecklistsFileGrep [query] → :Pickers checklists filegrep
+- [x] `:ChecklistsFileGrep` -- [pickers coll] :ChecklistsFileGrep [query] → :Pickers checklists filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :ChecklistsFiles
 
-- [ ] `:ChecklistsFiles` -- [pickers coll] :ChecklistsFiles → :Pickers checklists files
+- [x] `:ChecklistsFiles` -- [pickers coll] :ChecklistsFiles → :Pickers checklists files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :ChecklistsGrep
 
-- [ ] `:ChecklistsGrep` -- [pickers coll] :ChecklistsGrep → :Pickers checklists grep
+- [x] `:ChecklistsGrep` -- [pickers coll] :ChecklistsGrep → :Pickers checklists grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :ChecklistsSmart
 
-- [ ] `:ChecklistsSmart` -- [pickers coll] :ChecklistsSmart → :Pickers checklists smart
+- [x] `:ChecklistsSmart` -- [pickers coll] :ChecklistsSmart → :Pickers checklists smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Clipboard
 
@@ -875,7 +875,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :DirPicker
 
-- [ ] `:DirPicker` -- [pickers compat] :DirPicker [nav] → :Pickers dir [nav]
+- [x] `:DirPicker` -- [pickers compat] :DirPicker [nav] → :Pickers dir [nav] _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :DocBrowse
 
@@ -938,11 +938,11 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :FileGrep
 
-- [ ] `:FileGrep` -- [pickers] :FileGrep [query] → :Pickers cwd filegrep (query seeds the prompt)
+- [x] `:FileGrep` -- [pickers] :FileGrep [query] → :Pickers cwd filegrep (query seeds the prompt) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :FileGrepConfig
 
-- [ ] `:FileGrepConfig` -- [pickers] :FileGrepConfig [query] → :Pickers config filegrep
+- [x] `:FileGrepConfig` -- [pickers] :FileGrepConfig [query] → :Pickers config filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Filetree
 
@@ -1061,11 +1061,11 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :FindConfig
 
-- [ ] `:FindConfig` -- [pickers compat] :FindConfig → :Pickers config files
+- [x] `:FindConfig` -- [pickers compat] :FindConfig → :Pickers config files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :FindInFolder
 
-- [ ] `:FindInFolder` -- [pickers compat] :FindInFolder → :Pickers folder files
+- [x] `:FindInFolder` -- [pickers compat] :FindInFolder → :Pickers folder files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :FindOnSystem
 
@@ -1322,7 +1322,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :GrepConfig
 
-- [ ] `:GrepConfig` -- [pickers compat] :GrepConfig → :Pickers config grep
+- [x] `:GrepConfig` -- [pickers compat] :GrepConfig → :Pickers config grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Hover
 
@@ -1518,7 +1518,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :LiveGrep
 
-- [ ] `:LiveGrep` -- [pickers compat] :LiveGrep → :Pickers cwd grep
+- [x] `:LiveGrep` -- [pickers compat] :LiveGrep → :Pickers cwd grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Lsp
 
@@ -1791,51 +1791,51 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :NotesFileGrep
 
-- [ ] `:NotesFileGrep` -- [pickers coll] :NotesFileGrep [query] → :Pickers notes filegrep
+- [x] `:NotesFileGrep` -- [pickers coll] :NotesFileGrep [query] → :Pickers notes filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesFiles
 
-- [ ] `:NotesFiles` -- [pickers coll] :NotesFiles → :Pickers notes files
+- [x] `:NotesFiles` -- [pickers coll] :NotesFiles → :Pickers notes files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesGrep
 
-- [ ] `:NotesGrep` -- [pickers coll] :NotesGrep → :Pickers notes grep
+- [x] `:NotesGrep` -- [pickers coll] :NotesGrep → :Pickers notes grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesLuaFileGrep
 
-- [ ] `:NotesLuaFileGrep` -- [pickers coll] :NotesLuaFileGrep [query] → :Pickers notes_lua filegrep
+- [x] `:NotesLuaFileGrep` -- [pickers coll] :NotesLuaFileGrep [query] → :Pickers notes_lua filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesLuaFiles
 
-- [ ] `:NotesLuaFiles` -- [pickers coll] :NotesLuaFiles → :Pickers notes_lua files
+- [x] `:NotesLuaFiles` -- [pickers coll] :NotesLuaFiles → :Pickers notes_lua files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesLuaGrep
 
-- [ ] `:NotesLuaGrep` -- [pickers coll] :NotesLuaGrep → :Pickers notes_lua grep
+- [x] `:NotesLuaGrep` -- [pickers coll] :NotesLuaGrep → :Pickers notes_lua grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesLuaSmart
 
-- [ ] `:NotesLuaSmart` -- [pickers coll] :NotesLuaSmart → :Pickers notes_lua smart
+- [x] `:NotesLuaSmart` -- [pickers coll] :NotesLuaSmart → :Pickers notes_lua smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesNvimFileGrep
 
-- [ ] `:NotesNvimFileGrep` -- [pickers coll] :NotesNvimFileGrep [query] → :Pickers notes_nvim filegrep
+- [x] `:NotesNvimFileGrep` -- [pickers coll] :NotesNvimFileGrep [query] → :Pickers notes_nvim filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesNvimFiles
 
-- [ ] `:NotesNvimFiles` -- [pickers coll] :NotesNvimFiles → :Pickers notes_nvim files
+- [x] `:NotesNvimFiles` -- [pickers coll] :NotesNvimFiles → :Pickers notes_nvim files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesNvimGrep
 
-- [ ] `:NotesNvimGrep` -- [pickers coll] :NotesNvimGrep → :Pickers notes_nvim grep
+- [x] `:NotesNvimGrep` -- [pickers coll] :NotesNvimGrep → :Pickers notes_nvim grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesNvimSmart
 
-- [ ] `:NotesNvimSmart` -- [pickers coll] :NotesNvimSmart → :Pickers notes_nvim smart
+- [x] `:NotesNvimSmart` -- [pickers coll] :NotesNvimSmart → :Pickers notes_nvim smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :NotesSmart
 
-- [ ] `:NotesSmart` -- [pickers coll] :NotesSmart → :Pickers notes smart
+- [x] `:NotesSmart` -- [pickers coll] :NotesSmart → :Pickers notes smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Open
 
@@ -1863,52 +1863,52 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 ### :Pickers
 
 - [ ] `:Pickers system` -- Scope: system
-- [ ] `:Pickers repos` -- Scope: repos
-- [ ] `:Pickers` -- [pickers.nvim] :Pickers [scope] [nav|action] [action]
-- [ ] `:Pickers config` -- Scope: config
+- [x] `:Pickers repos` -- Scope: repos _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers` -- [pickers.nvim] :Pickers [scope] [nav|action] [action] _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers config` -- Scope: config _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 - [ ] `:Pickers drives` -- Scope: drives
-- [ ] `:Pickers folder` -- Scope: folder
-- [ ] `:Pickers cwd` -- Scope: cwd
-- [ ] `:Pickers dir` -- Directory navigation (depth / alias / explicit path)
-- [ ] `:Pickers notes_nvim` -- User-defined collection: notes_nvim
-- [ ] `:Pickers tabs` -- Open a tab group: its first target, then tab_next/tab_prev cycle the rest (pickers.tabs)
-- [ ] `:Pickers wkdbooks_lua` -- User-defined collection: wkdbooks_lua
-- [ ] `:Pickers wkdbooks` -- User-defined collection: wkdbooks
-- [ ] `:Pickers builtin` -- Native picker (git/lsp/search/…) — see docs/builtins.md
-- [ ] `:Pickers plugins_book` -- User-defined collection: plugins_book
-- [ ] `:Pickers spickzettel` -- User-defined collection: spickzettel
-- [ ] `:Pickers wkdbooks_nvim` -- User-defined collection: wkdbooks_nvim
-- [ ] `:Pickers notes_lua` -- User-defined collection: notes_lua
-- [ ] `:Pickers checklists` -- User-defined collection: checklists
-- [ ] `:Pickers notes` -- User-defined collection: notes
+- [x] `:Pickers folder` -- Scope: folder _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers cwd` -- Scope: cwd _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers dir` -- Directory navigation (depth / alias / explicit path) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers notes_nvim` -- User-defined collection: notes_nvim _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers tabs` -- Open a tab group: its first target, then tab_next/tab_prev cycle the rest (pickers.tabs) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
+- [x] `:Pickers wkdbooks_lua` -- User-defined collection: wkdbooks_lua _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers wkdbooks` -- User-defined collection: wkdbooks _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers builtin` -- Native picker (git/lsp/search/…) — see docs/builtins.md _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-snacks.sheet.lua)_
+- [x] `:Pickers plugins_book` -- User-defined collection: plugins_book _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers spickzettel` -- User-defined collection: spickzettel _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers wkdbooks_nvim` -- User-defined collection: wkdbooks_nvim _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers notes_lua` -- User-defined collection: notes_lua _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers checklists` -- User-defined collection: checklists _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
+- [x] `:Pickers notes` -- User-defined collection: notes _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua, via the collection's alias commands)_
 
 ### :PickersRepeat
 
-- [ ] `:PickersRepeat` -- [pickers] :PickersRepeat — reopen the last :Pickers action
+- [x] `:PickersRepeat` -- [pickers] :PickersRepeat — reopen the last :Pickers action _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PickersResume
 
-- [ ] `:PickersResume` -- [pickers] :PickersResume — reopen the last picker with its last query
+- [x] `:PickersResume` -- [pickers] :PickersResume — reopen the last picker with its last query _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-snacks.sheet.lua)_
 
 ### :PickersScopes
 
-- [ ] `:PickersScopes` -- [pickers] :PickersScopes — list every resolvable scope (built-ins + collections)
+- [x] `:PickersScopes` -- [pickers] :PickersScopes — list every resolvable scope (built-ins + collections) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PluginsBookFileGrep
 
-- [ ] `:PluginsBookFileGrep` -- [pickers coll] :PluginsBookFileGrep [query] → :Pickers plugins_book filegrep
+- [x] `:PluginsBookFileGrep` -- [pickers coll] :PluginsBookFileGrep [query] → :Pickers plugins_book filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PluginsBookFiles
 
-- [ ] `:PluginsBookFiles` -- [pickers coll] :PluginsBookFiles → :Pickers plugins_book files
+- [x] `:PluginsBookFiles` -- [pickers coll] :PluginsBookFiles → :Pickers plugins_book files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PluginsBookGrep
 
-- [ ] `:PluginsBookGrep` -- [pickers coll] :PluginsBookGrep → :Pickers plugins_book grep
+- [x] `:PluginsBookGrep` -- [pickers coll] :PluginsBookGrep → :Pickers plugins_book grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PluginsBookSmart
 
-- [ ] `:PluginsBookSmart` -- [pickers coll] :PluginsBookSmart → :Pickers plugins_book smart
+- [x] `:PluginsBookSmart` -- [pickers coll] :PluginsBookSmart → :Pickers plugins_book smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :PowershellProfile
 
@@ -2006,11 +2006,11 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :RepoFiles
 
-- [ ] `:RepoFiles` -- [pickers] :RepoFiles [repo] — pick repo (or jump to [repo]), then find files
+- [x] `:RepoFiles` -- [pickers] :RepoFiles [repo] — pick repo (or jump to [repo]), then find files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :RepoGrep
 
-- [ ] `:RepoGrep` -- [pickers] :RepoGrep [repo] — pick repo (or jump to [repo]), then live grep
+- [x] `:RepoGrep` -- [pickers] :RepoGrep [repo] — pick repo (or jump to [repo]), then live grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Reposcope
 
@@ -2198,19 +2198,19 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :SpickzettelFileGrep
 
-- [ ] `:SpickzettelFileGrep` -- [pickers coll] :SpickzettelFileGrep [query] → :Pickers spickzettel filegrep
+- [x] `:SpickzettelFileGrep` -- [pickers coll] :SpickzettelFileGrep [query] → :Pickers spickzettel filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :SpickzettelFiles
 
-- [ ] `:SpickzettelFiles` -- [pickers coll] :SpickzettelFiles → :Pickers spickzettel files
+- [x] `:SpickzettelFiles` -- [pickers coll] :SpickzettelFiles → :Pickers spickzettel files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :SpickzettelGrep
 
-- [ ] `:SpickzettelGrep` -- [pickers coll] :SpickzettelGrep → :Pickers spickzettel grep
+- [x] `:SpickzettelGrep` -- [pickers coll] :SpickzettelGrep → :Pickers spickzettel grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :SpickzettelSmart
 
-- [ ] `:SpickzettelSmart` -- [pickers coll] :SpickzettelSmart → :Pickers spickzettel smart
+- [x] `:SpickzettelSmart` -- [pickers coll] :SpickzettelSmart → :Pickers spickzettel smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Spotlight
 
@@ -2397,51 +2397,51 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :WkdbooksFileGrep
 
-- [ ] `:WkdbooksFileGrep` -- [pickers coll] :WkdbooksFileGrep [query] → :Pickers wkdbooks filegrep
+- [x] `:WkdbooksFileGrep` -- [pickers coll] :WkdbooksFileGrep [query] → :Pickers wkdbooks filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksFiles
 
-- [ ] `:WkdbooksFiles` -- [pickers coll] :WkdbooksFiles → :Pickers wkdbooks files
+- [x] `:WkdbooksFiles` -- [pickers coll] :WkdbooksFiles → :Pickers wkdbooks files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksGrep
 
-- [ ] `:WkdbooksGrep` -- [pickers coll] :WkdbooksGrep → :Pickers wkdbooks grep
+- [x] `:WkdbooksGrep` -- [pickers coll] :WkdbooksGrep → :Pickers wkdbooks grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksLuaFileGrep
 
-- [ ] `:WkdbooksLuaFileGrep` -- [pickers coll] :WkdbooksLuaFileGrep [query] → :Pickers wkdbooks_lua filegrep
+- [x] `:WkdbooksLuaFileGrep` -- [pickers coll] :WkdbooksLuaFileGrep [query] → :Pickers wkdbooks_lua filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksLuaFiles
 
-- [ ] `:WkdbooksLuaFiles` -- [pickers coll] :WkdbooksLuaFiles → :Pickers wkdbooks_lua files
+- [x] `:WkdbooksLuaFiles` -- [pickers coll] :WkdbooksLuaFiles → :Pickers wkdbooks_lua files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksLuaGrep
 
-- [ ] `:WkdbooksLuaGrep` -- [pickers coll] :WkdbooksLuaGrep → :Pickers wkdbooks_lua grep
+- [x] `:WkdbooksLuaGrep` -- [pickers coll] :WkdbooksLuaGrep → :Pickers wkdbooks_lua grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksLuaSmart
 
-- [ ] `:WkdbooksLuaSmart` -- [pickers coll] :WkdbooksLuaSmart → :Pickers wkdbooks_lua smart
+- [x] `:WkdbooksLuaSmart` -- [pickers coll] :WkdbooksLuaSmart → :Pickers wkdbooks_lua smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksNvimFileGrep
 
-- [ ] `:WkdbooksNvimFileGrep` -- [pickers coll] :WkdbooksNvimFileGrep [query] → :Pickers wkdbooks_nvim filegrep
+- [x] `:WkdbooksNvimFileGrep` -- [pickers coll] :WkdbooksNvimFileGrep [query] → :Pickers wkdbooks_nvim filegrep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksNvimFiles
 
-- [ ] `:WkdbooksNvimFiles` -- [pickers coll] :WkdbooksNvimFiles → :Pickers wkdbooks_nvim files
+- [x] `:WkdbooksNvimFiles` -- [pickers coll] :WkdbooksNvimFiles → :Pickers wkdbooks_nvim files _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksNvimGrep
 
-- [ ] `:WkdbooksNvimGrep` -- [pickers coll] :WkdbooksNvimGrep → :Pickers wkdbooks_nvim grep
+- [x] `:WkdbooksNvimGrep` -- [pickers coll] :WkdbooksNvimGrep → :Pickers wkdbooks_nvim grep _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksNvimSmart
 
-- [ ] `:WkdbooksNvimSmart` -- [pickers coll] :WkdbooksNvimSmart → :Pickers wkdbooks_nvim smart
+- [x] `:WkdbooksNvimSmart` -- [pickers coll] :WkdbooksNvimSmart → :Pickers wkdbooks_nvim smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :WkdbooksSmart
 
-- [ ] `:WkdbooksSmart` -- [pickers coll] :WkdbooksSmart → :Pickers wkdbooks smart
+- [x] `:WkdbooksSmart` -- [pickers coll] :WkdbooksSmart → :Pickers wkdbooks smart _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-commands.sheet.lua)_
 
 ### :Wrap
 
@@ -2482,7 +2482,7 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `x` (bindings) -- [Edit] Delete char without yanking
 - [ ] `<leader>ntS` (config) -- Stop test
 - [x] `<leader>dcf` (fileops) -- fileops: Delete current file _(auto 2026-11-06: TESTS/sheets/fileops-delete.sheet.lua)_
-- [ ] `<leader>fa` (pickers) -- pickers: Find all files in CWD (forces hidden+no_ignore+follow)
+- [x] `<leader>fa` (pickers) -- pickers: Find all files in CWD (forces hidden+no_ignore+follow) _(auto 2026-11-16: pickers.nvim/TESTS/sheets/pickers-bindings-keys.sheet.lua)_
 - [ ] `:Ai stop` -- Stop every running stream (one-shot asks and edits cannot be stopped)
 - [ ] `:Ai key` -- Choose the API-key profile for this session (reset = back to the configured one)
 - [ ] `:AstroDevStop` -- Stop Astro dev server
