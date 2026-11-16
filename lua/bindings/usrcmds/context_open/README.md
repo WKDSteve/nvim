@@ -64,8 +64,8 @@ Scans the whole buffer with `open.viewer.scan` (open.nvim's own link/URL/path
 extractor — markdown links, bare URLs, and existing-file paths) plus one
 entry per markdown table, sorted by line. Selecting an entry jumps the
 cursor there and runs the same action `M-o` would have. Entries pointing at
-an image or a `.pdf` file are tagged and routed to `images.show()` /
-`:PdfPort text` instead of the generic open.nvim dispatch.
+an image, a `.pdf` or a media file are tagged and routed to `images.show()` /
+`:PdfPort text` / `media.play()` instead of the generic open.nvim dispatch.
 
 **gopath imports, scoped.** `gopath.resolve()` has no position-parameter API
 — it always reads the real cursor (`nvim_win_get_cursor`) internally, so

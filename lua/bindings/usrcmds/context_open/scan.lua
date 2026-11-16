@@ -26,7 +26,7 @@ local function source_for_buffer(bufnr)
 end
 
 ---Turn one `open.viewer.scan` link into a context_open candidate, tagging
----images/PDFs with their dedicated action instead of the generic open.nvim
+---images/PDFs/media files with their dedicated action instead of the generic open.nvim
 ---dispatch.
 ---@internal
 ---@param lk table  OpenNvim.Viewer.Link
@@ -53,6 +53,30 @@ local function candidate_from_link(lk)
       col = lk.col,
       run = function()
         vim.cmd("PdfPort text " .. vim.fn.fnameescape(lk.target))
+      end,
+    }
+  end
+
+  local ok_media, media = pcall(require, "media")
+  if
+    not lk.is_url
+    and ok_media
+    and type(media) == "table"
+    and type(media.is_media) == "function"
+    and media.is_media(lk.target)
+  then
+    return {
+      label = "media  " .. label,
+      lnum = lk.lnum,
+      col = lk.col,
+      run = function()
+        local ok, err = media.play(lk.target)
+        if not ok then
+          vim.notify(
+            ("media: cannot play %s: %s"):format(lk.target, tostring(err)),
+            vim.log.levels.WARN
+          )
+        end
       end,
     }
   end

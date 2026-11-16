@@ -170,6 +170,29 @@ return function(H)
     vim.api.nvim_del_user_command("MDView")
     vim.cmd("silent! %bwipeout!")
 
+    -- M-O (buffer-wide list): a media link is played, not handed to open.nvim's file manager.
+    local S = dofile(root .. "/lua/bindings/usrcmds/context_open/scan.lua")
+    local entry = S.candidate_from_link({
+      lnum = 15,
+      col = 0,
+      display = "clip.mp4",
+      raw_target = "clip.mp4",
+      target = video,
+      is_url = false,
+    })
+    ok(entry.label:find("^media  15: clip%.mp4"), "M-O tags a media link: " .. entry.label)
+    entry.run()
+    eq(played[#played], video, "and plays it")
+    local plain = S.candidate_from_link({
+      lnum = 3,
+      col = 0,
+      display = "plain.txt",
+      raw_target = "plain.txt",
+      target = text,
+      is_url = false,
+    })
+    ok(plain.label:find("^path   "), "a plain file stays a path entry: " .. plain.label)
+
     -- Without the plugins nothing is offered and nothing throws.
     for name in pairs(saved) do
       package.loaded[name] = nil
