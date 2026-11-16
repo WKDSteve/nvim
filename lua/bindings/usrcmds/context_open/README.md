@@ -2,7 +2,7 @@
 
 One keymap instead of five. `M-o` looks at whatever is under the cursor and
 dispatches to the right plugin — `gopath.nvim`'s `gF`, `markdown.nvim`'s
-`TableView`, `images.nvim`, `pdfport.nvim`, or `open.nvim` — instead of
+`TableView`, `images.nvim`, `pdfport.nvim`, `media.nvim`, `hover.nvim`, `mdview.nvim`, or `open.nvim` — instead of
 having to remember which mapping belongs to which plugin. `M-O` lists every
 openable target in the whole buffer.
 
@@ -43,15 +43,18 @@ is no single correct answer, so `context_open` asks.
 | `markdown_table` | Cursor line inside a parsed GFM table (`markdown.tableview.parser`) | `:TableViewToggle` |
 | `images` | `images.resolve.under_cursor()` — a markdown image link or bare image filename | `images.hover()` |
 | `pdfport` | `<cfile>`/resolved path ends in `.pdf` and exists (pure filesystem check, no plugin dependency) | two candidates: `open.nvim`'s `default` handler (system PDF viewer) *and* `:PdfPort text` (extract to buffer) |
+| `media` | an existing file `media.nvim` calls media (`media.is_media`) | `media.play(path)` — the configured or system player |
+| `hover` | an existing office/video file (`hover.classify.kind_for_ext`), an `http(s)` URL ending in `.pdf` while hover.nvim may fetch (`links.fetch`), or a hex run shaped like a git object id — all cheap shape checks, hover.nvim resolves nothing here | `require("hover").show({ force = true })` |
+| `mdview` | an existing `.md`/`.markdown`/`.mdx` file, when `:MDView` exists | opens the file, then `:MDView start` (starts a session, or re-opens the preview for the current buffer when one runs; `mdview.open()` alone only previews the current buffer of a running session) |
 | `open_nvim` | `open.context.candidate_targets(signals)` — tree-buffer node, URL, or existing path | `open.registry.dispatch(key, ctx)` for each candidate key (`filemanager`/`browser`/`notepad`/`split`/`vsplit`/`tab`/…) |
 
 Provider order (also the picker's display order): `gopath`, `markdown_table`,
-`images`, `pdfport`, `open_nvim` — specific matches before open.nvim's
+`images`, `pdfport`, `media`, `hover`, `mdview`, `open_nvim` — specific matches before open.nvim's
 generic file-target candidates.
 
 `open_nvim` suppresses its own `split`/`vsplit`/`tab`/`filemanager`
 candidates for extensions a more specific provider already owns (`.pdf`,
-and whatever `images.nvim` is configured for) — nobody wants a PDF's raw
+whatever `images.nvim` is configured for, and what `media.nvim` calls media) — nobody wants a PDF's raw
 bytes loaded as a text buffer when `pdfport`/the system viewer are right
 there.
 
