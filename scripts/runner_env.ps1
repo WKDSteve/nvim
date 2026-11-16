@@ -77,8 +77,11 @@ function Get-ListenerStarts {
     }
     return $starts
   }
+  # The runners are Windows services' processes; pwsh elsewhere (the spec job on Linux) has no Get-CimInstance and
+  # no runner to find, so nothing is running there.
+  if (-not (Get-Command Get-CimInstance -ErrorAction SilentlyContinue)) { return $starts }
   # One process query for all runners; a listener belongs to the runner whose folder holds its executable.
-  $root = (Resolve-Path $Root).Path.ToLowerInvariant().TrimEnd('\') + '\'
+  $root =(Resolve-Path $Root).Path.ToLowerInvariant().TrimEnd('\') + '\'
   foreach ($p in Get-CimInstance Win32_Process -Filter "Name = 'Runner.Listener.exe'") {
     if (-not $p.ExecutablePath) { continue }
     $exe = $p.ExecutablePath.ToLowerInvariant()
