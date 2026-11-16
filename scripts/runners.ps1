@@ -95,27 +95,9 @@ function Get-RemoteMany([string[]] $list) {
   return $answers
 }
 
-# Starts a program outside the process tree and the job objects of this shell, hidden, with the environment of this
-# process (PATH, without the *_NVIM_DIR overrides the caller took out). Start-Process is not enough: its child stays in
-# the job of whoever started this script, and a Claude Code session ends its job when it stops or goes idle, which took
-# every runner it had started down with it, silently and mid-job (2026-11-16: the runners of the 22:42 and 04:52 starts
-# died together at 00:27 and 05:31:12, within minutes of the starting session going idle; tasks-vault
-# ALL/runner-gehen-still-offline). Win32_Process.Create lets WMI create the process (parent WmiPrvSE, no job), in the
-# same desktop session; EnvironmentVariables replaces the environment WMI would take from the registry.
-function Start-Detached([string] $Exe, [string] $Dir) {
-  $envList = [string[]] @(Get-ChildItem Env: | ForEach-Object { "$($_.Name)=$($_.Value)" })
-  $startup = New-CimInstance -ClassName Win32_ProcessStartup -ClientOnly -Property @{
-    ShowWindow = [uint16] 0  # SW_HIDE: run.cmd is a console program, its window stays hidden
-    EnvironmentVariables = $envList
-  }
-  $r = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{
-    CommandLine = "cmd.exe /d /c `"`"$Exe`"`""
-    CurrentDirectory = $Dir
-    ProcessStartupInformation = $startup
-  }
-  if ($r.ReturnValue -ne 0) { throw "Win32_Process.Create failed for ${Exe}: return value $($r.ReturnValue)" }
-  return $r.ProcessId
-}
+# Start-Detached / Get-RunnerEnvironment: the runner starts outside the job of whoever runs this script, without the
+# variables of a Claude Code session (scripts/runner_detached.ps1).
+. (Join-Path $PSScriptRoot 'runner_detached.ps1')
 
 function Show([string] $name, $remote) {
   $local = if (Get-Listener $name) { 'running' } else { 'stopped' }
