@@ -126,6 +126,30 @@ return {
       note = "a appends after every mark",
     },
 
+    -- the menu warm-up (ui.nvim runs it at idle right after startup) opens and closes a hidden float; marks set in
+    -- that first second used to vanish on its BufLeave. Run it on purpose while marks are active, then let two
+    -- ticks pass so a scheduled clear would have happened.
+    { lua = "_G.__reset()" },
+    { input = "<C-n>" },
+    { wait = "require('multicursor').count() == 1", timeout = 3000 },
+    {
+      lua = [[
+        _G.__warmed = require("ui.menu").warm()
+        _G.__ticked = false
+        vim.schedule(function()
+          vim.schedule(function()
+            _G.__ticked = true
+          end)
+        end)
+      ]],
+    },
+    { wait = "_G.__ticked == true", timeout = 3000 },
+    { expect = "_G.__warmed == true", note = "the warm-up really opened and closed the menu" },
+    {
+      expect = "require('multicursor').count() == 1",
+      note = "the mark survives the menu warm-up (<C-n> right after startup keeps its marks)",
+    },
+
     -- Esc clears, the operators come back
     { lua = "_G.__reset()" },
     { input = "<C-n>" },
