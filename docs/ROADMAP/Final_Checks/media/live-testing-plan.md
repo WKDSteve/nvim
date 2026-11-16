@@ -128,9 +128,10 @@ Abdeckung.
    Druck.
 3. Zurück über den Anfang hinaus sollte **nicht** wickeln — bei 0 % stehen
    bleiben.
-4. **Bekannt offen** (siehe Abschnitt 10): kein Prefetch — ein Druck fühlt
+4. ~~**Bekannt offen** (siehe Abschnitt 10): kein Prefetch — ein Druck fühlt
    sich wie ein Sprung an, nicht wie ein weicher Übergang. Kein Bug, nur
-   ungebaut.
+   ungebaut.~~ Überholt (2026-11-16): `hover.nvim@d3e45c9` rendert das nächste
+   Standbild vor, über `media.prefetch_frame` (`media.nvim@1158fe9`).
 
 ---
 
@@ -321,10 +322,11 @@ mit der echten Form aktualisieren.
 Diese Dinge sind **bekannt** und **kein neuer Bug** — beim Testen nicht
 verwirren lassen:
 
-- **Kein Prefetch beim Standbild-Scrub** (Abschnitt 5) — jeder Druck decodiert
+- ~~**Kein Prefetch beim Standbild-Scrub** (Abschnitt 5) — jeder Druck decodiert
   neu, fühlt sich wie ein Sprung an. Die Playback-Route (Abschnitt 6/7) hat
   das bereits; der Stepping-Pfad nie bekommen. `ROADMAP.md`, "Frame
-  stepping".
+  stepping".~~ Überholt (2026-11-16): `hover.nvim@d3e45c9` /
+  `media.nvim@1158fe9`.
 - **Auflösung nicht an die tatsächliche Float-Größe gekoppelt, nur an
   `max_width`** — ungemessen, ob das in der Praxis auffällt.
 - **`levels` (Farbquantisierung) nicht nach Material unterschieden** —
@@ -336,32 +338,49 @@ verwirren lassen:
   `video.experimental.system_player_*`) ist auf dieser Maschine nicht
   prüfbar (kein VLC installiert) — falls du VLC hast, das ist der Pfad zum
   Gegenprüfen.
-- **Kein SRT/VTT-Export, keine Fallback-Chain für Transkription** (Abschnitt
-  9) — Phase 1 der Roadmap, noch nicht gebaut.
-- **Zwei gleichzeitige `:Media transcribe`-Anfragen auf derselben Datei
+- ~~**Kein SRT/VTT-Export, keine Fallback-Chain für Transkription** (Abschnitt
+  9) — Phase 1 der Roadmap, noch nicht gebaut.~~ Überholt (2026-11-16):
+  `out=srt`/`out=vtt` (`media.nvim@50b365c`), drei Engines mit
+  `engine = "auto"` und `transcribe.fallback` (`media.nvim@1323828`,
+  `media.nvim@26137f2`).
+- ~~**Zwei gleichzeitige `:Media transcribe`-Anfragen auf derselben Datei
   werden nicht zusammengeführt** — bewusste Phase-0-Vereinfachung, siehe
-  `core/dispatcher.lua`s Moduldoc.
+  `core/dispatcher.lua`s Moduldoc.~~ Überholt: sie werden zusammengeführt
+  (`inflight`/`join`, `media.nvim@b599075`), siehe Abschnitt 9.4 Punkt 10.
 
 ---
 
 ## Checkliste zum Abhaken
 
-- [ ] `:checkhealth media` / `:checkhealth hover` / `:checkhealth images`
+> **Stand 2026-11-16** (gegen `media.nvim@e51f109`): abgehakt ist, was ein Commit
+> belegt oder ein Testblatt in `media.nvim/TESTS/sheets/` prüft (`_(auto …)_`, auf
+> allen drei Systemen in der CI). Offen bleibt, was Augen oder Ohren braucht.
+
+- [x] `:checkhealth media` / `:checkhealth hover` / `:checkhealth images`
       sauber (oder die Lücken sind bekannt und erwartet)
-- [ ] `:Media probe`/`frame`/`sheet` — Grundfunktion + ein Fehlerpfad
-- [ ] `:Media waveform`/`spectrogram` — Bild korrekt, Fehlerpfad ohne Ton
+      _(auto 2026-11-16: media.nvim/TESTS/sheets/media-info.sheet.lua (`:Media health` öffnet `:checkhealth media`), TESTS/health_spec.lua; hover und images prüfen ihre eigenen Pläne)_
+- [x] `:Media probe`/`frame`/`sheet` — Grundfunktion + ein Fehlerpfad
+      _(auto 2026-11-16: media.nvim/TESTS/sheets/media-info.sheet.lua, media-render.sheet.lua; Fehlerpfad fehlende Datei: media-audio-pictures.sheet.lua)_
+- [x] `:Media waveform`/`spectrogram` — Bild korrekt, Fehlerpfad ohne Ton
+      _(auto 2026-11-16: media.nvim/TESTS/sheets/media-audio-pictures.sheet.lua — PNG, `width=600 height=150` ergibt 600x150, ohne Tonspur „no audio stream in this file“; wie das Bild aussieht, ist das `judge` des Blatts)_
 - [ ] Standbild-Scrub über mehrere Seiten, kein Wickeln am Anfang
-- [ ] Playback-Fenster: öffnet, schließt sauber, Ton läuft
+      _(Handlauf; Prefetch inzwischen gebaut, siehe Abschnitt 5)_
+- [ ] Playback-Fenster: öffnet, schließt sauber, Ton läuft _(Handlauf: echtes mpv-Fenster und Ton)_
 - [ ] Playback inline: Uhr bei 0:00, Leiste läuft über 0:02 hinaus, kein Reset
-- [ ] Ton-Sync bleibt über mehrere Sekunden synchron
-- [ ] `whisper.cpp` gebaut, Modell geladen, `:checkhealth media` grün
-- [ ] `:Media transcribe` gegen eine echte Sprachaufnahme — Text kommt,
-      stimmt grob
-- [ ] `:Media transcribe out=sidecar` — `.transcript.md` korrekt geschrieben
-- [ ] Cache-Treffer beim zweiten Aufruf spürbar sofort
+      _(Handlauf im echten Terminal; Uhr, Leiste und Rückwärts-Seek als Spec: hover.nvim/TESTS/playback_spec.lua)_
+- [ ] Ton-Sync bleibt über mehrere Sekunden synchron _(Handlauf: hören)_
+- [x] `whisper.cpp` gebaut, Modell geladen, `:checkhealth media` grün
+      _(erledigt 2026-09-17: media.nvim@c84cb86, echter Build mit ggml-base.en.bin)_
+- [x] `:Media transcribe` gegen eine echte Sprachaufnahme — Text kommt,
+      stimmt grob _(erledigt 2026-09-17: media.nvim@c84cb86, samples/jfk.wav, ein Segment mit dem richtigen Text; die JSON-Form stimmte)_
+- [x] `:Media transcribe out=sidecar` — `.transcript.md` korrekt geschrieben
+      _(erledigt 2026-09-17: media.nvim@c84cb86 auf echtem Transkript; auto 2026-11-16: media.nvim/TESTS/sheets/media-transcribe.sheet.lua)_
+- [x] Cache-Treffer beim zweiten Aufruf spürbar sofort
+      _(erledigt 2026-09-17: media.nvim@c84cb86, 1819 ms kalt, 6 ms aus dem Cache; auto 2026-11-16: media-transcribe.sheet.lua, kein zweiter Engine-Lauf)_
 - [ ] `lang=`/`task=translate` einmal getestet
-- [ ] Beide Fehlerpfade (fehlendes Modell, fehlender Binary) — lesbare
-      Meldung, kein Hänger
+      _(die Argumente: auto 2026-11-16, TESTS/whisper_cpp_spec.lua (`-l`, `-tr`) und media-transcribe.sheet.lua; die echte Übersetzung einer nicht-englischen Aufnahme bleibt Handlauf)_
+- [x] Beide Fehlerpfade (fehlendes Modell, fehlender Binary) — lesbare
+      Meldung, kein Hänger _(auto 2026-11-16: media.nvim/TESTS/sheets/media-transcribe.sheet.lua; fand einen Absturz bei einem `bin["whisper-cli"]`, das auf nichts zeigt, behoben in media.nvim@6e6e2c3)_
 - [ ] Notiert, welche der "bekannten Eigenheiten" (Abschnitt 10) in der
       Praxis tatsächlich störend auffallen (Grundlage für die Priorisierung
-      der nächsten Runde)
+      der nächsten Runde) _(Stefans Urteil; Abschnitt 10 ist auf dem Stand 2026-11-16, drei der sieben Punkte sind überholt)_
