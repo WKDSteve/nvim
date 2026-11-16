@@ -323,6 +323,9 @@ end
 ---@return string[]
 local function pwsh_argv(code)
   local shell = vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell"
+  -- without it the progress records of the ScheduledTasks cmdlets reach stderr as `#< CLIXML` and end up
+  -- in the notification next to the real answer
+  code = "$ProgressPreference = 'SilentlyContinue'\n" .. code
   local utf16 = vim.iconv(code, "utf-8", "utf-16le")
   return { shell, "-NoProfile", "-NonInteractive", "-EncodedCommand", vim.base64.encode(utf16) }
 end

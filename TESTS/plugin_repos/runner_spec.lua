@@ -62,6 +62,11 @@ local function spec(H)
     eq(argv[4], "-EncodedCommand", action .. " hands the script over encoded (no quoting)")
     local decoded = vim.iconv(vim.base64.decode(argv[5]), "utf-16le", "utf-8")
     H.has(decoded, runner.AUTOSTART_TASK, action .. " names the fixed task")
+    H.has(
+      decoded,
+      "$ProgressPreference = 'SilentlyContinue'",
+      action .. " keeps the progress records (`#< CLIXML`) out of the notification"
+    )
   end
   H.has(
     vim.iconv(vim.base64.decode(runner.autostart_argv("on")[5]), "utf-16le", "utf-8"),
