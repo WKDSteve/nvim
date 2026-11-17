@@ -249,6 +249,11 @@ reinschreiben, damit `nvim-lint`/LSP etwas meldet):
 
 ## 8. ai-desktop-Dashboard (Browser)
 
+> **Stand 2026-11-17:** teilweise überholt. Das Dashboard hat inzwischen ein
+> Ask-Panel (`/ask/stream` gegen jedes ModelRouter-Backend, `dashboard/index.html`),
+> und das Badge „Model: simulation (LLM folgt)“ gibt es nicht mehr. SSE und
+> Decision-Flow bleiben zu prüfen: `ai-desktop/dashboard-sse-decision-flow-e2e`.
+
 **Wichtig zu wissen, bevor du testest:** das Dashboard (`http://127.0.0.1:8080/`)
 zeigt aktuell **ausschließlich** den alten Simulations-Agenten
 (`run_simulation_agent()` in `main.cpp`) — Planer/Executor/Human-Status,
