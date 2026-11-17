@@ -1326,18 +1326,18 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Hover
 
-- [ ] `:Hover all` -- Everything at once: every switch, every type and the mode
-- [ ] `:Hover mode` -- Set the mode: auto opens by itself, manual only on request, off not at all
-- [ ] `:Hover nav` -- Move the magnified view
-- [ ] `:Hover zoom` -- Magnify a detail of the picture on screen, or step back out
+- [x] `:Hover all` -- Everything at once: every switch, every type and the mode _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
+- [x] `:Hover mode` -- Set the mode: auto opens by itself, manual only on request, off not at all _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
+- [x] `:Hover nav` -- Move the magnified view _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-zoom.sheet.lua, in WSL)_
+- [x] `:Hover zoom` -- Magnify a detail of the picture on screen, or step back out _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-zoom.sheet.lua, in WSL)_
 - [ ] `:Hover links` -- whether a target written with link syntax hovers at all
-- [ ] `:Hover why` -- Say why nothing hovered at the cursor
-- [ ] `:Hover show` -- Show the hover for whatever is under the cursor, ignoring every volume switch
-- [ ] `:Hover auto` -- Which target types open by themselves; a type toggles it, `all`/`none` set every one
+- [x] `:Hover why` -- Say why nothing hovered at the cursor _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
+- [x] `:Hover show` -- Show the hover for whatever is under the cursor, ignoring every volume switch _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-float.sheet.lua)_
+- [x] `:Hover auto` -- Which target types open by themselves; a type toggles it, `all`/`none` set every one _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
 - [ ] `:Hover open` -- Open what the hover is showing, in whatever handles it outside Neovim
-- [ ] `:Hover toggle` -- Turn the hover off for this session, or back on
+- [x] `:Hover toggle` -- Turn the hover off for this session, or back on _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
 - [ ] `:Hover paths missing` -- whether a bare path that resolves to nothing is reported as broken
-- [ ] `:Hover border` -- Border style: rounded, single, double, heavy, ascii, dashed, block, solid, shadow, none
+- [x] `:Hover border` -- Border style: rounded, single, double, heavy, ascii, dashed, block, solid, shadow, none _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
 - [ ] `:Hover links web shot eager` -- let the automatic trigger render a page, not only an explicit request
 - [ ] `:Hover links web shot` -- render a hovered link in a headless browser and draw the page into the float
 - [ ] `:Hover paths code` -- whether a bare path hovers inside executable code, not just comments and strings
@@ -1345,14 +1345,14 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [ ] `:Hover positions` -- whether a plugin may say something about a cursor position that points at nothing
 - [ ] `:Hover office` -- render office documents through a PDF instead of showing a badge
 - [ ] `:Hover links web fetch pdf` -- show a link that answers with a PDF as its first page, paged and zoomable
-- [ ] `:Hover paths` -- whether a path written in prose or a comment hovers
-- [ ] `:Hover next` -- Step to the next plugin with something to say about this place
-- [ ] `:Hover dashboard` -- Open the board: every switch, its state, and the command that acts on it
+- [x] `:Hover paths` -- whether a path written in prose or a comment hovers _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
+- [x] `:Hover next` -- Step to the next plugin with something to say about this place _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-float.sheet.lua)_
+- [x] `:Hover dashboard` -- Open the board: every switch, its state, and the command that acts on it _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-switches.sheet.lua)_
 - [ ] `:Hover links web` -- whether http(s) links hover (off by default: documentation is made of links)
-- [ ] `:Hover zen` -- Put the hover on screen full screen, or take it back
-- [ ] `:Hover pin` -- Keep this hover on screen while the cursor goes elsewhere
+- [x] `:Hover zen` -- Put the hover on screen full screen, or take it back _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-float.sheet.lua)_
+- [x] `:Hover pin` -- Keep this hover on screen while the cursor goes elsewhere _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-float.sheet.lua)_
 - [ ] `:Hover links web fetch` -- fetch a hovered link for its status code and page title (implies `links web on`)
-- [ ] `:Hover resize` -- Make the hover on screen bigger or smaller
+- [x] `:Hover resize` -- Make the hover on screen bigger or smaller _(auto 2026-11-17: hover.nvim/TESTS/sheets/hover-bindings-float.sheet.lua)_
 
 ### :Image
 
