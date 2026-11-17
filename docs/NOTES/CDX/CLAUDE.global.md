@@ -130,6 +130,14 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   keine großen/escape-haltigen Literale durch die Shell jagen.
 - Tasks im tasks-vault nur mit `tasks done` abschließen, nie `status: done` von
   Hand; `<area>/ROADMAP/TASKS.md` gehört in denselben Commit.
+- Bevor du an einer Task im tasks-vault arbeitest, belegst du sie:
+  `tasks claim <area>/<slug> --by=<Name des Chats>` (setzt `status: doing`,
+  reserviert 4 h; `--renew` verlängert, `--for=` ändert die Dauer). Ein fremder
+  Claim wird nicht übergangen, sondern gemeldet. Gibst du die Task unerledigt
+  zurück: `tasks unclaim <id> --by=<Name>`; `tasks done` gibt von selbst frei.
+  Briefe an Child-Sitzungen enthalten diesen Schritt. Ohne Claim zeigt
+  tasks-desktop die Arbeit nicht als „In Arbeit“ (Details: Schritt 3 in
+  `$NVIM_CONFIG_DIR/docs/NOTES/CDX/templates/PROMPT/Base.md`).
 
 ## Docs/README-Pflege
 
