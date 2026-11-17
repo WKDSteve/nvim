@@ -121,14 +121,15 @@ Ablauf, Zustände und Build-Befehle: `$REPOS_DIR/tasks-vault/TOOLS/machine-sync.
 `scripts/git-hooks/` enthält zwei Hooks: `pre-commit` (Warnung vor großen Dateien) und `commit-msg`
 (entfernt `Co-Authored-By:`-Trailer von Claude/Anthropic aus Commit-Nachrichten; Trailer echter Personen
 bleiben). Hooks liegen in `.git/hooks` und werden nicht mitgepusht, deshalb gilt: **auf jeder Maschine
-nach dem Klonen/Einrichten einmal** ausführen. In Neovim am einfachsten mit `:MyGit hooks` (Repos auswählen,
-`<Tab>` markiert, `<CR>` installiert), `:MyGit hooks all` (alle unter `$REPOS_DIR`) oder `:MyGit hooks status` (nur
+nach dem Klonen/Einrichten einmal** ausführen. In Neovim am einfachsten mit `:MyGit hooks` (Repos auswählen, danach die Hooks:
+`all`, `pre-commit`, `commit-msg`, `pre-push`; `<Tab>` markiert, `<CR>` geht weiter), `:MyGit hooks all` (alle unter `$REPOS_DIR`) oder `:MyGit hooks status` (nur
 ansehen); die manuellen Push-Repos bekommen dabei ihren `pre-push` automatisch (`lua/bindings/usrcmds/git_hooks/README.md`).
 Ohne Neovim:
 
 ```sh
 bash scripts/git-hooks/install.sh <repo> [<repo> ...]           # beide Hooks
 bash scripts/git-hooks/install.sh --commit-msg-only <repo> ...   # nur commit-msg
+bash scripts/git-hooks/install.sh --pre-commit-only <repo> ...   # nur pre-commit (Große Dateien)
 bash scripts/git-hooks/install.sh --manual-push-only <repo> ...  # nur pre-push "nur von Hand"
 ```
 

@@ -7,7 +7,7 @@
 # (later changes to the scripts need no reinstall):
 #   pre-commit  -> pre-commit-large-files.sh        (marker: large-files-hook)
 #   commit-msg  -> commit-msg-no-claude-trailer.sh  (marker: no-claude-trailer-hook)
-# --commit-msg-only installs just the commit-msg hook.
+# --commit-msg-only installs just the commit-msg hook, --pre-commit-only just the pre-commit hook.
 # --manual-push-only installs just the pre-push hook of repos that are pushed only by
 # hand, after a confirmation (WKDBook-Tricentis, tricentis-vault):
 #   pre-push    -> pre-push-manual-only.sh          (marker: manual-push-hook)
@@ -16,9 +16,13 @@
 here="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 status=0
 only_commit_msg=0
+only_pre_commit=0
 only_manual_push=0
 if [ "$1" = "--commit-msg-only" ]; then
   only_commit_msg=1
+  shift
+elif [ "$1" = "--pre-commit-only" ]; then
+  only_pre_commit=1
   shift
 elif [ "$1" = "--manual-push-only" ]; then
   only_manual_push=1
@@ -57,6 +61,7 @@ for repo in "$@"; do
   if [ "$only_commit_msg" -eq 0 ]; then
     install_hook "$hooks" pre-commit "$here/pre-commit-large-files.sh" "# large-files-hook"
   fi
+  [ "$only_pre_commit" -eq 1 ] && continue
   install_hook "$hooks" commit-msg "$here/commit-msg-no-claude-trailer.sh" "# no-claude-trailer-hook"
 done
 

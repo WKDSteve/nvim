@@ -5,13 +5,16 @@ a front end for `install.sh`, which stays the one place that knows what a hook l
 `bash scripts/git-hooks/install.sh <repo> ...`).
 
 ```vim
-:MyGit hooks               " pick the repos: <Tab> marks, <CR> installs (no mark = the row under the cursor)
+:MyGit hooks               " pick the repos (<Tab> marks, <CR> goes on), then pick the hooks
 :MyGit hooks all           " every repo under $REPOS_DIR that has a .git
 :MyGit hooks status        " state of every repo, changes nothing
 :MyGit hooks repo <name>   " one repo
 ```
 
-The list uses `lib.nvim.ui.kit.select` (multi-select). Each row shows the state of that repo's hooks:
+The lists use `lib.nvim.ui.kit.select` (multi-select). The second list asks which hooks: `all` (first row, so <CR> alone
+takes it: every hook the repo is expected to have), `pre-commit`, `commit-msg`, `pre-push` (only reaches
+`M.MANUAL_PUSH`; chosen for a plain repo it installs nothing). `:MyGit hooks all` and `repo <name>` do not ask: they
+install everything expected. `install.sh` knows `--pre-commit-only`, `--commit-msg-only` and `--manual-push-only` for it. Each row shows the state of that repo's hooks:
 
 | State | Meaning |
 |---|---|

@@ -4,7 +4,8 @@
 --- Front end for `scripts/git-hooks/install.sh` (the single source of truth for what a hook looks like):
 ---
 ---  - `:MyGit hooks`              pick the repos in a themed list (<Tab> marks, <CR> installs; no mark = the row
----                                under the cursor). Each row shows the state of that repo's hooks.
+---                                under the cursor). Each row shows the state of that repo's hooks. A second list
+---                                asks which hooks (`all`, `pre-commit`, `commit-msg`, `pre-push`; <CR> = `all`).
 ---  - `:MyGit hooks all`          every repo under `$REPOS_DIR` that has a `.git`
 ---  - `:MyGit hooks status`       the state of every repo, nothing is changed
 ---  - `:MyGit hooks repo <name>`  one repo
@@ -224,12 +225,14 @@ function M.install_script()
 end
 
 ---argv of the `install.sh` calls for `names`: one for pre-commit/commit-msg, one more for the manual-push repos.
+---With `kinds` (hook names) only those hooks are installed; `pre-push` still only goes to the manual-push repos.
 ---@param bash string
 ---@param script string
 ---@param base string
 ---@param names string[]
+---@param kinds? string[]  nil = every hook the repo is expected to have
 ---@return string[][] calls
-function M.plan_calls(bash, script, base, names)
+function M.plan_calls(bash, script, base, names, kinds)
   local all, manual = {}, {}
   for _, name in ipairs(names) do
     all[#all + 1] = base .. "/" .. name
@@ -237,11 +240,27 @@ function M.plan_calls(bash, script, base, names)
       manual[#manual + 1] = base .. "/" .. name
     end
   end
-  local calls = {}
-  if #all > 0 then
-    calls[#calls + 1] = vim.list_extend({ bash, script }, all)
+  local want = nil
+  if kinds then
+    want = {}
+    for _, kind in ipairs(kinds) do
+      want[kind] = true
+    end
   end
-  if #manual > 0 then
+  local pre = not want or want["pre-commit"]
+  local msg = not want or want["commit-msg"]
+  local push = not want or want["pre-push"]
+  local calls = {}
+  if #all > 0 and (pre or msg) then
+    local head = { bash, script }
+    if pre and not msg then
+      head[#head + 1] = "--pre-commit-only"
+    elseif msg and not pre then
+      head[#head + 1] = "--commit-msg-only"
+    end
+    calls[#calls + 1] = vim.list_extend(head, all)
+  end
+  if #manual > 0 and push then
     calls[#calls + 1] = vim.list_extend({ bash, script, "--manual-push-only" }, manual)
   end
   return calls
@@ -252,7 +271,8 @@ local running = false
 ---Installs the hooks into the named repos (one `install.sh` run after the other).
 ---@param names string[]
 ---@param on_done? fun(installed: integer, problems: string[])
-function M.install(names, on_done)
+---@param kinds? string[]  hook names to install; nil = all that the repo is expected to have
+function M.install(names, on_done, kinds)
   if #names == 0 then
     notify.info("No repository chosen")
     return
@@ -270,7 +290,11 @@ function M.install(names, on_done)
     notify.error("Git hooks need bash (Git for Windows): " .. tostring(reason))
     return
   end
-  local calls = M.plan_calls(bash, M.install_script(), base, names)
+  local calls = M.plan_calls(bash, M.install_script(), base, names, kinds)
+  if #calls == 0 then
+    notify.info("Nothing to install: pre-push only goes to " .. table.concat(M.MANUAL_PUSH, ", "))
+    return
+  end
   local installed, problems, index = 0, {}, 0
   running = true
 
@@ -347,7 +371,41 @@ function M.pick()
       return rows[name]
     end,
     on_select = function(picked)
-      M.install(picked)
+      M.pick_kinds(function(kinds)
+        M.install(picked, nil, kinds)
+      end)
+    end,
+  })
+end
+
+---Second question after the repos: which hooks. `all` (first row, so <CR> alone takes it) = every hook the repo is
+---expected to have. `pre-push` only reaches the manual-push repos.
+---@param on_chosen fun(kinds: string[]|nil)  nil = all
+function M.pick_kinds(on_chosen)
+  local ok, kit = pcall(require, "lib.nvim.ui.kit")
+  if not ok then
+    on_chosen(nil)
+    return
+  end
+  local labels = {
+    all = "all          every hook the repo is expected to have",
+    ["pre-commit"] = "pre-commit   large files: ask before committing big files",
+    ["commit-msg"] = "commit-msg   strip Claude co-author trailers",
+    ["pre-push"] = "pre-push     push by hand only (" .. table.concat(M.MANUAL_PUSH, ", ") .. ")",
+  }
+  kit.select({
+    items = { "all", "pre-commit", "commit-msg", "pre-push" },
+    multi = true,
+    title = "Which hooks?  <Tab> mark  <CR> install",
+    format_item = function(kind)
+      return labels[kind]
+    end,
+    on_select = function(picked)
+      if vim.tbl_contains(picked, "all") then
+        on_chosen(nil)
+      else
+        on_chosen(picked)
+      end
     end,
   })
 end

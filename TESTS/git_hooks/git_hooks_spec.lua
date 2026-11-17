@@ -72,6 +72,32 @@ local function spec(H)
     "no second call without a manual repo"
   )
 
+  -- plan with a choice of hooks
+  local function plan(list, kinds)
+    return hooks.plan_calls("bash", "install.sh", "B", list, kinds)
+  end
+  eq(
+    plan({ "lib.nvim" }, { "pre-commit" }),
+    { { "bash", "install.sh", "--pre-commit-only", "B/lib.nvim" } },
+    "pre-commit only"
+  )
+  eq(
+    plan({ "lib.nvim" }, { "commit-msg" }),
+    { { "bash", "install.sh", "--commit-msg-only", "B/lib.nvim" } },
+    "commit-msg only"
+  )
+  eq(
+    plan({ "lib.nvim" }, { "pre-commit", "commit-msg" }),
+    { { "bash", "install.sh", "B/lib.nvim" } },
+    "both = the default call"
+  )
+  eq(
+    plan({ "lib.nvim", "tricentis-vault" }, { "pre-push" }),
+    { { "bash", "install.sh", "--manual-push-only", "B/tricentis-vault" } },
+    "pre-push reaches only the manual-push repo"
+  )
+  eq(plan({ "lib.nvim" }, { "pre-push" }), {}, "pre-push for a plain repo is nothing")
+
   -- repos(): only folders with a .git
   local base = H.tmpdir()
   vim.fn.mkdir(base .. "/with-git/.git", "p")
