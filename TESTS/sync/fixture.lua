@@ -41,10 +41,17 @@ return function(H)
     local cmd = { "git", "-C", dir }
     vim.list_extend(cmd, ID)
     vim.list_extend(cmd, args)
-    local res = vim.system(cmd, { text = true, env = ENV }):wait(30000)
+    -- 60 s: a fixture call that is only slow (a machine under load) is no failure; a real hang is
+    -- still stopped, by this and by the file limit of the runner.
+    local res = vim.system(cmd, { text = true, env = ENV }):wait(60000)
     if res.code ~= 0 then
+      -- The exit code and signal too: a call killed at the deadline (124) has an empty stderr.
+      local how = res.code == 124 and "timed out after 60 s" or ("exit %d"):format(res.code)
+      if (res.signal or 0) ~= 0 then
+        how = how .. (", signal %d"):format(res.signal)
+      end
       error(
-        ("git %s failed in %s: %s"):format(table.concat(args, " "), dir, res.stderr or ""),
+        ("git %s failed in %s (%s): %s"):format(table.concat(args, " "), dir, how, res.stderr or ""),
         level + 1
       )
     end
