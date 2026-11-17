@@ -45,6 +45,9 @@ return function(H)
     end
     return table.concat(copy, "\n") .. "\n"
   end
+  -- `c.txt` with 20 lines, committed and pushed, in all three repos: the base of the conflict scenarios
+  -- (part of the fixture's template, not four git processes per repo).
+  local C_BASE = { { "c.txt", text20(), "c base" } }
 
   -- diverged, and the two sides do not touch the same lines: rebase and merge both work
   local rb = make("rebase-ok")
@@ -54,30 +57,18 @@ return function(H)
   incoming(mg, "theirs.txt", "theirs\n")
   commit_file(mg.repo, "mine.txt", "mine\n", "unpushed")
   -- diverged on the SAME line: both actions conflict and must be undone
-  local rc = make("rebase-conflict")
-  commit_file(rc.dev, "c.txt", text20(), "c base")
-  git(rc.dev, "push", "-q")
-  git(rc.repo, "pull", "-q", "--ff-only")
+  local rc = make("rebase-conflict", C_BASE)
   incoming(rc, "c.txt", text20({ [10] = "THEIRS" }))
   commit_file(rc.repo, "c.txt", text20({ [10] = "MINE" }), "unpushed conflicting")
-  local mc = make("merge-conflict")
-  commit_file(mc.dev, "c.txt", text20(), "c base")
-  git(mc.dev, "push", "-q")
-  git(mc.repo, "pull", "-q", "--ff-only")
+  local mc = make("merge-conflict", C_BASE)
   incoming(mc, "c.txt", text20({ [10] = "THEIRS" }))
   commit_file(mc.repo, "c.txt", text20({ [10] = "MINE" }), "unpushed conflicting")
   -- blocked by a local edit, but the edit and the incoming change are far apart: stash-pull-pop works
-  local sp = make("stash-ok")
-  commit_file(sp.dev, "c.txt", text20(), "c base")
-  git(sp.dev, "push", "-q")
-  git(sp.repo, "pull", "-q", "--ff-only")
+  local sp = make("stash-ok", C_BASE)
   H.write(sp.repo .. "/c.txt", text20({ [1] = "local edit at the top" }))
   incoming(sp, "c.txt", text20({ [20] = "incoming edit at the bottom" }))
   -- blocked, and the edit collides with the incoming change: the pop conflicts
-  local sc = make("stash-conflict")
-  commit_file(sc.dev, "c.txt", text20(), "c base")
-  git(sc.dev, "push", "-q")
-  git(sc.repo, "pull", "-q", "--ff-only")
+  local sc = make("stash-conflict", C_BASE)
   H.write(sc.repo .. "/c.txt", text20({ [10] = "local edit" }))
   incoming(sc, "c.txt", text20({ [10] = "incoming edit" }))
   -- nothing to stash although the repo reads as blocked is not reachable, but an older stash of
@@ -265,10 +256,7 @@ return function(H)
   end
   ---a repo that is diverged on the same line of c.txt, upstream fetched
   local function conflicting(name)
-    local cl = make(name)
-    commit_file(cl.dev, "c.txt", text20(), "c base")
-    git(cl.dev, "push", "-q")
-    git(cl.repo, "pull", "-q", "--ff-only")
+    local cl = make(name, C_BASE)
     incoming(cl, "c.txt", text20({ [10] = "THEIRS" }))
     commit_file(cl.repo, "c.txt", text20({ [10] = "MINE" }), "unpushed conflicting")
     git(cl.repo, "fetch", "-q")
@@ -347,10 +335,7 @@ return function(H)
 
   -- a merge git refuses to START (local edit in the way) has nothing to abort: no --abort at all
   do
-    local refused = make("merge-refused")
-    commit_file(refused.dev, "c.txt", text20(), "c base")
-    git(refused.dev, "push", "-q")
-    git(refused.repo, "pull", "-q", "--ff-only")
+    local refused = make("merge-refused", C_BASE)
     incoming(refused, "c.txt", text20({ [20] = "THEIRS" }))
     commit_file(refused.repo, "other.txt", "mine\n", "unpushed")
     git(refused.repo, "fetch", "-q")
@@ -399,10 +384,7 @@ return function(H)
 
   -- #24: a conflicting pop says what the tree looks like and how to get out
   do
-    local p = make("pop-conflict")
-    commit_file(p.dev, "c.txt", text20(), "c base")
-    git(p.dev, "push", "-q")
-    git(p.repo, "pull", "-q", "--ff-only")
+    local p = make("pop-conflict", C_BASE)
     H.write(p.repo .. "/c.txt", text20({ [10] = "local edit" }))
     incoming(p, "c.txt", text20({ [10] = "incoming edit" }))
     git(p.repo, "fetch", "-q")

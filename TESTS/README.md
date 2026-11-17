@@ -20,10 +20,13 @@ when one fails, 2 when lib.nvim cannot be found. lib.nvim is looked up in
 `$LIB_NVIM_DIR`, `$LIB_NVIM_PATH`, `$REPOS_DIR/lib.nvim`, then lazy.nvim's data
 folder (the same order `scripts/tasks.lua` uses).
 
-Runtime: the whole suite takes about 3.5 minutes on Windows, almost all of it in
-the `sync/` specs, which work on real git repositories and kill real process
-trees (measured 2026-10-17: `sync_integration` ~58 s, `sync_assist` ~50 s,
-`sync_dash` ~19 s, `sync_busy` a few seconds). A spec prints its line only when
+Runtime: most of a full run on Windows is the `sync/` specs, which work on real
+git repositories and kill real process trees: about 1:45 min for all of `sync/`
+on an idle machine (measured 2026-11-17, `sync_assist` ~26 s; it was ~50 s
+before `sync/fixture.lua` cloned one template remote instead of building every
+repo from scratch, ~21 git processes each). Under load a git process on Windows
+gets several times slower, so keep fixture git calls few: put a common base into
+the template (`F.make(name, base)`), not into each spec. A spec prints its line only when
 it is finished, so a silent minute is not a hang. Give a full run a timeout of
 at least 5 minutes (a wrapper with the usual 2-minute limit kills it in the
 middle of the sync specs), or filter, e.g. `run.lua sync_status`.
