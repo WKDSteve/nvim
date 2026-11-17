@@ -319,8 +319,8 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [x] `gC` -- gopath: check path exists / offer create _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-check.sheet.lua)_
 - [x] `gY` -- gopath: copy path:line:col _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
 - [x] `g?` -- gopath: debug under cursor _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-info.sheet.lua)_
-- [ ] `gM` -- gopath: reveal in file explorer
-- [ ] `gT` -- gopath: reveal in filetree.nvim (soft dependency)
+- [x] `gM` -- gopath: reveal in file explorer _(Handlauf 2026-11-17, STEVESPC: Datei markiert im Ordner, Ordner gezeigt, kein Buffer; Weitergabe: gopath.nvim/TESTS/sheets/gopath-reveal.sheet.lua)_
+- [x] `gT` -- gopath: reveal in filetree.nvim (soft dependency) _(auto 2026-11-17: gopath.nvim/TESTS/sheets/gopath-filetree.sheet.lua, echtes filetree.nvim)_
 - [x] `gF` -- gopath: open here _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
 - [x] `g|` -- gopath: open in split _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
 - [x] `g}` -- gopath: open in tab _(auto 2026-11-07: gopath.nvim/TESTS/sheets/gopath-open.sheet.lua)_
