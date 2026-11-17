@@ -393,8 +393,8 @@ Suite von ai.nvim; offene Punkte brauchen echte Keys, Dienste oder Stefans Auge
 - [ ] `openai`: available/ask/stream/Fehlerpfad ✅ _(Blatt `ai-live-openai`, läuft nur mit `--live`)_
 - [ ] `gemini`: available/ask/stream/Fehlerpfad/Safety-Block ✅ (`GEMINI_API_KEY`
       nötig, bislang nie live getestet) _(Blatt `ai-live-gemini`; der Safety-Block bleibt ein Handlauf)_
-- [ ] `ollama`: available/ask/stream/Fehlerpfad ✅ _(Handlauf: Daemon an/aus, `AI_OLLAMA_HOST` statt `OLLAMA_HOST`)_
-- [ ] `ai-desktop`: available/ask/stream/Fehlerpfad (inkl. ai-desktop-intern) ✅ _(Handlauf)_
+- [ ] `ollama`: available/ask/stream/Fehlerpfad ✅ _(Blatt `ai-live-ollama`, läuft nur mit `--live` und `AI_OLLAMA_HOST=http://127.0.0.1:11434` bei laufendem Daemon)_
+- [ ] `ai-desktop`: available/ask/stream/Fehlerpfad (inkl. ai-desktop-intern) ✅ _(Blatt `ai-live-ai-desktop`, läuft nur mit `--live` und `AI_DESKTOP_HOST=http://127.0.0.1:8080`; der Fehler von Ollama hinter ai-desktop bleibt ein Handlauf)_
 - [x] `auto`-Resolution mit mind. 2 unterschiedlichen Verfügbarkeits-
       Kombinationen getestet _(auto 2026-11-16: ai.nvim/TESTS/ai/providers_spec.lua, `resolve('auto', order)`: erstes verfügbares, keins verfügbar, nie außerhalb der Order)_
 - [x] `<leader>aia`/`<leader>ais`/`<leader>aie` in normal + visual mode _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-quick-keys.sheet.lua, mit dem Standard-Präfix `<leader>a`; Auswahl und Diagnostics im Request. Fand den Kontext-Bug von `<leader>as`, behoben in `da79e8b`)_
@@ -406,8 +406,8 @@ Suite von ai.nvim; offene Punkte brauchen echte Keys, Dienste oder Stefans Auge
 - [x] Completion: `<Tab>` akzeptiert korrekt (Text + Cursor-Position) ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua, ein- und dreizeilig)_
 - [x] Completion: `<C-]>` verwirft ohne Texteinfügung ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua)_
 - [x] Completion: Tippen verwirft eine gezeigte Suggestion automatisch ✅ _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua)_
-- [ ] Completion: `<Tab>` mit offenem Completion-Menü navigiert das Menü,
-      greift nicht in Ghost-Text ein ✅ _(eingebautes Menü: auto 2026-11-16, ai.nvim/TESTS/sheets/ai-completion-ghost.sheet.lua; mit blink.cmp der echten Config: Handlauf)_
+- [x] Completion: `<Tab>` mit offenem Completion-Menü navigiert das Menü,
+      greift nicht in Ghost-Text ein ✅ _(auto 2026-11-17: ai.nvim/TESTS/sheets/ai-completion-blink.sheet.lua auf der installierten Config mit blink.cmp; das eingebaute Menü: ai-completion-ghost.sheet.lua)_
 - [ ] Completion: mind. 2 verschiedene Provider ausprobiert, Qualität notiert _(Handlauf, echte Provider)_
 - [x] Completion: `trigger = "auto"` einmal ausprobiert (idealerweise gegen
       `ollama`), danach zurück auf `"manual"` gestellt _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-completion-modes.sheet.lua, eine Anfrage nach der Tipp-Pause; die Config steht auf `"manual"`, `lua/plugins/personal/specs/ai.lua`)_
