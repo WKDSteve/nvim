@@ -1626,37 +1626,37 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :MDView
 
-- [ ] `:MDView open` -- Re-open a browser tab against the already-running session
-- [ ] `:MDView log trace` -- Show the internal log ring, filtered to TRACE and above
-- [ ] `:MDView preview-tab` -- Toggle the in-Neovim tab preview (works standalone, no server needed)
+- [x] `:MDView open` -- Re-open a browser tab against the already-running session _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView log trace` -- Show the internal log ring, filtered to TRACE and above _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView preview-tab` -- Toggle the in-Neovim tab preview (works standalone, no server needed) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
 - [ ] `:MDView write` -- Switch cursor caret and block editing together, starting the preview if needed; no argument toggles
-- [ ] `:MDView weblogs` -- Show the relay's captured stdout, including [client] browser-side diagnostics
+- [x] `:MDView weblogs` -- Show the relay's captured stdout, including [client] browser-side diagnostics _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
 - [ ] `:MDView standalone` -- Preview via the relay's own file watcher, with no Neovim in the chain
 - [ ] `:MDView start` -- Start the relay and open the preview for the current buffer (or the given file)
-- [ ] `:MDView log warn` -- Show the internal log ring, filtered to WARN and above
-- [ ] `:MDView cursor` -- Set the Neovim-cursor marker in the preview (line|caret|section|off|toggle — toggle flips section on/off)
-- [ ] `:MDView file-log` -- Toggle persistent file logging, then report the state
-- [ ] `:MDView log export` -- Write the internal log ring to a file (default: stdpath log)
-- [ ] `:MDView log` -- Show the internal log ring
-- [ ] `:MDView file-log on` -- Enable persistent file logging (optionally set its path)
-- [ ] `:MDView file-log toggle` -- Toggle persistent file logging, then report the state
-- [ ] `:MDView file-log off` -- Disable persistent file logging
-- [ ] `:MDView file-log status` -- Report persistent file logging state without changing anything
-- [ ] `:MDView theme` -- Switch the preview theme (optionally -light/-dark); no argument reports the current theme
-- [ ] `:MDView diagnose` -- Write a full component-state diagnostics report to a file and open it
-- [ ] `:MDView overlay` -- Toggle a preview overlay (floating TOC, …); no name lists them
-- [ ] `:MDView overlay list` -- List the known preview overlays and whether each is on
-- [ ] `:MDView blanklines` -- Show every blank line as extra space, or collapse them (CommonMark default); no argument toggles
-- [ ] `:MDView pin` -- Hold the preview on the current document instead of following the active buffer; no argument toggles
-- [ ] `:MDView reveal` -- Reveal/hide all private (```private) blocks in the preview
-- [ ] `:MDView sync` -- Pause/resume the nvim->browser scroll sync; no argument reports the state
-- [ ] `:MDView breadcrumbs` -- Show the session breadcrumbs (document + heading over time)
-- [ ] `:MDView breadcrumbs clear` -- Discard the recorded session breadcrumbs
-- [ ] `:MDView breadcrumbs export` -- Write the session breadcrumbs outline to a file (default: stdpath log)
-- [ ] `:MDView log error` -- Show the internal log ring, filtered to ERROR and above
-- [ ] `:MDView log info` -- Show the internal log ring, filtered to INFO and above
-- [ ] `:MDView lang` -- Show the preview in another language (<code> | off | refresh); no argument reports the state
-- [ ] `:MDView log debug` -- Show the internal log ring, filtered to DEBUG and above
+- [x] `:MDView log warn` -- Show the internal log ring, filtered to WARN and above _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView cursor` -- Set the Neovim-cursor marker in the preview (line|caret|section|off|toggle — toggle flips section on/off) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView file-log` -- Toggle persistent file logging, then report the state _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView log export` -- Write the internal log ring to a file (default: stdpath log) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView log` -- Show the internal log ring _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView file-log on` -- Enable persistent file logging (optionally set its path) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView file-log toggle` -- Toggle persistent file logging, then report the state _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView file-log off` -- Disable persistent file logging _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView file-log status` -- Report persistent file logging state without changing anything _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView theme` -- Switch the preview theme (optionally -light/-dark); no argument reports the current theme _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView diagnose` -- Write a full component-state diagnostics report to a file and open it _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView overlay` -- Toggle a preview overlay (floating TOC, …); no name lists them _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView overlay list` -- List the known preview overlays and whether each is on _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView blanklines` -- Show every blank line as extra space, or collapse them (CommonMark default); no argument toggles _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView pin` -- Hold the preview on the current document instead of following the active buffer; no argument toggles _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView reveal` -- Reveal/hide all private (```private) blocks in the preview _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView sync` -- Pause/resume the nvim->browser scroll sync; no argument reports the state _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView breadcrumbs` -- Show the session breadcrumbs (document + heading over time) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView breadcrumbs clear` -- Discard the recorded session breadcrumbs _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView breadcrumbs export` -- Write the session breadcrumbs outline to a file (default: stdpath log) _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView log error` -- Show the internal log ring, filtered to ERROR and above _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView log info` -- Show the internal log ring, filtered to INFO and above _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
+- [x] `:MDView lang` -- Show the preview in another language (<code> | off | refresh); no argument reports the state _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-commands.sheet.lua)_
+- [x] `:MDView log debug` -- Show the internal log ring, filtered to DEBUG and above _(auto 2026-11-17: mdview.nvim/TESTS/sheets/mdview-bindings-views.sheet.lua)_
 
 ### :Mark
 
