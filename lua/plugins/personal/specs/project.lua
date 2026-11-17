@@ -112,6 +112,9 @@ return {
       require("github_stats").setup({
         -- Notify at startup whether a fetch was performed or not.
         -- notify_fetch = true,
+        -- Repositories to track ("owner/name"). Empty by default; in remote mode (below)
+        -- the list is the data repository's config.json, not this option.
+        -- repos = {},
         -- Where the history lives: the private data repository whose GitHub
         -- Actions workflow collects once a day (github_stats.nvim's remote mode).
         -- Every machine only clones it (stdpath("data")/github_stats.nvim-vault)
@@ -327,6 +330,8 @@ return {
     --     help = "?",
     --     toggle_favorite = "<C-f>",
     --   },
+    --   -- Drawn in front of a favorited row of the list (not part of the row's text); "" hides it.
+    --   favorite_mark = "\u{2605} ",
     --   -- Symbol in the `prefix` field; needs a Nerd Font, e.g. "> " for plain terminals.
     --   prompt_prefix_symbol = " \u{f002} ",
     --   -- Request timing and logging, for debugging only.
@@ -1161,6 +1166,10 @@ return {
       -- they open the tree). Read on every lookup, so switching it off takes effect at
       -- once. Needs a filetree.nvim with `filetree.roots`; without one nothing happens.
       -- filetree_case_root = true,
+      -- Whether `casedesk.picker_root.files()`/`.grep()` search from `repo_root` while the
+      -- cwd lies anywhere inside it (in a case folder, too) instead of from the cwd.
+      -- Outside `repo_root` they are the plain cwd pickers. Read on every call.
+      -- picker_repo_root = true,
       -- Where `:Tricentis pto` finds its absence files, relative to `repo_root`: one
       -- Markdown file per kind of absence (`vacation.md`, `sick.md`), plus `back.md`
       -- for `:Tricentis pto back`. Checklist and mail texts live there, not here —
@@ -1373,6 +1382,34 @@ return {
       --   audit = true,
       --   statusline = true,
       --   log_budget_bytes = 120000,
+      -- },
+      -- The MCP layer (`casedesk.mcp`): a connection to a Model Context Protocol
+      -- server, by default Tosca Cloud's. Off by default; nothing starts until a
+      -- command asks.
+      -- - `profile`: which entry of `profiles` is used.
+      -- - `profiles.<name>`: `cmd` (the bridge's argv) plus `args` (appended; the
+      -- tenant's URL goes here, it is customer data and never a default), or `url`
+      -- (a Streamable HTTP endpoint) with `headers`/`secret_headers` (a token goes into
+      -- `secret_headers`, never argv); exactly one of `cmd` and `url`. `workspace` is the
+      -- default workspace of a call, `write_workspaces` the only ones a writing tool
+      -- may run in, `tools` the level per tool (`read`, `write`, `never`), which wins
+      -- over the server's hints; a tool with neither is `never`.
+      -- - `audit`: one metadata-only line per call in `stdpath("state")/casedesk/mcp-audit.jsonl`.
+      -- - `catalog_ttl_s`: how long the tool catalog is cached (memory and
+      -- `stdpath("state")/casedesk/mcp-catalog-<profile>.json`) before it is read again.
+      -- mcp = {
+      --   enabled = false,
+      --   profile = "tosca",
+      --   profiles = {
+      --     tosca = {
+      --       cmd = { "npx", "-y", "mcp-remote@latest" },
+      --       args = {},
+      --       write_workspaces = {},
+      --       tools = {},
+      --     },
+      --   },
+      --   audit = true,
+      --   catalog_ttl_s = 3600,
       -- },
       -- How many days back `:Cases marks` (`<leader>cm`) lists the cases you
       -- worked on.
@@ -1719,6 +1756,10 @@ return {
         main = vim.env.REPOS_DIR .. "/tasks-vault",
         tricentis = vim.env.REPOS_DIR .. "/tricentis-vault",
       } or {},
+      -- Pick the vault by the working directory at setup(): the first rule whose folder
+      -- holds the cwd wins over `vault`; a rule for an unnamed vault is skipped.
+      -- e.g. { { match = "~/work", vault = "work" } }.
+      -- vault_rules = {},
       -- Folders that are areas although they hold neither ROADMAP/ nor Backlog/.
       -- Default: {}.
       extra_areas = { "ALL", "nvim-config", "docmap-desktop", "migrate.nvim" },
@@ -1754,6 +1795,12 @@ return {
       --   -- lint_timeout_ms = 120000,
       --   -- Allow `ci` to run <vault>/TOOLS/scripts/md_lint.lua (code from the vault itself).
       --   -- trust_vault_lint = false,
+      -- },
+      -- `check` command.
+      -- check = {
+      --   -- Vaults (names in `vaults`, or folders) where `check` gives no hint for a UI
+      --   -- word in a title (`ui-word-without-ux`).
+      --   -- ui_words_off = {},
       -- },
       -- After finishing a task.
       -- next = {
@@ -1800,6 +1847,12 @@ return {
       -- Window of the `:Tasks new` form: "float" | "split" | "vsplit" | "current"
       -- (`:Tasks new mode=...` overrides it for one call).
       -- form = { mode = "float" },
+      -- The vault in a tree view (filetree.nvim's own tree, lib.nvim's registry): a count
+      -- of open tasks on the area folders, a view `tasks`, and the actions "finish" and
+      -- "claim" on a task. true: registered, the actions in the tree's menu;
+      -- { keys = { done = "<key>", claim = "<key>" } }: on those keys in the tree buffer
+      -- as well; false: nothing is registered.
+      -- tree = true,
       -- Plan steps in a task buffer.
       -- steps = {
       --   -- Ask whether to finish the task when the LAST open step of `## Plan` is ticked
@@ -2084,6 +2137,12 @@ return {
       -- Den Befehl `:Terminal` registrieren (toggle open hide close pin adopt list cheat send run).
       -- Default: true.
       -- commands = true,
+
+      -- "Terminal here" on a node of a tree view (filetree.nvim's own tree reads it from
+      -- lib.nvim's registry): a terminal that starts in the node's folder. true: in the
+      -- tree's menu and action list; { key = "<leader>t" }: on that key in the tree buffer
+      -- as well; false: not offered.
+      -- tree = true,
     },
   },
 

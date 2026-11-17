@@ -87,6 +87,13 @@ return {
         --   picker = true, -- false: always open with `default`, no chooser
         --   default = "system", -- mode used when picker = false: "system" | "buffer" | "float" | "terminal"
         -- },
+        -- Image handling; only takes effect when images.nvim is installed, else an
+        -- image always goes to the system viewer.
+        -- images = {
+        --   picker = true, -- false: always open with `default`, no chooser
+        --   default = "system", -- "system" | "show" | "zen", used when picker = false
+        --   optout = false, -- true: never offer images.nvim, even when installed
+        -- },
       },
 
       -- URLs under the cursor open in the browser instead of resolving to a file.
@@ -492,7 +499,10 @@ return {
         -- dismiss_keys = { "q", "<Esc>" },
         -- open_keys = { "gf" }, -- open what the float shows, externally
         -- nav_keys = { left = { "h" }, right = { "l" }, up = { "k" }, down = { "j" } }, -- pan while zoomed; also moves in a directory's mini filetree
-        -- dir_keys = { click = { "<LeftMouse>" } }, -- click an entry in a directory hover's mini filetree ({} = no click); a click that misses the float is replayed as a normal click
+        -- dir_keys = {
+        --   click = { "<LeftMouse>" }, -- click an entry in a directory hover's mini filetree ({} = no click); a click that misses the float is replayed as a normal click
+        --   expand = {}, -- e.g. { "o" }: open/close a folder of the listing in place (needs filetree.nvim's own tree)
+        -- },
         -- position_keys = { next = { "<M-n>" } }, -- step to the next position-preview contributor
         -- zoom_keys = { into = { ">" }, out = { "|" }, reset = { "=" } },
         -- zen_keys = { toggle = { "F" } },
@@ -898,6 +908,9 @@ return {
           -- Hand the entry to the OS: default application / file manager.
           -- open_system = { "<M-o>", "<leader>sm" },
           -- reveal_in_manager = { "<M-x>", "<leader>fm" },
+          -- Show the entry in the file tree: closes the picker, the tree opens with its
+          -- cursor on the entry (only when a tree that can reveal a path is loaded).
+          -- reveal_in_tree = { "<M-s>", "<leader>ft" },
           -- Switch between the targets of a tab group (telescope + snacks). On
           -- <Tab>/<S-Tab> they only switch while a group is active (`<leader>s`);
           -- in every other picker they keep the engine's own multi-select.
@@ -1172,6 +1185,7 @@ return {
         --   info = true, -- node info
         --   marks = true, -- toggle / mark all / unmark all / clear / show marked
         --   media = true, -- image/PDF nodes only: preview / open externally / OCR / image info
+        --   actions = true, -- own tree only: its actions that apply to the node (other plugins', the source's)
         --   window = true, -- open/close the tree itself
         -- },
 
@@ -1186,6 +1200,9 @@ return {
         features = {
           -- layout_guard = { enabled = true, delay_ms = 50 },
           -- no_name_guard = { enabled = true }, -- redirect stray [No Name] editor windows to a real buffer
+          -- The tree shares a sidebar slot with lib.nvim.ui.kit sidebars: opening one where
+          -- the tree is takes the tree off the screen, closing it brings the tree back.
+          -- kit_slot = { enabled = true, name = "filetree" },
           -- Warn when a just-opened buffer turns out to be a dangling symlink's target.
           -- broken_link_notify = { enabled = true },
           -- Keep the tree in its sidebar: a buffer landing there is moved to an editor
@@ -1999,6 +2016,17 @@ return {
         -- Persist per-tabpage tab-pin state (ui.nvim's `vim.t.ui_pinned`);
         -- restored after the buffer order. A no-op without ui.nvim's tabline.
         -- restore_pinned_buffers = true,
+
+        -- Persist the file tree with the session (a sidecar next to it): whether it
+        -- was open, its root, the open folders and what is open in the views of other
+        -- sources. `:mksession` cannot carry the tree window. No-op without
+        -- filetree.nvim or when the tree is closed at save time.
+        -- restore_tree = true,
+
+        -- A sign in a tree view on every pinned file (decorator `pin` at
+        -- lib.nvim.tree.registry, read by filetree.nvim's own tree). true: registered;
+        -- { sign = "<one cell>" }: another sign (default "*"); false: not registered.
+        -- tree = true,
 
         -- Attach `opts.title = "Sessions"` to `:Session`/autoload notify calls,
         -- for rich vim.notify backends; false calls vim.notify plainly.

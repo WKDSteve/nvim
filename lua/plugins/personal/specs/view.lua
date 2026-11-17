@@ -518,6 +518,15 @@ return {
         -- inherited variables); `:Image check` shows which of the two decided. Under
         -- tmux the outer terminal's reply is asked for instead.
         -- terminal_probe = true,
+        -- Largest file drawn as it is, in MB (the whole file is base64-encoded and
+        -- sent in one terminal write). Above it the image is shrunk first
+        -- (`shrink_oversized`) or refused with a message. 0 = no limit.
+        -- max_file_mb = 25,
+        -- Above `max_file_mb`: shrink to a PNG that fits in `shrink_px` on its longer
+        -- side (cached under stdpath("cache")/images.nvim/shrunk) instead of refusing.
+        -- Needs ImageMagick.
+        -- shrink_oversized = true,
+        -- shrink_px = 2400,
         -- Maximum image size in terminal cells (OSC 1337 scales by itself, so
         -- no cell measurement is needed).
         -- max_cols = 60,
@@ -737,6 +746,27 @@ return {
       --   double_click = true, -- <2-LeftMouse> on a Markdown link shows the image
       --   filetypes = { "markdown", "vimwiki", "norg", "text" }, -- replaces the list
       -- },
+
+      -- `:Image export <dir|glob>`: above this many files it asks before making one PDF
+      -- of them (0 = never ask).
+      -- export = { confirm_over = 50 },
+
+      -- External programs (magick, tesseract): how long a call may take before it is
+      -- killed, and the resource limits every `magick` run gets (`-limit memory`/`map`/
+      -- `time`). `false` leaves that limit off.
+      -- process = {
+      --   timeout_ms = 60000,
+      --   magick_memory = "512MiB",
+      --   magick_time_s = 60,
+      -- },
+
+      -- A badge in a tree view on every image no document refers to (decorator `orphan`
+      -- at lib.nvim.tree.registry, read by filetree.nvim's own tree), plus the menu
+      -- actions "delete unreferenced image" and "look again". true: registered;
+      -- { badge = "<text>" }: another badge text; { actions = false }: without the
+      -- actions; { keys = { delete = "<lhs>", rescan = "<lhs>" } }: an action on a key;
+      -- false: not registered. The root is scanned only while a tree shows the badges.
+      -- tree = true,
     },
   },
 
@@ -1171,6 +1201,15 @@ return {
         -- Which-key group registration: true | false | a table of group options.
         -- which_key = true,
       },
+
+      -- Media files in a tree view (filetree.nvim's own tree, lib.nvim's registry): a
+      -- badge on video/audio nodes, the still (video) or waveform (audio) as their
+      -- preview, and the actions transcribe, play, contact sheet. true, false (none of
+      -- it), or a table: { badge = "<text>" }, { preview = false }, { actions = false },
+      -- { keys = { transcribe = "gt", play = "gp", sheet = "gs" } } (none by default:
+      -- the actions are in the tree's menu). Roots are scanned only while a tree shows
+      -- the badges.
+      -- tree = true,
     },
   },
 

@@ -193,6 +193,7 @@ return {
       --   nvim_options = true, -- :Debug indent
       --   markdown = true, -- :Debug markdown
       --   neotree = false, -- :Debug neotree ... (config-specific, opt-in)
+      --   filetree = true, -- :Debug filetree watchers|quarantine|handles (filetree.nvim's own tree)
       --   neotest = true, -- :Debug neotest adapters|state|file|root|framework|discover
       --   module_reload = true, -- :Debug module reload
       --   proc_trace = true, -- :Debug proc start|stop|status|log|watch
@@ -214,6 +215,13 @@ return {
       -- neotree = {
       --   quarantine = "config.neotree.watcher_quarantine", -- string|table
       --   safety = "config.neotree.safety", -- string|table
+      -- },
+
+      -- The file layer of filetree.nvim's own tree (:Debug filetree ...); reads
+      -- `require("filetree").fs_state()`, without filetree.nvim every action is one
+      -- notification.
+      -- filetree = {
+      --   output = "float", -- "float" (scratch float per report) | "notify" (one notification)
       -- },
 
       -- neotest diagnostics (:Debug neotest ...); without neotest every action
@@ -380,6 +388,12 @@ return {
       -- Use pickers.nvim's fuzzy engine for that picker when select_fn is unset;
       -- false always uses the ui.kit chooser.
       -- use_pickers_nvim = true,
+      -- "Compare" on a node of a tree view (filetree.nvim's own tree reads it from
+      -- lib.nvim's registry): two marked files/folders against each other, or the
+      -- node against the file of the editor window. true: in the tree's menu and
+      -- action list; { key = "<lhs>" }: on that key in the tree buffer as well;
+      -- false: not offered.
+      -- tree = true,
     },
   },
 
@@ -1562,6 +1576,11 @@ return {
       -- `:Testing lint`. `on_save = true`: a written file is linted in the background (only
       -- the checks that may run on save, never luals) and its diagnostics are updated.
       -- lint = { on_save = false },
+      -- The last result in a tree view (filetree.nvim's own tree): a badge on spec files
+      -- and the view `tests`. true, false (nothing registered), or
+      -- { keys = { run = "r", failed = "R" } } for the keys of that view (an lhs, a list
+      -- of them, or false: the action stays in the menu).
+      -- tree = true,
       -- The repositories `:Testing ci repos` runs one after the other: every sub-directory of a root
       -- whose `.testing.lua` has a `ci` section ("$VAR" is expanded by testing.nvim); `include` /
       -- `exclude` narrow them by directory name.

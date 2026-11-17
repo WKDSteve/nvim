@@ -127,6 +127,20 @@ return {
         --   structured_data = false,
         --   -- Both sides of every unresolved merge conflict (needs gitsuite.nvim).
         --   conflict = false,
+        --   -- One read-only MCP tool call the caller makes before the request (never
+        --   -- the model): { server = "<lib.nvim.mcp client id>", tool = "...", args = { ... } };
+        --   -- false = none (see docs/scope.md of ai.nvim).
+        --   mcp = false,
+        --   -- "<server>/<tool>" entries a `context.mcp` call may name. Empty = no
+        --   -- restriction; a malformed value refuses every call.
+        --   mcp_allowed = {},
+        -- },
+
+        -- Fixed context window sent with every Ollama request (`num_ctx`), so a long
+        -- prompt is not cut at Ollama's small default. One value on purpose: another
+        -- value makes Ollama reload the model. `false` sends none.
+        -- ollama = {
+        --   num_ctx = 32768,
         -- },
 
         -- Ghost-text completion at the cursor (see docs/configuration.md in the

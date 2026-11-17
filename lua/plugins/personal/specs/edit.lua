@@ -352,6 +352,12 @@ return {
       --   -- Open the stacked filter prompt (needs pickers.nvim).
       --   filter = "<C-f>",
       -- },
+
+      -- "Replace in this file or folder" on a node of a tree view (filetree.nvim's own
+      -- tree reads it from lib.nvim's registry). true: in the tree's menu and action
+      -- list; { key = "<leader>r" }: on that key in the tree buffer as well; false: not
+      -- offered.
+      -- tree = true,
     },
   },
 
@@ -723,6 +729,11 @@ return {
         -- One-time "which CLI tools does this plugin want, and why" popup on
         -- first setup() after install (via lib.nvim.deps); false disables it.
         -- deps_popup = true,
+        -- "Spell check this" and "Translate this" on a node of a tree view
+        -- (filetree.nvim's own tree reads them from lib.nvim's registry). true: in the
+        -- tree's menu and action list; { key = { check = "<lhs>", translate = "<lhs>" } }:
+        -- on those keys in the tree buffer as well; false: not offered.
+        -- tree = true,
       })
     end,
   },
@@ -781,6 +792,14 @@ return {
       --   fold = true, -- fold/unfold entries (shown on a heading)
       --   toc = true, -- Insert/Refresh TOC
       --   refs = true, -- Sync References
+      --   checkbox = true, -- Cycle Checkbox and the direct states (shown on a checkbox line)
+      -- },
+
+      -- Task-list checkboxes (`<C-CR>`, `<S-CR>`, `<leader>mx`, a double-click on the
+      -- box, the menu): the states they step through, one character each. A state
+      -- outside the list (`[-]`) starts it over.
+      -- checkbox = {
+      --   states = { " ", "x", "~" },
       -- },
 
       -- `ui_menu = false` keeps ui.nvim's right-click menu from composing the
@@ -847,7 +866,7 @@ return {
         -- },
         -- bullets = { enabled = true, icons = { "•", "◦", "▪" } }, -- one per nesting level
         -- ordered = { enabled = true }, -- the number of a `1.` / `1)` list item gets its own colour
-        -- checkboxes = { enabled = true, unchecked = "☐", checked = "☑", partial = "◐" },
+        -- checkboxes = { enabled = true, unchecked = "☐", checked = "☑", partial = "◐", cancelled = "☒" },
         -- -- icons: the language label gets the icon of nvim-web-devicons / mini.icons;
         -- -- icon_map = { lua = "L" } overrides it per language.
         -- code = { enabled = true, background = true, label = true, icons = true, icon_map = {} },
