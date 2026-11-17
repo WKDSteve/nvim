@@ -72,7 +72,13 @@ return {
         -- provider_order = { "claude", "ollama", "openai", "gemini", "ai_desktop" },
         -- Default model per provider id, e.g. { claude = "claude-opus-4-5" };
         -- empty = each provider's own built-in default.
-        model = { claude = "claude-sonnet-5-5", ai_desktop = "claude-haiku-5-5" },
+        -- ollama: the local coding model (MoE, ~60 tok/s on the RTX 4070 SUPER with DDR5-7200; benchmark in
+        -- tasks-vault ALL/ROADMAP/reports/2026-11-10_lokale-ai-setup-benchmark-und-openclaw-vergleich.md).
+        model = {
+          claude = "claude-sonnet-5-5",
+          ai_desktop = "claude-haiku-5-5",
+          ollama = "qwen3.6:35b-a3b-coding",
+        },
         -- Request timeout in ms.
         -- timeout_ms = 60000,
 
@@ -140,8 +146,8 @@ return {
           -- idle_ms = 500,
           -- Lines of buffer context sent before/after the cursor.
           -- max_context_lines = 60,
-          -- Response-length cap of a completion request (a whole number >= 1; only
-          -- the claude provider reads it). An answer cut off at the cap is discarded.
+          -- Response-length cap of a completion request (a whole number >= 1; read by
+          -- claude, and by ollama as num_predict). An answer cut off at the cap is discarded.
           -- max_tokens = 512,
           -- How much the model may think: "low" | "medium" | "high" | "xhigh" | "max",
           -- or false for none. Only the claude provider sends it, lowered to what
@@ -179,7 +185,18 @@ return {
         --     local_ = { provider = "ollama", model = "llama3" },
         --   }
         -- Every field is optional; a field a request sets itself always wins.
-        -- agents = {},
+        -- Two local presets (`:Ai agent local_code` / `local_fast`, <leader>ain cycles):
+        -- the MoE coding model, and gemma4 for text, markdown and quick questions
+        -- (fully on the GPU, also with a long context).
+        agents = {
+          local_code = { provider = "ollama", model = "qwen3.6:35b-a3b-coding" },
+          local_fast = { provider = "ollama", model = "gemma4:12b-it-qat" },
+        },
+        -- Ollama only: the context window every request asks for (default 32768);
+        -- false = Ollama's own default (as low as 4096 on a 12 GB GPU).
+        -- ollama = {
+        --   num_ctx = 32768,
+        -- },
         -- Guard rails for unattended bulk requests (`req.bulk`, see lua/ai/bulk.lua).
         -- `max_session_chars` caps the characters of ALL bulk requests of one
         -- Neovim session; `false` = no cap. `false`, not `nil`, so the key exists
