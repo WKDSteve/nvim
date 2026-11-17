@@ -40,24 +40,31 @@ return function(H)
   end
 
   local lib = vim.env.LIB_NVIM_DIR or (repos .. "/lib.nvim")
-  local argv = { python, script, root, repos, "--lib", lib, "--check" }
-  local res = vim.system(argv, { text = true }):wait(120000)
+  -- The audit stops its own children (30 s each, process tree included) and starts none after its
+  -- --deadline; waiting 20 s longer than that never leaves a child behind, and both stay under the
+  -- 120 s file limit of .testing.lua.
+  local argv = { python, script, root, repos, "--lib", lib, "--check", "--deadline", "90" }
+  local res = vim.system(argv, { text = true }):wait(110000)
   local out = (res.stdout or "") .. (res.stderr or "")
-  H.ok(res.code ~= 124 and res.signal == 0, "audit.py finished within 2 minutes\n" .. out)
-  -- Only the per-plugin sections ("### <name>" then "Spec: ..."), the table is noise when it fails.
+  H.ok(res.code ~= 124 and res.signal == 0, "audit.py finished within 110 s\n" .. out)
+  -- Only the per-plugin sections ("### <name>" then "Spec: ..." or "Fehler: ..."), the table is noise.
   local gaps = {}
   local current
   for line in out:gmatch("[^\r\n]+") do
     current = line:match("^### (.+)$") or current
     local spec = line:match("^Spec: (.+)$")
+    local failed = line:match("^Fehler: (.+)$")
     if spec then
       gaps[#gaps + 1] = ("%s: %s"):format(current or "?", spec)
+    elseif failed then
+      gaps[#gaps + 1] = ("%s: DEFAULTS not readable (%s)"):format(current or "?", failed)
     end
   end
   H.eq(
     res.code,
     0,
-    "every DEFAULTS option is named in its install spec (missing, add them per TOOLS/spec-full-options.md):\n  "
+    "every DEFAULTS option is named in its install spec and every DEFAULTS loads"
+      .. " (add missing ones per TOOLS/spec-full-options.md):\n  "
       .. (#gaps > 0 and table.concat(gaps, "\n  ") or out)
   )
 end
