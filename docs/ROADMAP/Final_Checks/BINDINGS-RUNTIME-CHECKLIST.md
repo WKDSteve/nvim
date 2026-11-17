@@ -2036,31 +2036,31 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 
 ### :Rules
 
-- [ ] `:Rules messages` -- Open this plugin's notify history (toast + :messages log)
-- [ ] `:Rules list` -- List the rules in the quickfix list, each at its source line; --family= and --severity= narrow it, --format=json prints the document of the machine contract
-- [ ] `:Rules set` -- Change parts of a rule's file (key=value, a value may hold spaces): every line it was not asked to change stays byte for byte; an open buffer of the file is reloaded, one with unsaved changes is reported
-- [ ] `:Rules catalog` -- Build the reading documents of a one-file-per-rule ruleset from its layouts; --check for CI
-- [ ] `:Rules reinstate` -- Bring a retired rule back from _retired/. Where it stood is not recorded: give --after=<ID>, --before=<ID> or --section=<heading> --layout=<file>, or it stands in no layout. Asks first (--yes skips the question)
-- [ ] `:Rules move` -- Move a rule's {{rule ID}} line within its layout or into another (--to=<file>#<section>, or --after=<ID> / --before=<ID>); the rule's own file is not touched
-- [ ] `:Rules waive` -- Accept the findings of a rule in this project: a waiver in .rules-waivers.json with a reason (reason=, required), a last day (expires=) and places (paths=, comma separated; a blank in a path is typed as it is). The project is that of this buffer or the working directory (--project= names it)
-- [ ] `:Rules stats` -- Structural overview of every loaded rule: per-family totals, automated-vs-manual, severity -- no check run
-- [ ] `:Rules gate` -- Run a configured gate (setup({ gates = {...} })), --diff=<git-ref> to scope to that diff
-- [ ] `:Rules show` -- Jump to one rule's source location by id, e.g. :Rules show DEP-06
-- [ ] `:Rules retire` -- Move a rule's file to _retired/ and out of every layout; its id stays taken. Asks first (--yes skips the question), --by=<ID> names the rule that takes its place
-- [ ] `:Rules check` -- Sweep one rule family (--family=PREFIX) across PATH (default: cwd), --format=json for machine-readable output
-- [ ] `:Rules new` -- Make a rule in the next free id of the family. The words after the family are the title; with a title and severity= the rule is made and opened, with less the Markdown form opens (family, title, severity, place, text; <C-s> checks it, shows what would be made and asks). A family no rule has yet is asked about first (--yes skips the question)
-- [ ] `:Rules renew` -- Give a waiver a new last day (expires=YYYY-MM-DD, or --no-expiry for none) and, with reason=, a new reason; its paths stay. The way on for a waiver that expired
+- [x] `:Rules messages` -- Open this plugin's notify history (toast + :messages log) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules list` -- List the rules in the quickfix list, each at its source line; --family= and --severity= narrow it, --format=json prints the document of the machine contract _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules set` -- Change parts of a rule's file (key=value, a value may hold spaces): every line it was not asked to change stays byte for byte; an open buffer of the file is reloaded, one with unsaved changes is reported _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules catalog` -- Build the reading documents of a one-file-per-rule ruleset from its layouts; --check for CI _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules reinstate` -- Bring a retired rule back from _retired/. Where it stood is not recorded: give --after=<ID>, --before=<ID> or --section=<heading> --layout=<file>, or it stands in no layout. Asks first (--yes skips the question) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules move` -- Move a rule's {{rule ID}} line within its layout or into another (--to=<file>#<section>, or --after=<ID> / --before=<ID>); the rule's own file is not touched _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules waive` -- Accept the findings of a rule in this project: a waiver in .rules-waivers.json with a reason (reason=, required), a last day (expires=) and places (paths=, comma separated; a blank in a path is typed as it is). The project is that of this buffer or the working directory (--project= names it) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules stats` -- Structural overview of every loaded rule: per-family totals, automated-vs-manual, severity -- no check run _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules gate` -- Run a configured gate (setup({ gates = {...} })), --diff=<git-ref> to scope to that diff _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules show` -- Jump to one rule's source location by id, e.g. :Rules show DEP-06 _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules retire` -- Move a rule's file to _retired/ and out of every layout; its id stays taken. Asks first (--yes skips the question), --by=<ID> names the rule that takes its place _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules check` -- Sweep one rule family (--family=PREFIX) across PATH (default: cwd), --format=json for machine-readable output _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-read.sheet.lua)_
+- [x] `:Rules new` -- Make a rule in the next free id of the family. The words after the family are the title; with a title and severity= the rule is made and opened, with less the Markdown form opens (family, title, severity, place, text; <C-s> checks it, shows what would be made and asks). A family no rule has yet is asked about first (--yes skips the question) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:Rules renew` -- Give a waiver a new last day (expires=YYYY-MM-DD, or --no-expiry for none) and, with reason=, a new reason; its paths stay. The way on for a waiver that expired _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
 
 ### :RulesVault
 
-- [ ] `:RulesVault` -- The rules vault: open, copy, link, search and show its rulesets, rules and families; create a vault
-- [ ] `:RulesVault link` -- Insert a Markdown link to a rule, a family or a part at the cursor, relative to the current file
-- [ ] `:RulesVault clipboard` -- Copy the path of a rule file, a family folder or a part of a ruleset to the + register
-- [ ] `:RulesVault find` -- Pick a file by name in the ruleset of a rule id, in a family or in a part, through pickers.nvim
-- [ ] `:RulesVault grep` -- Search the content of the files of a ruleset, a family or a part through pickers.nvim
-- [ ] `:RulesVault tree` -- Show a ruleset as a tree: family, then rules, with counts per family and a marker on the retired ones
-- [ ] `:RulesVault open` -- Open the rule file of an id, the folder of a family, or a part of a ruleset (rules, layouts, catalogs, all)
-- [ ] `:RulesVault cdx` -- Copy a prompt for an agent session that names the rule, family or part to the + register
+- [x] `:RulesVault` -- The rules vault: open, copy, link, search and show its rulesets, rules and families; create a vault _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault link` -- Insert a Markdown link to a rule, a family or a part at the cursor, relative to the current file _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault clipboard` -- Copy the path of a rule file, a family folder or a part of a ruleset to the + register _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault find` -- Pick a file by name in the ruleset of a rule id, in a family or in a part, through pickers.nvim _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault grep` -- Search the content of the files of a ruleset, a family or a part through pickers.nvim _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault tree` -- Show a ruleset as a tree: family, then rules, with counts per family and a marker on the retired ones _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
+- [x] `:RulesVault open` -- Open the rule file of an id, the folder of a family, or a part of a ruleset (rules, layouts, catalogs, all) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault; a rule with a check block opens at its rule line, not the heading: rules.nvim/rulesvault-open-auf-der-ueberschrift)_
+- [x] `:RulesVault cdx` -- Copy a prompt for an agent session that names the rule, family or part to the + register _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
 
 ### :Sandbox
 
@@ -2569,8 +2569,8 @@ caution, not a verdict. Read the description before triggering any of these.
 - [ ] `:ReplacePreset` -- Run a saved preset: :ReplacePreset {name}
 - [ ] `:ReplaceSavePreset` -- Usage: :ReplaceSavePreset {name} {old} {new} [scope] [--flags]
 - [x] `:Reposcope filter` -- Filter the repository list by substring (no args resets the list) _(auto 2026-11-07: reposcope.nvim/TESTS/sheets/reposcope-filter-sort.sheet.lua)_
-- [ ] `:Rules unwaive` -- Remove a waiver from .rules-waivers.json: the findings it accepted flag again. Asks first (--yes skips the question)
-- [ ] `:RulesVault create` -- Make a rules vault: folder, README, .rules.json, .gitattributes, .gitignore, CI and a first ruleset. Lists what happens and the setup() step that is left to you, then asks (--yes skips it). Never overwrites a file, never adds a remote
+- [x] `:Rules unwaive` -- Remove a waiver from .rules-waivers.json: the findings it accepted flag again. Asks first (--yes skips the question) _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-write.sheet.lua)_
+- [x] `:RulesVault create` -- Make a rules vault: folder, README, .rules.json, .gitattributes, .gitignore, CI and a first ruleset. Lists what happens and the setup() step that is left to you, then asks (--yes skips it). Never overwrites a file, never adds a remote _(auto 2026-11-17: rules.nvim/TESTS/sheets/rules-bindings-vault.sheet.lua; in the config :RulesVault exists only after the first :Rules loaded the plugin: nvim-config/rules-nvim-spec-cmd-rulesvault)_
 - [x] `:Sandbox container kill` -- Force kill a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
 - [x] `:Sandbox container restart` -- Restart a container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
 - [x] `:Sandbox container remove` -- Remove a stopped container (--buffer: stream to a terminal buffer) _(auto 2026-11-07: sandbox.nvim/TESTS/sheets/sandbox-cmds-container.sheet.lua)_
