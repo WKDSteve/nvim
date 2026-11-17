@@ -157,8 +157,8 @@ return {
           -- claude, and by ollama as num_predict). An answer cut off at the cap is discarded.
           -- max_tokens = 512,
           -- How much the model may think: "low" | "medium" | "high" | "xhigh" | "max",
-          -- or false for none. Only the claude provider sends it, lowered to what
-          -- the model takes.
+          -- or false for none. The claude provider sends it, lowered to what the
+          -- model takes; ollama turns "low" into think = false (no thinking).
           -- effort = "low",
           -- string; overrides `provider` for completion requests only (false = unset).
           -- Pinned together with `model` below: a claude-* id must never be
