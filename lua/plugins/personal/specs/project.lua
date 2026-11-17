@@ -682,7 +682,9 @@ return {
         -- `:Git dashboard` fetches the page it opens with, each repository as soon as its
         -- row is read, and redraws the row once its fetch is through (the `gf` most
         -- openings are followed by, without asking). Off: opening never reaches the network.
-        -- fetch_on_open = false,
+        -- Off on the workstation until its Falcon check (task
+        -- gitsuite.nvim/abnahme-dashboard-fetch-on-open-und-cli-mit-echten-repos-che) passes.
+        fetch_on_open = not require("machine").is("workstation"),
         -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
         -- focused default. "behind" = only repositories behind their upstream
         -- (as of the last fetch); "all" = every repository on the page.
