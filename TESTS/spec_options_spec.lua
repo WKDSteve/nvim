@@ -15,9 +15,19 @@ return function(H)
   if (not script or script == "") and repos and repos ~= "" then
     script = repos .. "/tasks-vault/TOOLS/scripts/spec-options/audit.py"
   end
-  local python = vim.fn.exepath("python3")
-  if python == "" then
-    python = vim.fn.exepath("python")
+  -- The first interpreter that answers: on Windows `python3` (and `python`) can be the Microsoft Store stub, which
+  -- is on PATH but runs nothing.
+  local python = ""
+  for _, name in ipairs({ "python3", "python" }) do
+    local exe = vim.fn.exepath(name)
+    if python == "" and exe ~= "" then
+      local probe = vim.system({ exe, "--version" }, { text = true }):wait(10000)
+      if
+        probe.code == 0 and ((probe.stdout or "") .. (probe.stderr or "")):find("Python 3", 1, true)
+      then
+        python = exe
+      end
+    end
   end
   local role_ok, machine = pcall(require, "machine")
   if role_ok and machine.is("workstation") then

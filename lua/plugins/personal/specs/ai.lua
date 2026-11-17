@@ -136,13 +136,6 @@ return {
         --   mcp_allowed = {},
         -- },
 
-        -- Fixed context window sent with every Ollama request (`num_ctx`), so a long
-        -- prompt is not cut at Ollama's small default. One value on purpose: another
-        -- value makes Ollama reload the model. `false` sends none.
-        -- ollama = {
-        --   num_ctx = 32768,
-        -- },
-
         -- Ghost-text completion at the cursor (see docs/configuration.md in the
         -- ai.nvim repo).
         completion = {
@@ -199,6 +192,7 @@ return {
         --     local_ = { provider = "ollama", model = "llama3" },
         --   }
         -- Every field is optional; a field a request sets itself always wins.
+        -- `repo_prompt = true` in an agent adds the repository's prompt file (below).
         -- Two local presets (`:Ai agent local_code` / `local_fast`, <leader>ain cycles):
         -- the MoE coding model, and gemma4 for text, markdown and quick questions
         -- (fully on the GPU, also with a long context).
@@ -210,6 +204,14 @@ return {
         -- false = Ollama's own default (as low as 4096 on a 12 GB GPU).
         -- ollama = {
         --   num_ctx = 32768,
+        -- },
+        -- The repository's own system-prompt file, read only for an agent with
+        -- `repo_prompt = true` and only once its content is trusted (`:Ai trust`).
+        -- `file` is relative to the project root and may not leave it; a file larger
+        -- than `max_bytes` is refused, not cut.
+        -- repo_prompt = {
+        --   file = ".ai.md",
+        --   max_bytes = 16384,
         -- },
         -- Guard rails for unattended bulk requests (`req.bulk`, see lua/ai/bulk.lua).
         -- `max_session_chars` caps the characters of ALL bulk requests of one
