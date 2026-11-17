@@ -679,6 +679,10 @@ return {
         -- `gf` (fetch the whole page) runs this many fetches at once. Fetch only reads
         -- the remote; push and pull stay one after another.
         -- fetch_jobs = 4,
+        -- `:Git dashboard` fetches the page it opens with, each repository as soon as its
+        -- row is read, and redraws the row once its fetch is through (the `gf` most
+        -- openings are followed by, without asking). Off: opening never reaches the network.
+        -- fetch_on_open = false,
         -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
         -- focused default. "behind" = only repositories behind their upstream
         -- (as of the last fetch); "all" = every repository on the page.
