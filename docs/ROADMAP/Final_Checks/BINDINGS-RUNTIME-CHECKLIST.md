@@ -174,7 +174,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [ ] `<M-O>` -- [Open] List every openable target in the buffer
 - [ ] `<M-j>` -- Move down by screen line (through wrapped text)
 - [ ] `<M-k>` -- Move up by screen line (through wrapped text)
-- [ ] `<M-o>` -- [Open] Open whatever is under the cursor
+- [x] `<M-o>` -- [Open] Open whatever is under the cursor _(auto 2026-11-17: nvim/TESTS/sheets/context-open.sheet.lua)_
 - [ ] `<S-h>` -- [Window] Resize narrower
 - [ ] `<S-j>` -- [Window] Resize shorter
 - [ ] `<S-k>` -- [Window] Resize taller
@@ -218,8 +218,8 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [ ] `<leader>zm` -- [Window] Zoom toggle.
 - [ ] `P` -- Paste before cursor (leading/trailing blank lines trimmed)
 - [ ] `[]` -- Surround selection with []
-- [ ] `[u` -- Jump to the head of the enclosing structure (repeatable)
-- [ ] `]u` -- Jump to the end of the enclosing structure (repeatable)
+- [x] `[u` -- Jump to the head of the enclosing structure (repeatable) _(auto 2026-11-17: nvim/TESTS/sheets/structure-jump.sheet.lua)_
+- [x] `]u` -- Jump to the end of the enclosing structure (repeatable) _(auto 2026-11-17: nvim/TESTS/sheets/structure-jump.sheet.lua)_
 - [ ] ``` -- Surround selection with backticks (`)
 - [ ] `jk` -- [General] Exit to normal mode
 - [ ] `p` -- Paste after cursor (leading/trailing blank lines trimmed)
@@ -516,7 +516,7 @@ Checkbox convention: `- [ ]` open, `- [x]` verified.
 - [ ] `:Bindings audit naming` -- Routes whose last path segment is a bare vague word (deep/full/check/...) -- candidates for a naming review, not a verdict
 - [ ] `:Bindings search` -- Live-Grep über beide BINDINGS-Bäume (Picker-Engine, sonst Prompt+Liste); ein Cheatsheet-Stamm als Argument scopt auf dessen Sheets
 - [ ] `:Bindings` -- Cheatsheets in docs/NOTES/{PersonelPlugins/BINDINGS,ExternPlugins/Bindings} durchsuchen
-- [ ] `:Bindings check` -- Drift-Bericht: dokumentiert-aber-nicht-live / live-aber-undokumentiert (Personal, read-only)
+- [x] `:Bindings check` -- Drift-Bericht: dokumentiert-aber-nicht-live / live-aber-undokumentiert (Personal, read-only) _(auto 2026-11-17: nvim/TESTS/sheets/bindings-check.sheet.lua)_
 - [ ] `:Bindings search usercmds` -- Live-Grep, nur Usercmds-Cheatsheets; `hover.nvim` als Argument scopt auf dessen Sheet
 - [ ] `:Bindings path` -- BINDINGS-Wurzel(n) in die Zwischenablage kopieren
 - [ ] `:Bindings browse usercmds` -- Gruppierte Ansicht der Usercmds-Tabellenzeilen; `personal`/`extern` oder ein Cheatsheet-Stamm scopen
