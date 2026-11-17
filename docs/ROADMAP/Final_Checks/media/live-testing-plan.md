@@ -365,7 +365,7 @@ verwirren lassen:
       _(auto 2026-11-16: media.nvim/TESTS/sheets/media-audio-pictures.sheet.lua — PNG, `width=600 height=150` ergibt 600x150, ohne Tonspur „no audio stream in this file“; wie das Bild aussieht, ist das `judge` des Blatts)_
 - [ ] Standbild-Scrub über mehrere Seiten, kein Wickeln am Anfang
       _(Handlauf; Prefetch inzwischen gebaut, siehe Abschnitt 5)_
-- [ ] Playback-Fenster: öffnet, schließt sauber, Ton läuft _(Handlauf: echtes mpv-Fenster und Ton)_
+- [ ] Playback-Fenster: öffnet, schließt sauber, Ton läuft _(Start, Datei und Fehlerpfad ohne mpv: auto 2026-11-17, media.nvim/TESTS/sheets/media-play.sheet.lua; das echte Fenster mit Ton bleibt Handlauf: Task media.nvim/abnahme-von-hand-live-plan-media-scrub-playback-ton-ueberset)_
 - [ ] Playback inline: Uhr bei 0:00, Leiste läuft über 0:02 hinaus, kein Reset
       _(Handlauf im echten Terminal; Uhr, Leiste und Rückwärts-Seek als Spec: hover.nvim/TESTS/playback_spec.lua)_
 - [ ] Ton-Sync bleibt über mehrere Sekunden synchron _(Handlauf: hören)_
