@@ -748,7 +748,8 @@ return {
     --     --   picker_document_diagnostics <leader>do, picker_workspace_diagnostics <leader>wo,
     --     --   picker_incoming_calls lsc, picker_outgoing_calls lsC, picker_finder lsf,
     --     --   picker_type_super lsh, picker_type_sub lsH, root_scope_pick <leader>lsp,
-    --     --   workspace_folder_add <leader>lsw, marksman_hints <leader>lb
+    --     --   workspace_folder_add <leader>lsw, marksman_hints <leader>lb,
+    --     --   word_help (no key; help for the word under the cursor, as :Lsp help)
     --     map = {}, -- table<string, string|false>, e.g. { goto_definition = "gd", rename = false }
     --   },
     --
