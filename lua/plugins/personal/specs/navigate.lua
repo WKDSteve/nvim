@@ -1026,6 +1026,16 @@ return {
 
     "WKDSteve/filetree.nvim",
     event = "VeryLazy", -- must load AFTER the tree plugin's config function runs
+    -- The file helper (Rust, shared by every plugin through lib.nvim.fs.fast): built with cargo or
+    -- downloaded into stdpath("data")/filetree-helper on install and update. It refuses on the
+    -- workstation (nothing native there before the EDR check), which is no error.
+    build = function()
+      local helper = require("filetree.native.fs.helper")
+      local ok, msg = helper.build()
+      if not ok and not helper.workstation() then
+        vim.notify("[filetree] file helper: " .. msg, vim.log.levels.WARN)
+      end
+    end,
     dependencies = {
       "WKDSteve/lib.nvim", -- shared helpers (neo-tree node utils, etc.)
       -- ui.kit / ui.contextmenu: the right-click menu (on by default).
