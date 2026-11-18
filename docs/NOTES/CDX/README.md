@@ -14,7 +14,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 
 | Datei                       | Zweck                                                                 |
 |------------------------------|------------------------------------------------------------------------|
-| `CLAUDE.global.md`           | Quelle der Wahrheit fuer `~/.claude/CLAUDE.md` (Verhaltensregeln, Konventionen) |
+| `CLAUDE.global.md`           | Quelle der Wahrheit fuer `~/.claude/CLAUDE.md`: nur der Kern, der ohne rules-vault gelten muss (Sprache, Maschine/Workstation, Signatur, Push-Verbote, geteilte Checkouts, Commit-Liste), mit Regel-IDs; alles andere laedt aus `~/.claude/rules/` |
 | `settings.global.json`       | Quelle der Wahrheit fuer `~/.claude/settings.json` (Permissions-Allowlist + Hooks) |
 | `check-hook.js`              | Vom PostToolUse-Hook aufgerufener Dispatcher: prueft je nach Endung `.lua` (stylua+luacheck), `.rs` (rustfmt mit der Edition aus der naechsten `Cargo.toml`, auch `edition.workspace`), C/C++ (clang-format, nur mit `.clang-format`), `.ts/.js/.css/.json` (projektlokales prettier) |
 | `check-hook.test.js`         | End-to-end-Test der Edition-Erkennung von `check-hook.js` (Wegwerf-Crates im Temp-Ordner, braucht rustfmt): `node check-hook.test.js` |
@@ -23,7 +23,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `WORKFLOW.md`                | Anleitung: neuer Chat, neues Repo, neue Maschine |
 | `../../../scripts/install-tools/` | Ersetzt `setup-devtools.js` + `tools.json`: installiert fehlende Toolchains pro Profil (`nvim`, `cpp`, `rust`, `web`, `tauri`, oder `all` für alle) und die CLI-Tools der Plugins, bevorzugt per winget. `install-tools.ps1 -Profile nvim,rust -DryRun`; `-Status` zeigt je Profil, was schon installiert ist, und installiert nichts. Siehe dortiges README |
 | `new-project-claude.js`      | Kopiert die Projekt-Vorlage aus `templates/<stack>/` (`CLAUDE.md` + `.claude/settings.json`) in ein Repo: `node new-project-claude.js rust [zielordner]` |
-| `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web` |
+| `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web`; dazu `PROMPT/` (Prompt-Vorlagen fuer `:Cdx prompt`): `Base.md`, `base_workstation.md`, `full.md`, `tasks.md` verweisen per Regel-ID auf den rules-vault, ihre Langfassungen `*_standalone.md` stehen fuer sich (Sitzungen ohne `~/.claude/rules`). `TESTS/cdx/rule_refs_spec.lua` prueft, dass jede zitierte Regel-ID im Vault existiert |
 | `KONZEPT-multi-stack.md`     | Begruendung/Architektur der drei Schichten |
 | `merge-claude-settings.js`   | Gemeinsame Merge-Logik fuer `settings.json`, von beiden Setup-Skripten unten aufgerufen (verhindert, dass Windows- und Unix-Skript bei dieser Logik auseinanderlaufen) |
 | `luarc.repos-root.jsonc`     | LuaLS-Config fuer `$REPOS_DIR/.luarc.jsonc`, von beiden Setup-Skripten kopiert. Sitzungen mit cwd = `$REPOS_DIR` starten (Plugin `lua-lsp`) einen LuaLS ueber den ganzen Repos-Baum: ohne die Datei 5,4 GB, mit ihr 1,4 GB (gemessen 2026-11-18). Bewusst `.jsonc`, damit lsp.nvim sie nicht als Root-Marker nimmt |
@@ -71,9 +71,9 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
   `$NVIM_MACHINE_ROLE` (`workstation` auf der Tricentis-Workstation, sonst
   nicht gesetzt) setzt das Skript nicht (auf der Workstation einmal von Hand:
   `setx NVIM_MACHINE_ROLE workstation`, siehe `WORKFLOW.md` Abschnitt 4); sie wird von `lua/machine.lua` der
-  nvim-Config und von den Claude-Regeln (Abschnitt „Maschine“ in
-  `CLAUDE.global.md`) gelesen und steht in den Prompt-Vorlagen
-  (`templates/PROMPT/`) für die Task-Tags `on-workstation` / `not-on-workstation`.
+  nvim-Config und von den Claude-Regeln (`MASCHINE-01` bis `MASCHINE-06`,
+  Kurzfassung im Abschnitt „Maschine“ von `CLAUDE.global.md`) gelesen und
+  entscheidet über die Task-Tags `on-workstation` / `not-on-workstation`.
   - **Windows**: als User-Env-Var gesetzt
     (`[Environment]::SetEnvironmentVariable(..., 'User')`) - gilt in neu
     gestarteten Shells/der Claude-Code-App.

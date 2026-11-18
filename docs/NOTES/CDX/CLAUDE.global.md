@@ -6,166 +6,87 @@ ist). Änderungen hier -> committen/pushen -> auf den anderen Rechnern pullen
 und Setup-Skript erneut laufen lassen (bei Symlink reicht sogar nur `git
 pull`).
 
-Diese Datei ist bewusst stack-neutral. Stack-spezifische Regeln (Lua/Nvim,
-Rust, C++, Web/Tauri) stehen in der `CLAUDE.md` des jeweiligen Repos
-(Vorlagen: `$NVIM_CONFIG_DIR/docs/NOTES/CDX/templates/`, ausrollen mit
+Sie hält nur den Kern, der auch ohne Regel-Vault gelten muss (Rechner ohne
+Klon, Cloud-Sitzungen); die Regel-IDs in Klammern verweisen auf den Wortlaut.
+**Die übrigen Arbeitsregeln laden aus `~/.claude/rules/rules-vault-*.md`
+(Quelle `$RULES_VAULT/rulesets/arbeit`); fehlen sie, `setup-claude-code`
+laufen lassen bzw. `$RULES_VAULT/rulesets/arbeit/regeln/` lesen.**
+Stack-spezifische Regeln (Lua/Nvim, Rust, C++, Web/Tauri) stehen in der
+`CLAUDE.md` des jeweiligen Repos (Vorlagen:
+`$NVIM_CONFIG_DIR/docs/NOTES/CDX/templates/`, ausrollen mit
 `node new-project-claude.js <stack>`).
 
-## Sprache
+## Sprache und Arbeitsweise
 
-- Antworte immer auf Deutsch.
-- Im Quellcode (Code, Kommentare, Commit-Message-Body etc.) immer Englisch
-  verwenden.
-
-## Arbeitsweise
-
-- Nie mehr als 1 Agent gleichzeitig starten; werden mehrere gebraucht,
-  mehrere Runden mit je maximal 1 Agent fahren.
-- Immer ausgeben, was du gerade machst bzw. ob es etwas Interessantes gab,
-  damit ich Bescheid weiß.
-- Chip-/Background-Tasks (spawn_task) ebenfalls auf Deutsch anlegen.
-- Geteilte Checkouts: In den Repos unter `$REPOS_DIR` arbeiten oft mehrere
-  Sitzungen gleichzeitig. Fremde uncommittete Änderungen nie committen,
-  zurücksetzen, formatieren oder stashen (nur `pull --rebase --autostash`
-  legt sie sofort zurück); nur eigene Dateien mit Pfad stagen
-  (nie `git add -A`/`.`, `commit -a`). Änderungen über viele Repos: ein
-  schmutziges Repo nicht auslassen, sondern dort in einem eigenen Worktree
-  arbeiten, committen, mit `ci commit` prüfen und `push HEAD:main`;
-  auslassen (in der Task notieren, später nachziehen) nur, wenn die fremde
-  Änderung genau in einer meiner Dateien liegt.
-
-## Env-Variablen
-
-Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
-
-- `$REPOS_DIR` - Wurzel aller Repos (u.a. alle eigenen `.nvim`-Plugins unter
-  `$REPOS_DIR/repos`). Wert ist pro Maschine unterschiedlich.
-- `$NVIM_CONFIG_DIR` - `vim.fn.stdpath('config')`, also das nvim-Config-Repo. Wird
-  vom Setup-Skript automatisch aus dessen eigenem Pfad ermittelt (der alte Name
-  `$NVIM_CONFIG` wird mit demselben Wert weiter gesetzt).
-- `$RULES_VAULT` - Wurzel des Repos `rules-vault` (die Regelwerke: `rulesets/lua`
-  mit `regeln/`, `gates/`, `belege/`, `nachschlagen/` und `rulesets/native`). Wird
-  gesetzt, wenn `$REPOS_DIR/rules-vault` existiert; sonst Repo klonen und das
-  Setup-Skript erneut laufen lassen.
-- `$TESTING_TRUST_ROOTS` - Wurzeln, unter denen testing.nvim Projekten vertraut
-  (Default `$REPOS_DIR`). Ohne sie enden lokale Läufe (`scripts/test.sh`,
-  `:Testing`) mit Exit 2, weil `.testing.lua` erst nach Vertrauen ausgeführt
-  wird; die CI vertraut über `CI=true`.
-- `$TESTING_ALLOWED_SIGNERS` - Geräte-Registry (`docs/NOTES/CDX/git-allowed-signers`
-  der nvim-Config, gesetzt von `setup-git-signing.ps1`): der runner-guard von
-  testing.nvim gibt Push-Läufe öffentlicher Repos ohne `testing ci trust` frei,
-  wenn alle neuen Commits von einem dieser Keys signiert sind. Commits daher nie
-  unsigniert machen (kein `-c commit.gpgsign=false`, kein `--no-gpg-sign`).
-- `PATH` += `$REPOS_DIR/testing.nvim/bin` - der Befehl `testing` (`testing ci
-  trust ...` usw.), den Meldungen und Doku von testing.nvim nennen. Fehlt er,
-  gibt es den Befehl nicht; dann `nvim -n -i NONE --headless -u NONE -l
-  "$REPOS_DIR/testing.nvim/scripts/testing.lua" ...`.
-- `$NVIM_MACHINE_ROLE` - `workstation` auf der Tricentis-Workstation, sonst
-  nicht gesetzt (= privater Rechner). Dieselbe Variable liest `lua/machine.lua`
-  der nvim-Config. Das Setup-Skript setzt sie nie, es zeigt sie nur an: auf einer
-  (neuen) Workstation einmal von Hand setzen (`setx NVIM_MACHINE_ROLE workstation`,
-  siehe `WORKFLOW.md` Abschnitt 4) und die App neu starten.
+- Antworte immer auf Deutsch, auch in Chip-/Background-Tasks; im Quellcode
+  (Code, Kommentare, Commit-Messages samt Body) immer Englisch (`ALLG-01`).
+- Nie mehr als 1 Agent gleichzeitig (`ALLG-02`); laufend sagen, was gerade
+  passiert (`ALLG-03`).
 
 ## Maschine: Workstation oder privater Rechner
 
-- `$NVIM_MACHINE_ROLE` (dieselbe Variable wie in `lua/machine.lua` der
-  nvim-Config): `workstation` = Tricentis-Workstation (dort darf gebaut werden,
-  auch mit Bau-Toolchains wie rustup, MSVC, CMake, `cargo build/test`, und
-  selbst gebaute Programme dürfen laufen, aber nichts, was CrowdStrike
-  Falcon/EDR als Angriff lesen kann: kein Code in fremde Prozesse injizieren,
-  keine Treiber, kein Zugriff auf Anmeldedaten oder fremden Prozessspeicher,
-  keine Prozess-Lawinen, keine Tarnung (umbenannte Systemprogramme,
-  verschleierte Skripte); im Zweifel erst als `on-workstation`-Handlauf prüfen;
-  auch kein Runner. **Ausnahme: die ai-Familie (`ai.nvim`, `ai-desktop` samt
-  Mobil-Variante) wird dort nie installiert, gebaut oder gestartet**, auch
-  nicht als Abhängigkeit eines anderen Plugins. **Die nativen Desktop-Apps
-  (`tasks-`, `rules-`, `docmap-desktop` und ihre Hubs, Installer und
-  Autostart) sind dort gesperrt, bis
-  `appkit/edr-ausloeser-aus-allen-nativen-apps-entfernen` erledigt ist und ein
-  `on-workstation`-Handlauf sie freigibt**: tasks-desktop hat am 2026-10-27
-  und noch einmal danach Falcon ausgelöst, auch nach abgebrochener
-  Installation (ein Hub lief weiter). Bis dahin dort nur die Web-Variante
-  (`file://`). Fertige Fremd-Tools aus
-  Paketquellen, die die Plugins brauchen, z. B. lazygit, rg, pandoc per winget,
-  scoop, npm oder pip-Wheels, sind dort erlaubt: installiert über
-  `scripts/install-tools` der nvim-Config, das dort auch die Bau-Toolchains
-  installiert und nur die Tools der ai-Familie auslässt); nicht gesetzt oder `default` = privater Rechner (`STEVESPC`: Builds,
-  Tests, Runner). Groß-/Kleinschreibung egal. Lesen in PowerShell mit
-  `$env:NVIM_MACHINE_ROLE`, in Bash mit `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in
-  Bash nicht, dort kommt das Literal `:NVIM_MACHINE_ROLE` heraus). Jeder andere
-  Wert als `workstation`, `default` oder leer: falsch gelesen oder Tippfehler,
-  nachfragen. Nicht aus dem Rechnernamen raten. Ist sie nicht gesetzt, aber
-  `USERDOMAIN` ist `AzureAD` oder der Rechnername (`COMPUTERNAME`) beginnt mit
-  `TRI-`: unklar, nachfragen, bevor etwas gebaut oder gestartet wird (die App
-  kennt eine neu gesetzte Variable erst nach einem Neustart).
-- Der Git-User `lavalue` (`bartl.stefan@pm.me`) bin ich auf der Workstation, bewusst
-  anders benannt. Seine Commits, auch unsignierte, sind in Ordnung und kein Befund.
-- Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe,
-  Messungen auf der Workstation); `not-on-workstation` = nie dort (was Falcon als
-  Angriff lesen kann, siehe oben, Runner, die ai-Familie und die nativen
-  Desktop-Apps bis zu ihrer Freigabe). Ohne Tag: Code-Arbeit, läuft auf
-  dem privaten Rechner.
-- Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen, die
-  Workstation, Falcon oder EDR betreffen) zuerst `NVIM_MACHINE_ROLE` lesen (wie
-  oben) und in einer Zeile nennen („Maschine: privat“ bzw. „Workstation“). Passt der
-  Rechner nicht zum Tag: nichts ausführen, nur vorbereiten und mir Bescheid
-  geben. Fällt beim Arbeiten ein Workstation-Bezug auf, den die Task nicht
-  kennzeichnet, den Tag nachziehen.
+- Erkennen an `NVIM_MACHINE_ROLE` (dieselbe Variable wie `lua/machine.lua`
+  der nvim-Config), PowerShell `$env:NVIM_MACHINE_ROLE`, Bash
+  `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in Bash nicht): `workstation` =
+  Tricentis-Workstation, leer oder `default` = privater Rechner (`STEVESPC`),
+  Groß-/Kleinschreibung egal; jeder andere Wert: nachfragen. Nicht aus dem
+  Rechnernamen raten. Leer, aber `USERDOMAIN` ist `AzureAD` oder
+  `COMPUTERNAME` beginnt mit `TRI-`: unklar, nachfragen, bevor etwas gebaut
+  oder gestartet wird (`MASCHINE-01`).
+- Workstation: bauen und eigene Programme laufen lassen ja (auch rustup,
+  MSVC, CMake, `cargo build/test`), aber nichts, was CrowdStrike Falcon als
+  Angriff lesen kann, und kein Runner (`MASCHINE-02`). Konkret nie:
+  verschleierte/kodierte Befehle, Code direkt aus dem Netz, LOLBins,
+  Zugriff auf Anmeldedaten oder fremden Prozessspeicher, Sicherheitsfunktionen
+  ändern, Persistenz (Run-Keys, Dienste, geplante Tasks), Netz-Scans,
+  Masseneingriffe, Code in fremde Prozesse. Im Zweifel nachfragen; wird etwas
+  blockiert: sofort stoppen und melden, nie umgehen (`FALCON-01..13`).
+  Fremd-Tools aus Paketquellen dort nur auf Bitte und nur über
+  `scripts/install-tools` der nvim-Config (`FALCON-12`).
+- **Die ai-Familie (`ai.nvim`, `ai-desktop` samt Mobil-Variante) wird auf der
+  Workstation nie installiert, gebaut oder gestartet**, auch nicht als
+  Abhängigkeit (`MASCHINE-03`).
+- **Die nativen Desktop-Apps (`tasks-`, `rules-`, `docmap-desktop`, ihre
+  Hubs, Installer, Autostart) werden dort nicht installiert oder gestartet**,
+  bis `appkit/edr-ausloeser-aus-allen-nativen-apps-entfernen` erledigt ist
+  und ein `on-workstation`-Handlauf sie freigibt; bis dahin nur die
+  Web-Variante (`file://`) (`MASCHINE-04`).
+- Tags: `on-workstation` = nur dort, `not-on-workstation` = nie dort
+  (`MASCHINE-05`). Vor einer getaggten Task (oder einem Auftrag zu
+  Workstation, Falcon, EDR) die Maschine lesen und in einer Zeile nennen;
+  passt sie nicht: nur vorbereiten und Bescheid geben (`MASCHINE-06`).
+- Der Git-User `lavalue` bin ich auf der Workstation; seine Commits, auch
+  unsignierte, sind kein Befund (`MASCHINE-07`).
 
-## Doku-Struktur (nicht verwechseln)
+## Env-Variablen
 
-- Repo-Docs (README, Feature-Docs) -> für Endnutzer, im jeweiligen Repo.
-- `$REPOS_DIR/tasks-vault/<area>` -> Reports und Handover-Files (Originale);
-  in `$NVIM_CONFIG_DIR/docs` liegen nur Symlinks darauf.
-- `$REPOS_DIR/tasks-vault/**` bzw.
-  `.../Development/**` -> Backlogs, interne Notizen, Roadmaps, Features -
-  alles was Endnutzer nicht betrifft.
-- Im Zweifelsfall nachfragen, es sind aber idR genug Files vorhanden, um
-  Ableitungen zu treffen.
-- `$REPOS_DIR/tasks-vault/TOOLS/TOOL-PLACEMENT.md`
-  beachten (Tool bauen vs. Wegwerf-Skript, wohin damit). Entsteht im Zuge
-  einer Task ein wiederverwendbares Tool, an geeigneter Stelle in `TOOLS/`
-  ablegen.
-- `$REPOS_DIR/tasks-vault/HEREDOC.md` beachten:
-  keine großen/escape-haltigen Literale durch die Shell jagen.
-- Tasks im tasks-vault nur mit `tasks done` abschließen, nie `status: done` von
-  Hand; `<area>/ROADMAP/TASKS.md` gehört in denselben Commit.
-- `_Telemetry/history/*.jsonl` im tasks-vault ist die Verlaufsreihe der
-  Kennzahlen (generiert von `tasks index` über den ganzen Vault, `tasks history
-  record` und dem Hub; `merge=union`). Geänderte Dateien dort sind nie fremde
-  Arbeit: beim nächsten Vault-Commit mit Pfad mitstagen. Vergessen kostet nur
-  eine Stufe in der Kurve; von Hand nie bearbeiten.
-- Bevor du an einer Task im tasks-vault arbeitest, belegst du sie:
-  `tasks claim <area>/<slug> --by=<Name des Chats>` (setzt `status: doing`,
-  reserviert 4 h; `--renew` verlängert, `--for=` ändert die Dauer). Ein fremder
-  Claim wird nicht übergangen, sondern gemeldet. Gibst du die Task unerledigt
-  zurück: `tasks unclaim <id> --by=<Name>`; `tasks done` gibt von selbst frei.
-  Briefe an Child-Sitzungen enthalten diesen Schritt. Ohne Claim zeigt
-  tasks-desktop die Arbeit nicht als „In Arbeit“ (Details: Schritt 3 in
-  `$NVIM_CONFIG_DIR/docs/NOTES/CDX/templates/PROMPT/Base.md`).
+Gesetzt von `setup-claude-code.ps1` pro Maschine (User-Scope); Bedeutung:
+`MASCHINE-08`.
 
-## Docs/README-Pflege
-
-- README/Docs aktualisieren, sofern es inhaltlich Sinn ergibt.
+- `$REPOS_DIR` (Wurzel aller Repos), `$NVIM_CONFIG_DIR` (nvim-Config; der
+  alte Name `$NVIM_CONFIG` wird mit demselben Wert weiter gesetzt),
+  `$RULES_VAULT` (gesetzt, wenn `$REPOS_DIR/rules-vault` existiert; sonst
+  Repo klonen und das Setup-Skript erneut laufen lassen),
+  `$TESTING_TRUST_ROOTS` (ohne sie enden lokale testing.nvim-Läufe mit
+  Exit 2; die CI vertraut über `CI=true`), `$TESTING_ALLOWED_SIGNERS`, `PATH` +=
+  `$REPOS_DIR/testing.nvim/bin`.
+- `$NVIM_MACHINE_ROLE` setzt das Skript nie, es zeigt sie nur an: auf einer
+  (neuen) Workstation einmal von Hand setzen (`setx NVIM_MACHINE_ROLE
+  workstation`, `WORKFLOW.md` Abschnitt 4) und die App neu starten.
 
 ## Git
 
-- Keine Co-Autorenschaft von Claude in Commits.
-- Nach Abschluss einer Aufgabe sofort committen/pushen (und ggf. vorher
-  pullen) im main branch, damit die Änderung sofort nutzbar ist.
-- **Ausnahme: `WKDBook-Tricentis` und `tricentis-vault` nie pushen**, nur committen.
-  Gepusht wird dort nur von Hand durch mich. Ein pre-push-Hook
-  (`scripts/git-hooks/pre-push-manual-only.sh`) weist jeden unbestätigten Push ab;
-  nicht mit `--no-verify` umgehen. In der Commit-Liste stehen diese Commits als
-  „nicht gepusht“.
-- Am Ende jeder Ausgabe gibst du eine laufende Liste aller Commits des Chats aus mit kurzer Beschreibung + welches Repository. Jedes bekommt einen grünen Haken, wenn es mit höherem Reasoning als `normal` reviewed wurde; durch einen
-  `ultracode`-Agenten oder mit von mir auf ultracode gestelltem Reasoning reviewte Commits bekommen einen Stern. Reine
-  Doku-Commits bekommen den Haken auch ohne Review; Fix-Commits werden nicht nochmals reviewed, außer ich sage es.
-- **Review nach Abschluss:** Sind die aktuellen Aufgaben abgeschlossen, reviewst du zu einem guten Zeitpunkt (nicht mitten in der Arbeit, sondern wenn der Stand stimmig ist) jedes Commit des Chats, das nicht reine Doku war, gleich selbst mit hohem Reasoning (`high` oder mehr), damit es einen grünen Haken bekommt. Gefundene Bugs, Security- und Performance-Probleme fixt du direkt (Fix-Commit, mit Test) und führst sie in der Commit-Liste mit; die Fix-Commits werden nicht nochmals reviewed. Nicht nachfragen, ob reviewed werden soll.
-- **Commits prüfen:** In Repos mit `scripts/test.sh` (testing.nvim) prüfst du einen Commit mit `scripts/test.sh ci commit <sha>` (eigener Git-Worktree, Vergleich mit dem Parent), nie mit einem Lauf im Arbeitsbaum, und lässt nie einen Commit aus, weil die Suite rot ist (`known-red` ist ein Ergebnis). Details: Abschnitt „Commits prüfen“ der `CLAUDE.md` des Repos (Vorlage `templates/nvim-plugin/CLAUDE.md`).
-- **CI-Takt** (Regeln `CI-01` bis `CI-10` in `$RULES_VAULT/rulesets/arbeit/regeln/CI_TAKT.md`): je Commit sofort im Hintergrund `scripts/test.sh ci commit <sha> --quick -- --cached` und weiterarbeiten (eine `REGRESSION` sofort beheben; quick ist kein Beweis); einmal pro Push voll für den Endstand `scripts/test.sh ci commit HEAD --base=@{upstream} --wsl -- --cached` (ohne WSL ohne `--wsl`; ein Windows-Lauf legt den Beweis für den pre-push-Hook ab, sonst läuft dort nur `fast`), bei Rot mit `--range=@{upstream}..HEAD` eingrenzen; öffentliche Repos mit `land = true` landen per `testing ci land`; gebündelt pushen, fertig erst bei grüner CI je System (`scripts/test.sh ci remote`). Im Arbeitsbaum nur `scripts/test.sh --file <teil>`. Ein umgeschriebener Commit mit gleichem Baum behält sein Urteil.
-- **Schwere Läufe mit niedriger Priorität** (privater Rechner, neben den selbst gehosteten Runnern): was über
-  testing.nvim läuft (`scripts/test.sh`, `testing ci`, `ci commit`, `sheets run`), senkt sich selbst auf
-  `BelowNormal` (`TESTING_PRIORITY=normal` schaltet es ab, unter `CI` nie); alles andere Schwere (`cargo
-  build/test/clippy`, `pnpm e2e`, `pnpm test`) startest du über
-  `node "$REPOS_DIR/tasks-vault/TOOLS/scripts/low-prio/low.mjs" <befehl> ...`. Die Runner selbst bleiben normal.
+- Kein Co-Author-Trailer von Claude (`GIT-02`).
+- Commits immer signiert: kein `-c commit.gpgsign=false`, kein
+  `--no-gpg-sign`; scheitert das Signieren, melden (`GIT-03`).
+- **`WKDBook-Tricentis` und `tricentis-vault` nie pushen**, nur committen;
+  den pre-push-Hook nie mit `--no-verify` umgehen (`GIT-04`).
+- Geteilte Checkouts: in den Repos unter `$REPOS_DIR` arbeiten oft mehrere
+  Sitzungen. Fremde uncommittete Änderungen nie committen, zurücksetzen,
+  formatieren oder stashen (nur `pull --rebase --autostash` legt sie sofort
+  zurück); nur eigene Dateien mit Pfad stagen, nie `git add -A`/`.` oder
+  `commit -a` (`GIT-05`, Flotte: `GIT-07`).
+- Am Ende jeder Ausgabe eine laufende Liste aller Commits des Chats (Repo,
+  SHA, kurze Beschreibung); grüner Haken = mit Reasoning über `normal`
+  reviewed (reine Doku ohne Review), Stern = zusätzlich durch `ultracode`;
+  nicht gepushte Commits als solche markiert (`REVIEW-01`).

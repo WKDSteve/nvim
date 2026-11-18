@@ -8,8 +8,8 @@ tun musst. Hintergrund und Dateien: [README.md](README.md),
 
 | Quelle                                   | Inhalt                                             | Wo es herkommt                  |
 |------------------------------------------|----------------------------------------------------|---------------------------------|
-| `~/.claude/CLAUDE.md`                    | Sprache, Arbeitsweise, Doku-Struktur, Git-Regeln   | Symlink auf `CLAUDE.global.md`  |
-| `~/.claude/rules/rules-vault-*.md`       | Arbeitsregeln (Kontext-Dokumente)                  | Symlinks auf `$RULES_VAULT/rulesets/arbeit/kontext/` |
+| `~/.claude/CLAUDE.md`                    | Kern ohne Vault: Sprache, Maschine, Git-Verbote    | Symlink auf `CLAUDE.global.md`  |
+| `~/.claude/rules/rules-vault-*.md`       | Alle Arbeitsregeln mit Regel-ID (Kontext-Dokumente) | Symlinks auf `$RULES_VAULT/rulesets/arbeit/kontext/` |
 | `~/.claude/settings.json`                | Allowlist + Hooks (`check-hook.js`, `check-stop.js`)| Merge aus `settings.global.json`|
 | `<repo>/CLAUDE.md`                       | Stack-Regeln (Lua, Rust, C++, Web, Tauri)          | `templates/<stack>/`            |
 | `<repo>/.claude/settings.json`           | Stack-Allowlist (cargo, pnpm, cmake ...)           | `templates/<stack>/`            |
@@ -17,7 +17,13 @@ tun musst. Hintergrund und Dateien: [README.md](README.md),
 | Env-Var `NVIM_MACHINE_ROLE`              | Workstation oder privater Rechner                  | von Hand (Abschnitt 4)          |
 
 Deshalb: **keine Regeln mehr in den Chat pasten.** Aendern sich Regeln, dann
-in der jeweiligen Datei anpassen, committen, pushen.
+in der jeweiligen Datei anpassen, committen, pushen. Arbeitsregeln stehen nur
+einmal, im rules-vault (`$RULES_VAULT/rulesets/arbeit`, aendern mit
+rules.nvim, danach `nvim -l scripts/kontext.lua rulesets/arbeit`);
+`CLAUDE.global.md`, Repo- und Prompt-Vorlagen verweisen per Regel-ID darauf.
+Die Prompt-Vorlagen (`:Cdx prompt base|full|tasks|base_workstation`) sind
+darum kurz; fuer eine Sitzung ohne `~/.claude/rules` (Cloud, Rechner ohne
+Klon) die Langfassung `*_standalone` nehmen.
 
 ## 2. Ablauf pro neuem Chat
 
@@ -29,7 +35,7 @@ in der jeweiligen Datei anpassen, committen, pushen.
 3. **Bei Bedarf Kontext verlinken statt einfuegen:** Handover-Datei aus
    `$NVIM_CONFIG_DIR/docs` oder Backlog aus den wkdbooks nennen, Claude liest sie.
 4. **Ein Chat = eine Aufgabe.** Nach Abschluss committet/pusht Claude auf
-   `main` (Regel aus `CLAUDE.global.md`). Fuer die naechste Aufgabe neuen Chat
+   `main` (Regel `GIT-01`). Fuer die naechste Aufgabe neuen Chat
    starten; Zwischenstaende gehoeren in ein Handover-File, nicht in den Chat.
 5. **Am Ende pruefen:** `git log -1`, ggf. auf den anderen Maschinen `git pull`.
 
