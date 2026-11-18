@@ -55,8 +55,16 @@ known_value() {
 TRUST_ROOTS_VALUE="$(known_value TESTING_TRUST_ROOTS)"
 TRUST_ROOTS_VALUE="${TRUST_ROOTS_VALUE:-$REPOS_DIR_VALUE}"
 
-# RULES_VAULT, TASKS_VAULT: roots of the repos of the same name, as in setup-claude-code.ps1.
+# RULES_VAULT, TASKS_VAULT: roots of the repos of the same name, as in setup-claude-code.ps1. Every session loads the
+# context documents of rules-vault (step [rules] below), so it is cloned or fast-forwarded here first; foreign changes
+# or another branch only warn (rules-vault.js ensure, git only).
 RULES_VAULT_VALUE="$(known_value RULES_VAULT)"
+RULES_VAULT_JS="$SCRIPT_DIR/rules-vault.js"
+if command -v node > /dev/null 2>&1; then
+  node "$RULES_VAULT_JS" ensure "${RULES_VAULT_VALUE:-$REPOS_DIR_VALUE/rules-vault}" || true
+else
+  echo "  node fehlt: rules-vault nicht geklont/aktualisiert."
+fi
 if [ -z "$RULES_VAULT_VALUE" ] && [ -d "$REPOS_DIR_VALUE/rules-vault" ]; then
   RULES_VAULT_VALUE="$REPOS_DIR_VALUE/rules-vault"
 fi
@@ -144,6 +152,14 @@ node "$SCRIPT_DIR/merge-claude-settings.js" \
   "$SCRIPT_DIR/settings.global.json" \
   "$CLAUDE_DIR/settings.json" \
   "$NVIM_CONFIG_DIR"
+
+# ~/.claude/rules: context documents of rules-vault, as in setup-claude-code.ps1. Claude Code loads
+# ~/.claude/rules/*.md at the start of every session without an approval dialog; foreign files there stay untouched.
+echo
+echo "[rules] ~/.claude/rules aus dem rules-vault"
+LINK_FLAGS=()
+if [ "$MACHINE_ROLE" = "workstation" ]; then LINK_FLAGS+=(--workstation); fi
+node "$RULES_VAULT_JS" link "${RULES_VAULT_VALUE:--}" "$CLAUDE_DIR" ${LINK_FLAGS[@]+"${LINK_FLAGS[@]}"}
 
 # LuaLS config for the repos root: sessions with cwd = $REPOS_DIR start one
 # lua-language-server (plugin lua-lsp) over the whole repos tree. Same as in

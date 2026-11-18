@@ -89,6 +89,7 @@ local specs = {
   "cdx/usrcmds_help_spec.lua",
   "cdx/prompt_templates_spec.lua",
   "cdx/luarc_repos_root_spec.lua",
+  "cdx/rules_vault_spec.lua",
   "execute/execute_spec.lua",
   "strip_coauthor/git_spec.lua",
   "strip_coauthor/repin_spec.lua",

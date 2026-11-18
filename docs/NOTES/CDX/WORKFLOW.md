@@ -9,6 +9,7 @@ tun musst. Hintergrund und Dateien: [README.md](README.md),
 | Quelle                                   | Inhalt                                             | Wo es herkommt                  |
 |------------------------------------------|----------------------------------------------------|---------------------------------|
 | `~/.claude/CLAUDE.md`                    | Sprache, Arbeitsweise, Doku-Struktur, Git-Regeln   | Symlink auf `CLAUDE.global.md`  |
+| `~/.claude/rules/rules-vault-*.md`       | Arbeitsregeln (Kontext-Dokumente)                  | Symlinks auf `$RULES_VAULT/rulesets/arbeit/kontext/` |
 | `~/.claude/settings.json`                | Allowlist + Hooks (`check-hook.js`, `check-stop.js`)| Merge aus `settings.global.json`|
 | `<repo>/CLAUDE.md`                       | Stack-Regeln (Lua, Rust, C++, Web, Tauri)          | `templates/<stack>/`            |
 | `<repo>/.claude/settings.json`           | Stack-Allowlist (cargo, pnpm, cmake ...)           | `templates/<stack>/`            |
@@ -58,6 +59,9 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    - Windows: `pwsh -File "$env:LOCALAPPDATA\nvim\docs\NOTES\CDX\setup-claude-code.ps1"`
    - Linux/macOS: `bash ~/.config/nvim/docs/NOTES/CDX/setup-claude-code.sh`
    Es zeigt die Maschinenrolle an (Workstation: muss dort `workstation` sein).
+   Es klont bzw. pullt den rules-vault (nur sauber und auf `main`, sonst
+   Warnung) und verlinkt dessen Kontext-Dokumente nach `~/.claude/rules/`
+   (Workstation zusaetzlich `kontext/workstation/`).
    Am Ende zeigt das Skript, was schon installiert ist, und fragt nach
    Toolchain-Profilen (`nvim,cpp,rust,web,tauri`, oder `all` fuer alle). Auf
    der Workstation kommen auch die Bau-Toolchains; ausgelassen werden nur die

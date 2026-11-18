@@ -28,6 +28,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `merge-claude-settings.js`   | Gemeinsame Merge-Logik fuer `settings.json`, von beiden Setup-Skripten unten aufgerufen (verhindert, dass Windows- und Unix-Skript bei dieser Logik auseinanderlaufen) |
 | `luarc.repos-root.jsonc`     | LuaLS-Config fuer `$REPOS_DIR/.luarc.jsonc`, von beiden Setup-Skripten kopiert. Sitzungen mit cwd = `$REPOS_DIR` starten (Plugin `lua-lsp`) einen LuaLS ueber den ganzen Repos-Baum: ohne die Datei 5,4 GB, mit ihr 1,4 GB (gemessen 2026-11-18). Bewusst `.jsonc`, damit lsp.nvim sie nicht als Root-Marker nimmt |
 | `install-repos-luarc.ps1`/`.sh` | Kopiert `luarc.repos-root.jsonc` nach `<repos>/.luarc.jsonc` (eine abweichende Datei wird vorher gesichert). Von den Setup-Skripten aufgerufen und von `TESTS/cdx/luarc_repos_root_spec.lua` gegen einen Temp-Ordner geprueft |
+| `rules-vault.js`             | Gemeinsamer Helfer beider Setup-Skripte: `ensure <vault>` klont den rules-vault bzw. holt ihn per `git pull --ff-only` (nur sauber und auf `main`, sonst nur Warnung); `link <vault> <~/.claude> [--workstation]` verlinkt `rulesets/arbeit/kontext/*.md` nach `~/.claude/rules/rules-vault-<name>.md`. Geprueft von `TESTS/cdx/rules_vault_spec.lua` (Fake-Vault, Fake-`~/.claude`) |
 | `setup-claude-code.ps1`      | Windows: rollt die Vorlagen oben nach `~/.claude/` aus. Idempotent. |
 | `setup-claude-code.sh`       | Linux/macOS: dasselbe wie oben, plus `~/.claude/env.sh` fuer die Env-Variablen. Idempotent. |
 | `setup-git-signing.ps1/.sh`  | Commit-Signatur dieses Geraets: eigener SSH-Key (`~/.ssh/git-signing_ed25519`), `commit.gpgsign`, Eintrag in `git-allowed-signers`. Von beiden Setup-Skripten aufgerufen, auch allein lauffaehig. Idempotent. |
@@ -41,6 +42,21 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
   moeglich sind (kein Developer Mode, keine Admin-Rechte), wird stattdessen
   kopiert - dann muss man nach Aenderungen `setup-claude-code.ps1` erneut
   laufen lassen.
+- **`~/.claude/rules/`** (Arbeitsregeln aus dem rules-vault): Claude Code laedt
+  `~/.claude/rules/*.md` beim Start jeder Sitzung ohne Freigabedialog. Das
+  Setup legt je Datei `$RULES_VAULT/rulesets/arbeit/kontext/*.md` einen
+  Symlink `rules-vault-<name>.md` an (Fallback Kopie), auf der Workstation
+  (`NVIM_MACHINE_ROLE=workstation`) zusaetzlich `kontext/workstation/*.md` als
+  `rules-vault-workstation-<name>.md`. Eigene Eintraege erkennt es am Praefix
+  `rules-vault-`: verwaiste werden entfernt, fremde Dateien in `rules/` nie
+  angefasst. Weil jede Sitzung vom lokalen Vault abhaengt, klont das Setup ihn
+  bei Bedarf (`gh repo clone WKDSteve/rules-vault`, Rueckfall `git clone`) und
+  holt ihn per `git pull --ff-only`; mit uncommitteten Aenderungen, auf einem
+  anderen Branch oder bei einem Pull-Fehler nur eine Warnung. Ohne Vault oder
+  `kontext/`-Ordner: Hinweis, kein Fehler. Mit Symlinks wirkt eine Aenderung
+  im Vault nach dem Pull sofort, mit Kopien erst nach erneutem Setup.
+  `~/.claude` liegt im echten Profil, die MSIX-Virtualisierung der Claude-App
+  betrifft nur AppData.
 - **`settings.json`**: Wird **gemerged**, nicht ueberschrieben (Logik in
   `merge-claude-settings.js`, per `node` von beiden Setup-Skripten
   aufgerufen). Bestehende Eintraege (z. B. maschinenspezifische Permissions)
@@ -119,10 +135,13 @@ Ablauf (beide Skripte, gleiches Prinzip):
    ersten Mal nach, validiert dass der Pfad existiert). Zeigt die
    Maschinenrolle `NVIM_MACHINE_ROLE` an (setzt sie nie; unbekannte Werte und
    ein AzureAD-/`TRI-`-Rechner ohne Rolle werden gemeldet).
+   Klont bzw. aktualisiert den rules-vault (`rules-vault.js ensure`) und
+   setzt danach `RULES_VAULT`.
 2. Verlinkt/kopiert `CLAUDE.global.md` nach `~/.claude/CLAUDE.md` (mit
    Backup, falls dort schon etwas anderes liegt).
 3. Merged `settings.global.json` in `~/.claude/settings.json` (mit Backup,
-   ueber `merge-claude-settings.js`).
+   ueber `merge-claude-settings.js`) und verlinkt die Kontext-Dokumente des
+   rules-vault nach `~/.claude/rules/` (`rules-vault.js link`, siehe oben).
 4. Richtet die Commit-Signatur ein (`setup-git-signing.*`): erzeugt bei Bedarf
    den Signing-Key, setzt `gpg.format ssh`/`commit.gpgsign true` und traegt
    das Geraet in `git-allowed-signers` ein. Neuer Eintrag: nvim-Config

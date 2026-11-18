@@ -48,8 +48,17 @@ if (-not $reposDir) {
     Write-Host "  REPOS_DIR bereits gesetzt: $reposDir"
 }
 
-# RULES_VAULT: Wurzel des Repos rules-vault (Regelwerke, rulesets/lua und rulesets/native).
+# RULES_VAULT: Wurzel des Repos rules-vault (Regelwerke, rulesets/lua und rulesets/native). Jede Sitzung laedt dessen
+# Kontext-Dokumente (Schritt [rules] unten), deshalb wird er hier geklont bzw. per ff-Pull aktuell gehalten; mit
+# fremden Aenderungen oder auf einem anderen Branch nur eine Warnung (rules-vault.js ensure, nur git).
 $rulesVault = [Environment]::GetEnvironmentVariable('RULES_VAULT', 'User')
+$rulesVaultDir = if ($rulesVault) { $rulesVault } else { Join-Path $reposDir 'rules-vault' }
+$rulesVaultJs = Join-Path $PSScriptRoot 'rules-vault.js'
+if (Get-Command node -ErrorAction SilentlyContinue) {
+    node $rulesVaultJs ensure $rulesVaultDir
+} else {
+    Write-Host "  node fehlt: rules-vault nicht geklont/aktualisiert." -ForegroundColor Yellow
+}
 if (-not $rulesVault) {
     $candidate = Join-Path $reposDir 'rules-vault'
     if (Test-Path $candidate) {
@@ -219,6 +228,18 @@ $settingsPath = Join-Path $claudeDir 'settings.json'
 $mergeScript = Join-Path $PSScriptRoot 'merge-claude-settings.js'
 
 node $mergeScript $templatePath $settingsPath $nvimConfig
+
+# --- ~/.claude/rules: Kontext-Dokumente aus dem rules-vault -----------------
+# Claude Code laedt ~/.claude/rules/*.md beim Start jeder Sitzung ohne Freigabedialog (Symlinks erlaubt). Je Datei
+# rulesets/arbeit/kontext/*.md ein Link rules-vault-<name>.md (Fallback Kopie), auf der Workstation zusaetzlich
+# kontext/workstation/*.md. Fremde Dateien in rules/ bleiben unberuehrt. $HOME ist das echte Profil (die
+# MSIX-Virtualisierung der Claude-App betrifft nur AppData), also derselbe Ordner, den die App liest.
+Write-Host "`n[rules] ~/.claude/rules aus dem rules-vault"
+$rulesVaultNow = [Environment]::GetEnvironmentVariable('RULES_VAULT', 'User')
+# '-' = kein Vault (ein leeres Argument verschluckt PowerShell 5.1 beim Aufruf von node)
+$linkArgs = @('link', $(if ($rulesVaultNow) { $rulesVaultNow } else { '-' }), $claudeDir)
+if ($isWorkstation) { $linkArgs += '--workstation' }
+node $rulesVaultJs @linkArgs
 
 # --- LuaLS-Config fuer die Repos-Wurzel ------------------------------------
 # Sitzungen mit cwd = $REPOS_DIR starten (Plugin lua-lsp) einen LuaLS ueber den
