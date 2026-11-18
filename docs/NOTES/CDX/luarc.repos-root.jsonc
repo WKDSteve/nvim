@@ -1,0 +1,45 @@
+// LuaLS configuration for the root of all repos ($REPOS_DIR/.luarc.jsonc).
+//
+// Deployed by setup-claude-code.ps1 / .sh (copied, not linked). Every Claude
+// Code session started with cwd = $REPOS_DIR gets its own lua-language-server
+// (plugin lua-lsp@claude-plugins-official) whose workspace is the whole repos
+// tree: ~15k Lua files, a third of them copies in worktrees. Without this file
+// such a server preloads 5000 files and diagnoses all of them (measured
+// 2026-11-18, see tasks-vault nvim-config task
+// lua-language-server-sechs-instanzen-eine-mit-5-gb-arbeitsspe).
+//
+// Deliberately `.luarc.jsonc`, not `.luarc.json`: LuaLS reads both, but
+// lsp.nvim's lua_ls root resolver treats `.luarc.json` as a project marker, and
+// a marker here would make Neovim root every non-git Lua file below
+// $REPOS_DIR at $REPOS_DIR.
+//
+// Sessions inside a repo or worktree are unaffected: their workspace root is
+// that repo, and the repo's own `.luarc.json` applies.
+{
+  "$schema": "https://raw.githubusercontent.com/LuaLS/vscode-lua/master/setting/schema.json",
+  "runtime.version": "LuaJIT",
+  "runtime.path": ["lua/?.lua", "lua/?/init.lua"],
+  // No library list here ($VIMRUNTIME is unknown outside Neovim): declare the
+  // one global every plugin uses, so edited files do not drown in
+  // "undefined global vim".
+  "diagnostics.globals": ["vim"],
+  // Diagnose only the files that are open (the ones a session edits), never
+  // the whole tree.
+  "diagnostics.workspaceDelay": -1,
+  "workspace.checkThirdParty": false,
+  "workspace.useGitIgnore": true,
+  // Copies and bulk that never belong to the code being edited.
+  "workspace.ignoreDir": [
+    ".git",
+    ".claude",
+    ".wt",
+    ".tools",
+    ".deps",
+    "node_modules",
+    "target",
+    "builds",
+    "testing-results",
+    "ARCHIV_NICHT_BEARBEITEN"
+  ],
+  "workspace.maxPreload": 2000
+}

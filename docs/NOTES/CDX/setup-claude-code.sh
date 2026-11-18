@@ -145,6 +145,29 @@ node "$SCRIPT_DIR/merge-claude-settings.js" \
   "$CLAUDE_DIR/settings.json" \
   "$NVIM_CONFIG_DIR"
 
+# LuaLS config for the repos root: sessions with cwd = $REPOS_DIR start one
+# lua-language-server (plugin lua-lsp) over the whole repos tree. Same as in
+# setup-claude-code.ps1.
+echo
+echo "[luals] .luarc.jsonc fuer die Repos-Wurzel"
+LUARC_SRC="$SCRIPT_DIR/luarc.repos-root.jsonc"
+if [ -z "$REPOS_DIR_VALUE" ] || [ ! -d "$REPOS_DIR_VALUE" ]; then
+  echo "  REPOS_DIR fehlt oder existiert nicht: uebersprungen."
+else
+  LUARC_DST="$REPOS_DIR_VALUE/.luarc.jsonc"
+  if [ -f "$LUARC_DST" ] && cmp -s "$LUARC_SRC" "$LUARC_DST"; then
+    echo "  Bereits aktuell: $LUARC_DST"
+  else
+    if [ -e "$LUARC_DST" ]; then
+      backup="$LUARC_DST.bak-$(date +%Y%m%d-%H%M%S%N)"
+      mv "$LUARC_DST" "$backup"
+      echo "  Bestehende Datei gesichert nach: $backup"
+    fi
+    cp "$LUARC_SRC" "$LUARC_DST"
+    echo "  Kopiert: $LUARC_DST"
+  fi
+fi
+
 echo
 echo "[git] Globale Hooks"
 HOOK_SRC="${REPOS_DIR_VALUE:+$REPOS_DIR_VALUE/tasks-vault/TOOLS/scripts/git-global-hooks}"

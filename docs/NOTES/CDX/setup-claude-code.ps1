@@ -220,6 +220,29 @@ $mergeScript = Join-Path $PSScriptRoot 'merge-claude-settings.js'
 
 node $mergeScript $templatePath $settingsPath $nvimConfig
 
+# --- LuaLS-Config fuer die Repos-Wurzel ------------------------------------
+# Sitzungen mit cwd = $REPOS_DIR starten (Plugin lua-lsp) einen LuaLS ueber den
+# ganzen Repos-Baum; ohne diese Datei laedt er tausende Dateien inkl. Worktrees
+# vor (gemessen bis 5 GB). Kopie statt Link, damit kein Symlink-Recht noetig ist.
+Write-Host "`n[luals] .luarc.jsonc fuer die Repos-Wurzel"
+$luarcSource = Join-Path $PSScriptRoot 'luarc.repos-root.jsonc'
+if (-not $reposDir -or -not (Test-Path $reposDir)) {
+    Write-Host "  REPOS_DIR fehlt oder existiert nicht: uebersprungen." -ForegroundColor Yellow
+} else {
+    $luarcTarget = Join-Path $reposDir '.luarc.jsonc'
+    if ((Test-Path $luarcTarget) -and ((Get-FileHash $luarcTarget).Hash -eq (Get-FileHash $luarcSource).Hash)) {
+        Write-Host "  Bereits aktuell: $luarcTarget"
+    } else {
+        if (Test-Path $luarcTarget) {
+            $backup = "$luarcTarget.bak-$(Get-Date -Format 'yyyyMMdd-HHmmssfff')"
+            Move-Item $luarcTarget $backup -Force
+            Write-Host "  Bestehende Datei gesichert nach: $backup"
+        }
+        Copy-Item $luarcSource $luarcTarget
+        Write-Host "  Kopiert: $luarcTarget"
+    }
+}
+
 # --- 4. Globale Git-Hooks (pre-push: kein Force-Push ueber fremde Commits) -----
 
 Write-Host "`n[git] Globale Hooks"

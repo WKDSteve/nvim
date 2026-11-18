@@ -26,6 +26,7 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web` |
 | `KONZEPT-multi-stack.md`     | Begruendung/Architektur der drei Schichten |
 | `merge-claude-settings.js`   | Gemeinsame Merge-Logik fuer `settings.json`, von beiden Setup-Skripten unten aufgerufen (verhindert, dass Windows- und Unix-Skript bei dieser Logik auseinanderlaufen) |
+| `luarc.repos-root.jsonc`     | LuaLS-Config fuer `$REPOS_DIR/.luarc.jsonc`, von beiden Setup-Skripten kopiert. Sitzungen mit cwd = `$REPOS_DIR` starten (Plugin `lua-lsp`) einen LuaLS ueber den ganzen Repos-Baum: ohne die Datei 5,4 GB, mit ihr 1,4 GB (gemessen 2026-11-18). Bewusst `.jsonc`, damit lsp.nvim sie nicht als Root-Marker nimmt |
 | `setup-claude-code.ps1`      | Windows: rollt die Vorlagen oben nach `~/.claude/` aus. Idempotent. |
 | `setup-claude-code.sh`       | Linux/macOS: dasselbe wie oben, plus `~/.claude/env.sh` fuer die Env-Variablen. Idempotent. |
 | `setup-git-signing.ps1/.sh`  | Commit-Signatur dieses Geraets: eigener SSH-Key (`~/.ssh/git-signing_ed25519`), `commit.gpgsign`, Eintrag in `git-allowed-signers`. Von beiden Setup-Skripten aufgerufen, auch allein lauffaehig. Idempotent. |
