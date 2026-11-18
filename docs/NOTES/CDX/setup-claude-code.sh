@@ -159,7 +159,8 @@ echo
 echo "[rules] ~/.claude/rules aus dem rules-vault"
 LINK_FLAGS=()
 if [ "$MACHINE_ROLE" = "workstation" ]; then LINK_FLAGS+=(--workstation); fi
-node "$RULES_VAULT_JS" link "${RULES_VAULT_VALUE:--}" "$CLAUDE_DIR" ${LINK_FLAGS[@]+"${LINK_FLAGS[@]}"}
+node "$RULES_VAULT_JS" link "${RULES_VAULT_VALUE:--}" "$CLAUDE_DIR" ${LINK_FLAGS[@]+"${LINK_FLAGS[@]}"} \
+  || echo "  Kontext-Dokumente nicht verlinkt, siehe Ausgabe oben."
 
 # LuaLS config for the repos root: sessions with cwd = $REPOS_DIR start one
 # lua-language-server (plugin lua-lsp) over the whole repos tree. Same as in

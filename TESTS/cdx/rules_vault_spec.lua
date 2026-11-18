@@ -196,6 +196,16 @@ return function(H)
   ok(not H.exists(rules .. "/rules-vault-old.md"), "a stale own entry is removed")
   foreign_intact()
 
+  -- A folder under an own name is never ours: it stays, the run warns and goes on (no crash under set -e).
+  vim.fn.delete(rules .. "/rules-vault-c.md")
+  vim.fn.mkdir(rules .. "/rules-vault-c.md/keep", "p")
+  out = node(nil, "link", vault, claude)
+  ok(out:find("ist ein Ordner", 1, true), "a folder in the way is reported")
+  eq(vim.fn.isdirectory(rules .. "/rules-vault-c.md/keep"), 1, "...and left alone")
+  eq(H.read(rules .. "/rules-vault-d.md"), "D\n", "...and the other documents are still linked")
+  vim.fn.delete(rules .. "/rules-vault-c.md", "rf")
+  node(nil, "link", vault, claude)
+
   -- Copy fallback: regular files, refreshed when the source changes. A correct symlink would stay as it is, so the
   -- own entries go first (as on a machine that never had the symlink right).
   for _, name in ipairs(entries()) do

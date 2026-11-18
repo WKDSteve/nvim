@@ -116,6 +116,11 @@ function place(src, dst) {
     const target = path.resolve(path.dirname(dst), fs.readlinkSync(dst));
     if (sameFile(target, src)) return 'ok';
   }
+  if (st && st.isDirectory()) {
+    // never ours (we only write files and file links): leave it, the setup goes on
+    warn(`${dst} ist ein Ordner: nicht ersetzt, Dokument nicht verlinkt.`);
+    return 'skipped';
+  }
   const noSymlink = process.env.RULES_VAULT_NO_SYMLINK === '1';
   if (st && st.isFile() && noSymlink && fs.readFileSync(dst).equals(fs.readFileSync(src))) return 'ok';
   if (st) fs.rmSync(dst, { force: true });
@@ -148,11 +153,11 @@ function link(vault, claudeDir, workstation) {
   }
 
   if (wanted.size > 0) fs.mkdirSync(rulesDir, { recursive: true });
-  const counts = { ok: 0, link: 0, copy: 0, removed: 0 };
+  const counts = { ok: 0, link: 0, copy: 0, removed: 0, skipped: 0 };
   for (const [name, src] of wanted) {
     const how = place(src, path.join(rulesDir, name));
     counts[how] += 1;
-    if (how !== 'ok') say(`${how === 'link' ? 'verlinkt' : 'kopiert'}: rules/${name} -> ${src}`);
+    if (how === 'link' || how === 'copy') say(`${how === 'link' ? 'verlinkt' : 'kopiert'}: rules/${name} -> ${src}`);
   }
 
   // Remove own entries that no longer have a source (only the prefix is ours).
