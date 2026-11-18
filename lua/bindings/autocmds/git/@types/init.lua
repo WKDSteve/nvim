@@ -38,10 +38,11 @@
 
 ---@class AutoCmds.Git.GitsignsRefreshCfg
 ---@field enable boolean
---- Enable gitsigns refresh hooks (safe no-op when gitsigns is absent).
+--- Enable gitsigns refresh hooks (safe no-op when gitsigns is absent). Default: false;
+--- gitsigns' own watch_gitdir keeps the signs current.
 ---
 ---@field events? Autocmds.Event[]|nil
---- Events used to refresh hunks. Default: { "BufEnter", "FocusGained" }.
+--- Events used to refresh hunks. Default: { "FocusGained" }.
 --- Add/remove events to balance freshness vs. overhead.
 
 --------------------------------------------------------------------------------

@@ -1,5 +1,7 @@
 ---@module 'bindings.autocmds.git.gitsigns_refresh'
---- Refresh gitsigns hunks on focus/enter to keep UI accurate.
+--- Refresh gitsigns hunks on focus. Off by default (see defaults.lua): gitsigns'
+--- own gitdir watcher keeps the signs current; this is the fallback for setups
+--- where that watcher sees no events.
 
 ---@class AutoCmds.Git.GitsignsRefresh
 local M = {}
@@ -14,7 +16,8 @@ function M.enable(cfg, shared)
     return
   end
 
-  local events = shared.norm_events(cfg.events, { "BufEnter", "FocusGained" })
+  -- No BufEnter by default: gitsigns runs its deferred updates on BufEnter itself.
+  local events = shared.norm_events(cfg.events, { "FocusGained" })
   Autocmd.create(events, function()
     -- Never `require` it here: that loaded gitsigns with the first buffer, long before its own
     -- trigger. Not loaded yet means nothing to refresh.
