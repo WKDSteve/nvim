@@ -91,6 +91,7 @@ local specs = {
   "cdx/luarc_repos_root_spec.lua",
   "cdx/rules_vault_spec.lua",
   "cdx/rule_refs_spec.lua",
+  "cdx/rule_drift_spec.lua",
   "cdx/new_project_claude_spec.lua",
   "execute/execute_spec.lua",
   "strip_coauthor/git_spec.lua",

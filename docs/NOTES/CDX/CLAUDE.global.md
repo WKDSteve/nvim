@@ -18,8 +18,8 @@ Stack-spezifische Regeln (Lua/Nvim, Rust, C++, Web/Tauri) stehen in der
 
 ## Sprache und Arbeitsweise
 
-- Antworte immer auf Deutsch, auch in Chip-/Background-Tasks; im Quellcode
-  (Code, Kommentare, Commit-Messages samt Body) immer Englisch (`ALLG-01`).
+- Antworte immer auf Deutsch, auch in Chip-/Background-Tasks; Code,
+  Kommentare und Commit-Messages auf Englisch (`ALLG-01`).
 - Nie mehr als 1 Agent gleichzeitig (`ALLG-02`); laufend sagen, was gerade
   passiert (`ALLG-03`).
 
