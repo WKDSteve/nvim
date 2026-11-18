@@ -80,6 +80,7 @@ local specs = {
   "bindings/insert_moves_spec.lua",
   "bindings/gitsigns_refresh_spec.lua",
   "bindings/copy_ctrl_c_spec.lua",
+  "bindings/save_ctrl_s_spec.lua",
   "profile/profile_spec.lua",
   "profile/source_workstation_spec.lua",
   "startup/heartbeat_spec.lua",
