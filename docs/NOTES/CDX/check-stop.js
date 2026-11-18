@@ -4,7 +4,10 @@
 // (per `git status`). Exit 2 blocks the stop and feeds the output back.
 //
 //   Rust: cargo clippy --all-targets -- -D warnings   (if Cargo.toml + changed .rs)
-//   TS:   node_modules/.bin/tsc --noEmit               (if tsconfig.json + changed .ts/.tsx)
+//   TS:   <pm> run check                               (if tsconfig.json + changed .ts/.tsx and the package.json
+//                                                       next to it has a `check` script; pm from the lockfile:
+//                                                       pnpm, yarn, else npm)
+//         node_modules/.bin/tsc --noEmit               (otherwise)
 //
 // Missing tools are skipped. `stop_hook_active` guards against endless loops.
 
@@ -34,6 +37,39 @@ function findUp(start, rel) {
     if (parent === dir) return null;
     dir = parent;
   }
+}
+
+/** The program `name` on PATH (with PATHEXT on Windows), or null. */
+function which(name) {
+  const exts = IS_WIN ? (process.env.PATHEXT || '.EXE;.CMD;.BAT').split(';') : [''];
+  for (const dir of (process.env.PATH || '').split(path.delimiter)) {
+    if (!dir) continue;
+    for (const ext of exts) {
+      const candidate = path.join(dir, name + ext);
+      if (fs.existsSync(candidate) && fs.statSync(candidate).isFile()) return candidate;
+    }
+  }
+  return null;
+}
+
+/**
+ * The `check` script of the package.json next to the tsconfig, run by the package manager its lockfile names:
+ * { bin, dir }, or null when there is none or the package manager is not installed.
+ */
+function checkScript(dir) {
+  const pkgPath = path.join(dir, 'package.json');
+  let pkg;
+  try {
+    pkg = JSON.parse(fs.readFileSync(pkgPath, 'utf8'));
+  } catch {
+    return null;
+  }
+  if (!pkg || !pkg.scripts || typeof pkg.scripts.check !== 'string') return null;
+  let manager = 'npm';
+  if (findUp(dir, 'pnpm-lock.yaml') || findUp(dir, 'pnpm-workspace.yaml')) manager = 'pnpm';
+  else if (findUp(dir, 'yarn.lock')) manager = 'yarn';
+  const bin = which(manager);
+  return bin ? { bin: IS_WIN ? `"${bin}"` : bin, dir } : null;
 }
 
 let input = '';
@@ -70,10 +106,17 @@ process.stdin.on('end', () => {
 
   if (changed.some((f) => /\.(ts|tsx)$/.test(f))) {
     const tsconfig = findUp(cwd, 'tsconfig.json');
-    const tsc = tsconfig && findUp(path.dirname(tsconfig), path.join('node_modules', '.bin', IS_WIN ? 'tsc.cmd' : 'tsc'));
-    if (tsc) {
-      const err = run(IS_WIN ? `"${tsc}"` : tsc, ['--noEmit'], path.dirname(tsconfig), IS_WIN);
+    const projectCheck = tsconfig && checkScript(path.dirname(tsconfig));
+    if (projectCheck) {
+      // The project's own type check (e.g. svelte-check + tsc -p ...): a bare tsc cannot read every file it can.
+      const err = run(projectCheck.bin, ['run', 'check'], projectCheck.dir, IS_WIN);
       if (err) errors.push(err);
+    } else {
+      const tsc = tsconfig && findUp(path.dirname(tsconfig), path.join('node_modules', '.bin', IS_WIN ? 'tsc.cmd' : 'tsc'));
+      if (tsc) {
+        const err = run(IS_WIN ? `"${tsc}"` : tsc, ['--noEmit'], path.dirname(tsconfig), IS_WIN);
+        if (err) errors.push(err);
+      }
     }
   }
 

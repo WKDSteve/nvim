@@ -18,7 +18,8 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 | `settings.global.json`       | Quelle der Wahrheit fuer `~/.claude/settings.json` (Permissions-Allowlist + Hooks) |
 | `check-hook.js`              | Vom PostToolUse-Hook aufgerufener Dispatcher: prueft je nach Endung `.lua` (stylua+luacheck), `.rs` (rustfmt mit der Edition aus der naechsten `Cargo.toml`, auch `edition.workspace`), C/C++ (clang-format, nur mit `.clang-format`), `.ts/.js/.css/.json` (projektlokales prettier) |
 | `check-hook.test.js`         | End-to-end-Test der Edition-Erkennung von `check-hook.js` (Wegwerf-Crates im Temp-Ordner, braucht rustfmt): `node check-hook.test.js` |
-| `check-stop.js`              | Stop-Hook: bei geaenderten Dateien `cargo clippy -D warnings` (Rust) bzw. `tsc --noEmit` (TS) |
+| `check-stop.js`              | Stop-Hook: bei geaenderten Dateien `cargo clippy -D warnings` (Rust) bzw. die Typpruefung des Projekts (TS): das `check`-Skript der `package.json` neben der `tsconfig.json` (pnpm/yarn/npm nach Lockfile), ohne Skript `tsc --noEmit` |
+| `check-stop.test.js`         | End-to-end-Test der TS-Wahl von `check-stop.js` (Wegwerf-Repos im Temp-Ordner, braucht git und npm): `node check-stop.test.js` |
 | `WORKFLOW.md`                | Anleitung: neuer Chat, neues Repo, neue Maschine |
 | `../../../scripts/install-tools/` | Ersetzt `setup-devtools.js` + `tools.json`: installiert fehlende Toolchains pro Profil (`nvim`, `cpp`, `rust`, `web`, `tauri`, oder `all` für alle) und die CLI-Tools der Plugins, bevorzugt per winget. `install-tools.ps1 -Profile nvim,rust -DryRun`; `-Status` zeigt je Profil, was schon installiert ist, und installiert nichts. Siehe dortiges README |
 | `new-project-claude.js`      | Kopiert die Projekt-Vorlage aus `templates/<stack>/` (`CLAUDE.md` + `.claude/settings.json`) in ein Repo: `node new-project-claude.js rust [zielordner]` |

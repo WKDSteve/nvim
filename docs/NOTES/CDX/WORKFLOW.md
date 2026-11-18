@@ -103,6 +103,8 @@ git push
 - **Nach jedem Edit** (`check-hook.js`): schnelle Einzeldatei-Checks
   (stylua/luacheck, rustfmt, clang-format, prettier).
 - **Am Ende eines Durchlaufs** (`check-stop.js`): nur bei geaenderten Dateien
-  `cargo clippy --all-targets -- -D warnings` (Rust) bzw. `tsc --noEmit` (TS,
-  wenn lokal installiert). Schlaegt das fehl, muss Claude erst korrigieren.
+  `cargo clippy --all-targets -- -D warnings` (Rust) bzw. die Typpruefung des
+  Projekts (TS): `pnpm`/`yarn`/`npm run check`, wenn die `package.json` neben der
+  `tsconfig.json` ein `check`-Skript hat (z. B. svelte-check, das generische
+  `.svelte`-Bauteile versteht), sonst `tsc --noEmit` (wenn lokal installiert). Schlaegt das fehl, muss Claude erst korrigieren.
 - Fehlende Tools werden uebersprungen, nie hart blockiert.
