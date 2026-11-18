@@ -106,5 +106,7 @@ git push
   `cargo clippy --all-targets -- -D warnings` (Rust) bzw. die Typpruefung des
   Projekts (TS): `pnpm`/`yarn`/`npm run check`, wenn die `package.json` neben der
   `tsconfig.json` ein `check`-Skript hat (z. B. svelte-check, das generische
-  `.svelte`-Bauteile versteht), sonst `tsc --noEmit` (wenn lokal installiert). Schlaegt das fehl, muss Claude erst korrigieren.
+  `.svelte`-Bauteile versteht) und `node_modules` installiert ist (Lockfile und
+  `node_modules` nur bis zur Repo-Wurzel gesucht), sonst `tsc --noEmit` (wenn lokal installiert).
+  Nach 5 min (`CHECK_STOP_TIMEOUT_MS`) blockiert es und beendet den ganzen Prozessbaum. Schlaegt das fehl, muss Claude erst korrigieren.
 - Fehlende Tools werden uebersprungen, nie hart blockiert.
