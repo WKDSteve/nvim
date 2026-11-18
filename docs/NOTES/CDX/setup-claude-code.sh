@@ -150,23 +150,7 @@ node "$SCRIPT_DIR/merge-claude-settings.js" \
 # setup-claude-code.ps1.
 echo
 echo "[luals] .luarc.jsonc fuer die Repos-Wurzel"
-LUARC_SRC="$SCRIPT_DIR/luarc.repos-root.jsonc"
-if [ -z "$REPOS_DIR_VALUE" ] || [ ! -d "$REPOS_DIR_VALUE" ]; then
-  echo "  REPOS_DIR fehlt oder existiert nicht: uebersprungen."
-else
-  LUARC_DST="$REPOS_DIR_VALUE/.luarc.jsonc"
-  if [ -f "$LUARC_DST" ] && cmp -s "$LUARC_SRC" "$LUARC_DST"; then
-    echo "  Bereits aktuell: $LUARC_DST"
-  else
-    if [ -e "$LUARC_DST" ]; then
-      backup="$LUARC_DST.bak-$(date +%Y%m%d-%H%M%S%N)"
-      mv "$LUARC_DST" "$backup"
-      echo "  Bestehende Datei gesichert nach: $backup"
-    fi
-    cp "$LUARC_SRC" "$LUARC_DST"
-    echo "  Kopiert: $LUARC_DST"
-  fi
-fi
+bash "$SCRIPT_DIR/install-repos-luarc.sh" "$REPOS_DIR_VALUE"
 
 echo
 echo "[git] Globale Hooks"
