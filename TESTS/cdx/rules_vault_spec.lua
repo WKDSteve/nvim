@@ -115,6 +115,13 @@ return function(H)
   git(vault, "reset", "-q", "--hard", "origin/main")
   ok(node(nil, "ensure", vault):find("aktuell", 1, true), "back on track it pulls again")
   ok(H.exists(vault .. "/rulesets/arbeit/kontext/d.md"), "...and has d.md")
+  if vim.fn.has("win32") == 1 then
+    -- the same folder spelt in another case is still the vault, not "no own git repo"
+    ok(
+      node(nil, "ensure", vault:upper()):find("aktuell", 1, true),
+      "the path case does not matter on Windows"
+    )
+  end
 
   local orphan_parent = base .. "/nowhere/repos/rules-vault"
   ok(

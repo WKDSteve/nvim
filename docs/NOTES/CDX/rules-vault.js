@@ -69,7 +69,8 @@ function ensure(vault) {
   }
 
   const top = run('git', ['rev-parse', '--show-toplevel'], vault);
-  if (!top.ok || path.resolve(top.out) !== path.resolve(vault)) {
+  // Windows paths compare without case (git may print e:/ for an E:\ argument)
+  if (!top.ok || !sameFile(top.out, vault)) {
     warn(`${vault} ist kein eigenes Git-Repo: nicht aktualisiert.`);
     return;
   }
@@ -99,6 +100,7 @@ function mdFiles(dir) {
 }
 
 function sameFile(a, b) {
+  if (process.platform !== 'win32') return path.resolve(a) === path.resolve(b);
   return path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
 }
 
