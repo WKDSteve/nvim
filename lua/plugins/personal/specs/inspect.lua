@@ -1471,7 +1471,7 @@ return {
 
   {
     "WKDSteve/rules.nvim",
-    cmd = { "Rules" },
+    cmd = { "Rules", "RulesVault" },
     dependencies = { "WKDSteve/lib.nvim" },
     opts = {
       -- Files or directories to load fenced ```rule blocks from; rules.nvim
