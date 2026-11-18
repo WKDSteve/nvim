@@ -13,7 +13,11 @@ const path = require('path');
 
 const templatesDir = path.join(__dirname, 'templates');
 const [, , stack, targetArg] = process.argv;
-const stacks = fs.readdirSync(templatesDir);
+// A stack is a folder with a CLAUDE.md; templates/PROMPT holds prompt templates, not a stack.
+const stacks = fs
+  .readdirSync(templatesDir, { withFileTypes: true })
+  .filter((e) => e.isDirectory() && fs.existsSync(path.join(templatesDir, e.name, 'CLAUDE.md')))
+  .map((e) => e.name);
 
 if (!stack || !stacks.includes(stack)) {
   console.error(`usage: node new-project-claude.js <${stacks.join('|')}> [targetDir]`);
