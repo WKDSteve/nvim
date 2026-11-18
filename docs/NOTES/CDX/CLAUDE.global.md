@@ -130,6 +130,11 @@ Werden von `setup-claude-code.ps1` pro Maschine gesetzt (User-Scope):
   keine großen/escape-haltigen Literale durch die Shell jagen.
 - Tasks im tasks-vault nur mit `tasks done` abschließen, nie `status: done` von
   Hand; `<area>/ROADMAP/TASKS.md` gehört in denselben Commit.
+- `_Telemetry/history/*.jsonl` im tasks-vault ist die Verlaufsreihe der
+  Kennzahlen (generiert von `tasks index` über den ganzen Vault, `tasks history
+  record` und dem Hub; `merge=union`). Geänderte Dateien dort sind nie fremde
+  Arbeit: beim nächsten Vault-Commit mit Pfad mitstagen. Vergessen kostet nur
+  eine Stufe in der Kurve; von Hand nie bearbeiten.
 - Bevor du an einer Task im tasks-vault arbeitest, belegst du sie:
   `tasks claim <area>/<slug> --by=<Name des Chats>` (setzt `status: doing`,
   reserviert 4 h; `--renew` verlängert, `--for=` ändert die Dauer). Ein fremder

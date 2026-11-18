@@ -17,7 +17,7 @@ Begriffe: `status` = open, doing, blocked, decision (wartet auf mich), parked (z
 
 - Lesen: `show <id>`, `list [<area>] --status=open,doing --ready --actor=cdx --format=ids|tsv|json`, `next [<area>] --actor=cdx --n=3`, `plans`, `plan --plan=<id>|--for=<id>`, `areas`, `list --done`.
 - Ändern: `set <id> key=value …` (leerer Wert entfernt den Key; ersetzt Listen komplett).
-- Prüfen: `check [<area>]` (vor jedem Commit von Vault-Dateien; Warnungen ändern den Exit-Code nicht, eigene trotzdem beheben; fremde Befunde nicht beheben, in einer Zeile melden). `ROADMAP/TASKS.md` ist generiert (`new`/`set`/`done` schreiben es), nie von Hand.
+- Prüfen: `check [<area>]` (vor jedem Commit von Vault-Dateien; Warnungen ändern den Exit-Code nicht, eigene trotzdem beheben; fremde Befunde nicht beheben, in einer Zeile melden). `ROADMAP/TASKS.md` ist generiert (`new`/`set`/`done` schreiben es), nie von Hand. Ebenso `_Telemetry/history/*.jsonl` (Verlaufsreihe der Kennzahlen; schreibt `index` über den ganzen Vault, `history record` und der Hub): geänderte Dateien dort beim nächsten Vault-Commit mitstagen, sie sind nie fremde Arbeit.
 
 ## Task bearbeiten
 
