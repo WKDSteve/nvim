@@ -13,7 +13,8 @@
 -- real copies do.
 local MIN_LEN = 50
 
--- Deliberate verbatim cores: { file basename, rule id, reason }. Keep it short; every entry needs a reason.
+-- Deliberate verbatim cores: { path below the config root, rule id, reason }. Keep it short; every entry needs a
+-- reason. Empty: the cores are shorter than the rules.
 local ALLOWED = {}
 
 ---@param s string
@@ -104,16 +105,13 @@ end
 local function sentences(text)
   local flat = flatten(text)
   local out = {}
-  for piece in (flat .. " "):gmatch("(.-[.!?;:])%s") do
-    piece = vim.trim(piece:gsub("[.!?;:]$", ""))
+  -- a delimiter ends a piece only before whitespace: `init.lua` and `z.B` stay whole; so does the last piece
+  local cut = flat:gsub("([.!?;:])%s", "%1\1") .. "\1"
+  for piece in cut:gmatch("([^\1]*)\1") do
+    piece = vim.trim((piece:gsub("[.!?;:]$", "")))
     if #piece >= MIN_LEN then
       out[#out + 1] = piece
     end
-  end
-  -- the tail after the last delimiter
-  local tail = vim.trim(flat:match("[.!?;:]%s([^.!?;:]*)$") or "")
-  if #tail >= MIN_LEN then
-    out[#out + 1] = tail
   end
   return out
 end
@@ -172,6 +170,18 @@ return function(H)
       body = "diese Begründung ist lang genug, um ohne Grenze als Dublette gemeldet zu werden",
     },
   }), 0, "the reason of a rule may be quoted")
+
+  -- the last sentence of a rule counts even without a final period and with a dot inside a path
+  local tail_rule = "#### `TEST-02` — Kurz\n\nKurzer Satz. Die Installations-Specs stehen in\n"
+    .. "`lua/plugins/personal/init.lua` und nirgends sonst\n"
+  local tail = { { id = "TEST-02", text = rule_text(tail_rule) } }
+  eq(#sentences(tail[1].text), 1, "the unterminated last sentence is one piece")
+  eq(#find_drift(tail, {
+    {
+      path = "t.md",
+      body = "Die Installations-Specs stehen in lua/plugins/personal/init.lua und nirgends sonst.",
+    },
+  }), 1, "a copy of the last sentence is reported")
 
   -- From this file, not stdpath("config"): in a worktree that is the main checkout.
   local spec = debug.getinfo(1, "S").source:sub(2)
@@ -240,7 +250,7 @@ return function(H)
   for _, h in ipairs(find_drift(rules, files)) do
     local allowed = false
     for _, a in ipairs(ALLOWED) do
-      allowed = allowed or (a[1] == vim.fs.basename(h.path) and a[2] == h.id)
+      allowed = allowed or (a[1] == h.path:sub(#root + 2) and a[2] == h.id)
     end
     if not allowed then
       report[#report + 1] = ("%s:%d copies %s: %s"):format(
