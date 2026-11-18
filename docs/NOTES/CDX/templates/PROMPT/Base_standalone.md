@@ -11,7 +11,7 @@
 ## Maschine (Workstation oder privater Rechner)
 
 - Erkennen: Umgebungsvariable `NVIM_MACHINE_ROLE` (dieselbe wie in `lua/machine.lua` der nvim-Config), in PowerShell `$env:NVIM_MACHINE_ROLE`, in Bash `$NVIM_MACHINE_ROLE` (`$env:…` gibt es in Bash nicht, dort kommt das Literal `:NVIM_MACHINE_ROLE` heraus). `workstation` = Tricentis-Workstation, nicht gesetzt oder `default` = privater Rechner (`STEVESPC`), Groß-/Kleinschreibung egal. Jeder andere Wert heißt falsch gelesen oder Tippfehler: nachfragen. Nicht aus dem Rechnernamen raten. Ist sie nicht gesetzt, aber `USERDOMAIN` ist `AzureAD` oder der Rechnername (`COMPUTERNAME`) beginnt mit `TRI-`: unklar, nachfragen, bevor etwas gebaut oder gestartet wird (die App kennt eine neu gesetzte Variable erst nach einem Neustart).
-- Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe, Messungen); `not-on-workstation` = nie dort (native Programme bauen, installieren oder starten, Runner, Tests und Builds der nativen Apps). Ohne Tag: Code-Arbeit, läuft auf dem privaten Rechner.
+- Tags an Tasks: `on-workstation` = nur dort ausführbar (Handläufe, Messungen); `not-on-workstation` = nie dort (was Falcon als Angriff lesen kann, Runner, die ai-Familie, das Installieren oder Starten der nativen Desktop-Apps bis zu ihrer Freigabe; Builds und Tests allein sind kein Grund für den Tag). Ohne Tag: Code-Arbeit, läuft auf dem privaten Rechner.
 - Vor dem Bearbeiten einer Task mit einem dieser Tags (und bei Aufträgen zu Workstation, Falcon oder EDR) die Maschine lesen und in einer Zeile nennen. Passt sie nicht zum Tag: nichts ausführen, nur vorbereiten und mir Bescheid geben. Fällt ein Workstation-Bezug auf, den die Task nicht kennzeichnet, den Tag nachziehen.
 
 ## Tasks und Pläne (tasks.nvim)
@@ -112,7 +112,7 @@ Nur für ein Vorhaben aus mehreren Tasks in Etappen mit eigenem Ziel (nicht für
 ## Pfade
 
 - Installations-Specs meiner Plugins: `vim.fn.stdpath('config') .. /lua/plugins/personal/init.lua`
-- Alle `.nvim`-Plugins (falls nötig): `$REPOS_DIR/repos`
+- Alle `.nvim`-Plugins (falls nötig): auf `STEVESPC` direkt unter `E:/repos/<name>`, auf anderen Rechnern unter `$REPOS_DIR/repos/<name>`
 
 ## Regeln
 

@@ -113,7 +113,7 @@ Nur für ein Vorhaben aus mehreren Tasks in Etappen mit eigenem Ziel (nicht für
 ## Pfade
 
 - Installations-Specs meiner Plugins: `vim.fn.stdpath('config') .. /lua/plugins/personal/init.lua`
-- Alle `.nvim`-Plugins (falls nötig): `$REPOS_DIR/repos`
+- Alle `.nvim`-Plugins (falls nötig): auf `STEVESPC` direkt unter `E:/repos/<name>`, auf anderen Rechnern unter `$REPOS_DIR/repos/<name>`
 
 ## Regeln
 
