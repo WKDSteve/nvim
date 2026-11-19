@@ -43,9 +43,9 @@ Schon erledigt/angelegt als task?:
 
 | Account  |    Sub Bis    | Week Reset Date |  Next 5h Reset  | Actual/Insgesamt |
 | -------- | ------------- | --------------- | --------------- | ---------------- |
-| **main** |   ~ 28. Sep   |   Fr., 11:00    |     23:20       |    100% / 127%     |
+| **main** |   ~ 28. Sep   |   Fr., 11:00    |     20:50       |    98% / 39%     |
 | **work** |   21. Sept    |   Sa., 06:00    |     10:45       |    10% / 53%     |
-| **free** | 22. Juli 2027 |   So., 09:00    |     21:30       |    81% / 63%     |
+| **free** | 22. Juli 2027 |   So., 09:00    |     00:00       |    99% / 13%     |
 
 - pickers.nvim `:Pickers []` neue optionen für den tasks-vault, den rules-vault, WKDBook-Tricentis (als `:Pickers Tricentis`), WKDBooks/Development/wkdbok-native als native-apps und wkdbook-myplugins als myplugins
 
