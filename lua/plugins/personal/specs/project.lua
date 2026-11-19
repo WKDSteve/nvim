@@ -1834,11 +1834,11 @@ return {
       -- `:Tasks sheet-run`: the path of testing.nvim's `scripts/testing.lua`
       -- (nil = found like a dependency).
       -- sheet_run = { testing_cli = nil },
-      -- reminders = {
-      --   -- One line at startup when reminders (`remind:`) are due (once per session,
-      --   -- only with a UI).
-      --   on_start = true,
-      -- },
+      reminders = {
+        -- One line at startup when reminders (`remind:`) are due (once per session,
+        -- only with a UI). Opt-in: the plugin default is false; set true to see it.
+        on_start = false,
+      },
       -- `attach --latest` (the `ga` key): where it looks and how old a file may be.
       -- attach = {
       --   -- Folders to look into; empty = the usual screenshot folders of the system.

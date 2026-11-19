@@ -1080,6 +1080,7 @@ return {
       -- opts.request_filetype = "http"
       -- One-time popup listing the CLI tools this plugin wants (lib.nvim.deps),
       -- shown on the first setup() after install.
+      -- Opt-in: the plugin default is false; set true to see it.
       -- opts.deps_popup = true
       -- How many past requests `:RA history` keeps (a ring, per project).
       -- opts.history_max_entries = 200

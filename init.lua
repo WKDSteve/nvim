@@ -20,6 +20,11 @@ vim.g.mapleader = " "
 -- any plugin spec or startup phase asks.
 vim.g.have_nerd_font = true
 
+-- Startup popups are opt-in: lib.nvim.deps' "which CLI tools does this plugin
+-- want" popup (shown once per plugin on first setup()) stays off. Re-enable
+-- with `false`, or look at one on demand with `:Lib deps show <plugin>`.
+vim.g.lib_nvim_deps_disable_first_run = true
+
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
 if not vim.uv.fs_stat(lazypath) then
   local repo = "https://github.com/folke/lazy.nvim.git"
