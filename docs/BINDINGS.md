@@ -371,6 +371,9 @@ Replaces the former flat `:MyPluginsClone [dir]` / `:MyPluginsRemove [dir]`.
 | `:MyPlugins task done <id> [done_in=] [commits=] [date=] [--yes]` | Finish after confirmation: moved to `Backlog/FEATURES\|TASKS/YYYY-MM-DD_<slug>.md`, Backlog README and index updated |
 | `:MyPlugins task template [--to=clipboard\|buffer\|file:<path>]` | The task file template into the `+` register |
 | `:MyPlugins task open <id>` | Open the file of a task (open, or its finished copy in `Backlog/`) |
+| `:MyPlugins task learn [toggle\|on\|off\|image\|follow]` | Learning tree view in a path or a task with `## Lernpunkte` (also `:Tasks learn`): progress as virtual text, folds, image placeholders; the image (images.nvim / mdview.nvim) or the promoted task of the point under the cursor |
+| `:MyPlugins task point [next\|open\|learned\|seen\|dropped\|blocked] [reason...]` | Mark of the learning point under the cursor (`[ ]` -> `[x]` -> `[~]` -> `[-]`); `[~]`/`[-]` ask for the reason |
+| `:MyPlugins task promote [<id>#<key>] [--area= --title= --actor= --dry-run]` / `task unpromote [<id>#<key>]` | Make a task of a learning point (default: under the cursor) and open it / take it back; no key is bound unless tasks.nvim's `keys.learning` names one |
 | `:MyPlugins open <area> [tasks\|roadmap\|backlog\|handover\|notes\|all] [--action=files\|grep\|smart] [--list] [--to=]` | pickers.nvim picker over the files of one folder of an area; `--list` delivers the file list instead |
 
 `dir` is where to look for the listed repos, never a folder to enumerate —
