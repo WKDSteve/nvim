@@ -17,14 +17,15 @@ config-eigene Wrapper, die gezielt `require("gitsigns").refresh()` bzw.
 
 | Gruppe | Event(s) | Quelle | Zweck | Status |
 |---|---|---|---|---|
-| `gitsigns_refresh` | `BufEnter`, `FocusGained` (konfigurierbar via `gitsigns_refresh.events`) | [autocmds/git/gitsigns_refresh.lua](../../../../../lua/bindings/autocmds/git/gitsigns_refresh.lua) | Ruft `gitsigns.refresh()` auf, damit die Sign-Spalte nach Fokuswechsel/Buffer-Wechsel aktuell bleibt. **Aktiv** (`enable = true` im Default). | [custom] |
+| `gitsigns_refresh` | `FocusGained` (konfigurierbar via `gitsigns_refresh.events`) | [autocmds/git/gitsigns_refresh.lua](../../../../../lua/bindings/autocmds/git/gitsigns_refresh.lua) | Ruft `gitsigns.refresh()` auf, damit die Sign-Spalte nach Fokuswechsel aktuell bleibt. **Inaktiv per Default** (`enable = false` seit 2026-11-18): gitsigns' eigener `watch_gitdir` erkennt externes `git add`/Commits, ein A/B ergab nur zusätzliche `git show` ohne Nutzen. Nur für Laufwerke ohne Dateisystem-Ereignisse einschalten. | [custom] |
 | `blame_on_hold` | `CursorHold` | [autocmds/git/blame_on_hold.lua](../../../../../lua/bindings/autocmds/git/blame_on_hold.lua) | Zeigt Inline-Blame via `gitsigns.blame_line({ full = false, ignore_whitespace = true, virt_text = … })` für die Zeile unter dem Cursor. Buftype-Ausschluss über `ignore_buftypes` (Default `{ "nofile", "prompt" }`), optionale Verzögerung über `delay`. **Inaktiv per Default** (`enable = false` in `defaults.lua`) — wird also derzeit nicht ausgeführt, obwohl der Code registriert würde, sobald `enable = true` gesetzt wird. | [custom] |
 
 ---
 
 ## Details
 
-- `gitsigns_refresh`: Default-Events `{ "BufEnter", "FocusGained" }`, überschreibbar
+- `gitsigns_refresh`: Default-Events `{ "FocusGained" }` (BufEnter übernimmt gitsigns
+  selbst über seine aufgeschobenen Updates), überschreibbar
   über `cfg.gitsigns_refresh.events` (wird durch `shared.norm_events`
   normalisiert). Der Refresh-Aufruf ist `pcall`-geschützt, falls gitsigns
   gerade nicht geladen ist.

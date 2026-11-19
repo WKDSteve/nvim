@@ -8,7 +8,8 @@ tun musst. Hintergrund und Dateien: [README.md](README.md),
 
 | Quelle                                   | Inhalt                                             | Wo es herkommt                  |
 |------------------------------------------|----------------------------------------------------|---------------------------------|
-| `~/.claude/CLAUDE.md`                    | Sprache, Arbeitsweise, Doku-Struktur, Git-Regeln   | Symlink auf `CLAUDE.global.md`  |
+| `~/.claude/CLAUDE.md`                    | Kern ohne Vault: Sprache, Maschine, Git-Verbote    | Symlink auf `CLAUDE.global.md`  |
+| `~/.claude/rules/rules-vault-*.md`       | Alle Arbeitsregeln mit Regel-ID (Kontext-Dokumente) | Symlinks auf `$RULES_VAULT/rulesets/arbeit/kontext/` |
 | `~/.claude/settings.json`                | Allowlist + Hooks (`check-hook.js`, `check-stop.js`)| Merge aus `settings.global.json`|
 | `<repo>/CLAUDE.md`                       | Stack-Regeln (Lua, Rust, C++, Web, Tauri)          | `templates/<stack>/`            |
 | `<repo>/.claude/settings.json`           | Stack-Allowlist (cargo, pnpm, cmake ...)           | `templates/<stack>/`            |
@@ -16,7 +17,13 @@ tun musst. Hintergrund und Dateien: [README.md](README.md),
 | Env-Var `NVIM_MACHINE_ROLE`              | Workstation oder privater Rechner                  | von Hand (Abschnitt 4)          |
 
 Deshalb: **keine Regeln mehr in den Chat pasten.** Aendern sich Regeln, dann
-in der jeweiligen Datei anpassen, committen, pushen.
+in der jeweiligen Datei anpassen, committen, pushen. Arbeitsregeln stehen nur
+einmal, im rules-vault (`$RULES_VAULT/rulesets/arbeit`, aendern mit
+rules.nvim, danach `nvim -l scripts/kontext.lua rulesets/arbeit`);
+`CLAUDE.global.md`, Repo- und Prompt-Vorlagen verweisen per Regel-ID darauf.
+Die Prompt-Vorlagen (`:Cdx prompt base|full|tasks|base_workstation`) sind
+darum kurz; fuer eine Sitzung ohne `~/.claude/rules` (Cloud, Rechner ohne
+Klon) die Langfassung `*_standalone` nehmen.
 
 ## 2. Ablauf pro neuem Chat
 
@@ -28,7 +35,7 @@ in der jeweiligen Datei anpassen, committen, pushen.
 3. **Bei Bedarf Kontext verlinken statt einfuegen:** Handover-Datei aus
    `$NVIM_CONFIG_DIR/docs` oder Backlog aus den wkdbooks nennen, Claude liest sie.
 4. **Ein Chat = eine Aufgabe.** Nach Abschluss committet/pusht Claude auf
-   `main` (Regel aus `CLAUDE.global.md`). Fuer die naechste Aufgabe neuen Chat
+   `main` (Regel `GIT-01`). Fuer die naechste Aufgabe neuen Chat
    starten; Zwischenstaende gehoeren in ein Handover-File, nicht in den Chat.
 5. **Am Ende pruefen:** `git log -1`, ggf. auf den anderen Maschinen `git pull`.
 
@@ -58,6 +65,9 @@ git add CLAUDE.md .claude/settings.json; git commit -m "chore: add Claude Code p
    - Windows: `pwsh -File "$env:LOCALAPPDATA\nvim\docs\NOTES\CDX\setup-claude-code.ps1"`
    - Linux/macOS: `bash ~/.config/nvim/docs/NOTES/CDX/setup-claude-code.sh`
    Es zeigt die Maschinenrolle an (Workstation: muss dort `workstation` sein).
+   Es klont bzw. pullt den rules-vault (nur sauber und auf `main`, sonst
+   Warnung) und verlinkt dessen Kontext-Dokumente nach `~/.claude/rules/`
+   (Workstation zusaetzlich `kontext/workstation/`).
    Am Ende zeigt das Skript, was schon installiert ist, und fragt nach
    Toolchain-Profilen (`nvim,cpp,rust,web,tauri`, oder `all` fuer alle). Auf
    der Workstation kommen auch die Bau-Toolchains; ausgelassen werden nur die
@@ -106,5 +116,7 @@ git push
   `cargo clippy --all-targets -- -D warnings` (Rust) bzw. die Typpruefung des
   Projekts (TS): `pnpm`/`yarn`/`npm run check`, wenn die `package.json` neben der
   `tsconfig.json` ein `check`-Skript hat (z. B. svelte-check, das generische
-  `.svelte`-Bauteile versteht), sonst `tsc --noEmit` (wenn lokal installiert). Schlaegt das fehl, muss Claude erst korrigieren.
+  `.svelte`-Bauteile versteht) und `node_modules` installiert ist (Lockfile und
+  `node_modules` nur bis zur Repo-Wurzel gesucht), sonst `tsc --noEmit` (wenn lokal installiert).
+  Nach 5 min (`CHECK_STOP_TIMEOUT_MS`) blockiert es und beendet den ganzen Prozessbaum. Schlaegt das fehl, muss Claude erst korrigieren.
 - Fehlende Tools werden uebersprungen, nie hart blockiert.

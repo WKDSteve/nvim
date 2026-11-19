@@ -8,7 +8,9 @@
 return function(H)
   local ok, eq = H.ok, H.eq
 
-  local cdx = vim.fs.normalize(vim.fn.stdpath("config")) .. "/docs/NOTES/CDX"
+  -- From this file, not stdpath("config"): that is ~/.config/nvim on the CI runner and the main checkout in a worktree.
+  local spec = vim.fs.normalize(vim.fn.fnamemodify(debug.getinfo(1, "S").source:sub(2), ":p"))
+  local cdx = vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(spec))) .. "/docs/NOTES/CDX"
   local src = cdx .. "/luarc.repos-root.jsonc"
   local text = H.read(src)
   ok(text and text ~= "", "the template exists: " .. src)

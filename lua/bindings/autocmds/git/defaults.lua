@@ -10,9 +10,16 @@ local AUTOCMDS_GIT_DEFAULTS = {
     formatoptions = "tcqj",
     start_in_insert = false,
   },
+  -- Off: gitsigns keeps itself current. watch_gitdir sees external `git add`
+  -- and commits, a reloaded buffer re-diffs, and its own BufEnter handler runs
+  -- the updates it deferred for hidden buffers. refresh() on top re-read the
+  -- index blob of every attached buffer on each event: 8 extra `git show` per
+  -- scripted 100 s session (A/B 2026-11-18, task
+  -- nvim-config/gitsigns-refresh-git-churn). Enable only where the watcher
+  -- cannot work (network drives without fs events).
   gitsigns_refresh = {
-    enable = true,
-    events = { "BufEnter", "FocusGained" },
+    enable = false,
+    events = { "FocusGained" },
   },
   blame_on_hold = {
     enable = false,

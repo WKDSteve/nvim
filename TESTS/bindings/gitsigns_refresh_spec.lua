@@ -1,6 +1,6 @@
--- TESTS/bindings/gitsigns_refresh_spec.lua -- `bindings.autocmds.git.gitsigns_refresh`: the refresh
--- on BufEnter / FocusGained only calls gitsigns when it is loaded already; it must never `require`
--- it (that loaded the plugin with the first buffer, long before its own trigger).
+-- TESTS/bindings/gitsigns_refresh_spec.lua -- `bindings.autocmds.git.gitsigns_refresh`: off by default, FocusGained
+-- only when on; it only calls gitsigns when it is loaded already and must never `require` it (that
+-- loaded the plugin with the first buffer, long before its own trigger).
 
 return function(H)
   local eq, ok = H.eq, H.ok
@@ -35,8 +35,8 @@ return function(H)
       required = true
       return { refresh = function() end }
     end
-    vim.api.nvim_exec_autocmds("BufEnter", { group = "spec_gitsigns_refresh" })
-    ok(not required, "BufEnter does not load gitsigns")
+    vim.api.nvim_exec_autocmds("FocusGained", { group = "spec_gitsigns_refresh" })
+    ok(not required, "FocusGained does not load gitsigns")
     ok(package.loaded["gitsigns"] == nil, "…and leaves it unloaded")
 
     -- loaded: refresh is called
@@ -46,10 +46,26 @@ return function(H)
         refreshed = refreshed + 1
       end,
     }
-    vim.api.nvim_exec_autocmds("BufEnter", { group = "spec_gitsigns_refresh" })
-    eq(refreshed, 1, "a loaded gitsigns is refreshed")
     vim.api.nvim_exec_autocmds("FocusGained", { group = "spec_gitsigns_refresh" })
-    eq(refreshed, 2, "…on FocusGained too")
+    eq(refreshed, 1, "a loaded gitsigns is refreshed on FocusGained")
+    -- gitsigns runs its deferred updates on BufEnter itself; refresh() there re-read the
+    -- index blob of every attached buffer on each buffer switch.
+    eq(
+      #vim.api.nvim_get_autocmds({ group = "spec_gitsigns_refresh", event = "BufEnter" }),
+      0,
+      "default events: no BufEnter autocmd"
+    )
+    vim.api.nvim_exec_autocmds("BufEnter", { group = "spec_gitsigns_refresh" })
+    eq(refreshed, 1, "…so a buffer switch does not refresh")
+
+    -- explicit events still win
+    mod.enable({ enable = true, events = { "BufEnter" } }, shared)
+    vim.api.nvim_exec_autocmds("BufEnter", { group = "spec_gitsigns_refresh" })
+    eq(refreshed, 2, "configured BufEnter refreshes")
+
+    -- shipped default: off (gitsigns' own watch_gitdir keeps the signs current)
+    local defaults = require("bindings.autocmds.git.defaults").get_defaults()
+    eq(defaults.gitsigns_refresh.enable, false, "refresh is off by default")
   end)
 
   package.loaded["gitsigns"] = saved

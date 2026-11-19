@@ -550,7 +550,7 @@ awareness of each other).
 | `general_autocmds_autocmds_general_kitty_spacing` | `VimEnter` | — | Kitty: shrink window padding for the current window |
 | `general_autocmds_autocmds_general_kitty_spacing` | `VimLeavePre` | — | Kitty: restore padding on exit |
 | `git_autocmds_commit_ft` | `FileType` | `gitcommit` | Buffer options for the commit-message buffer |
-| `gitsigns_refresh` | `BufEnter`, `FocusGained` | — | Re-read gitsigns on focus/entry |
+| `gitsigns_refresh` | `FocusGained` | — | Re-read gitsigns on focus (off by default: gitsigns' own watcher suffices) |
 | `trim_trailing` | `BufWritePre` | `*` | Strip trailing whitespace on save, preserving cursor position |
 | `trim_blank` | `BufWritePre` | `*` | Clean fully-blank lines, preserving cursor position |
 | `last_loc` | `BufReadPost` | `*` | Restore the last cursor position after reading |

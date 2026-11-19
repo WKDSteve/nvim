@@ -14,20 +14,21 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
 
 | Datei                       | Zweck                                                                 |
 |------------------------------|------------------------------------------------------------------------|
-| `CLAUDE.global.md`           | Quelle der Wahrheit fuer `~/.claude/CLAUDE.md` (Verhaltensregeln, Konventionen) |
+| `CLAUDE.global.md`           | Quelle der Wahrheit fuer `~/.claude/CLAUDE.md`: nur der Kern, der ohne rules-vault gelten muss (Sprache, Maschine/Workstation, Signatur, Push-Verbote, geteilte Checkouts, Commit-Liste), mit Regel-IDs; alles andere laedt aus `~/.claude/rules/` |
 | `settings.global.json`       | Quelle der Wahrheit fuer `~/.claude/settings.json` (Permissions-Allowlist + Hooks) |
 | `check-hook.js`              | Vom PostToolUse-Hook aufgerufener Dispatcher: prueft je nach Endung `.lua` (stylua+luacheck), `.rs` (rustfmt mit der Edition aus der naechsten `Cargo.toml`, auch `edition.workspace`), C/C++ (clang-format, nur mit `.clang-format`), `.ts/.js/.css/.json` (projektlokales prettier) |
 | `check-hook.test.js`         | End-to-end-Test der Edition-Erkennung von `check-hook.js` (Wegwerf-Crates im Temp-Ordner, braucht rustfmt): `node check-hook.test.js` |
-| `check-stop.js`              | Stop-Hook: bei geaenderten Dateien `cargo clippy -D warnings` (Rust) bzw. die Typpruefung des Projekts (TS): das `check`-Skript der `package.json` neben der `tsconfig.json` (pnpm/yarn/npm nach Lockfile), ohne Skript `tsc --noEmit` |
-| `check-stop.test.js`         | End-to-end-Test der TS-Wahl von `check-stop.js` (Wegwerf-Repos im Temp-Ordner, braucht git und npm): `node check-stop.test.js` |
+| `check-stop.js`              | Stop-Hook: bei geaenderten Dateien `cargo clippy -D warnings` (Rust) bzw. die Typpruefung des Projekts (TS): das `check`-Skript der `package.json` neben der `tsconfig.json` (pnpm/yarn/npm nach Lockfile, nur mit `node_modules`; gesucht bis zur Repo-Wurzel), ohne Skript `tsc --noEmit`; nach `CHECK_STOP_TIMEOUT_MS` (5 min) blockiert es und beendet den ganzen Prozessbaum |
+| `check-stop.test.js`         | End-to-end-Test der TS-Wahl von `check-stop.js` (Wegwerf-Repos im Temp-Ordner, falsche pnpm/yarn/npm in eigenem PATH, Timeout; braucht git und npm): `node check-stop.test.js` |
 | `WORKFLOW.md`                | Anleitung: neuer Chat, neues Repo, neue Maschine |
 | `../../../scripts/install-tools/` | Ersetzt `setup-devtools.js` + `tools.json`: installiert fehlende Toolchains pro Profil (`nvim`, `cpp`, `rust`, `web`, `tauri`, oder `all` für alle) und die CLI-Tools der Plugins, bevorzugt per winget. `install-tools.ps1 -Profile nvim,rust -DryRun`; `-Status` zeigt je Profil, was schon installiert ist, und installiert nichts. Siehe dortiges README |
 | `new-project-claude.js`      | Kopiert die Projekt-Vorlage aus `templates/<stack>/` (`CLAUDE.md` + `.claude/settings.json`) in ein Repo: `node new-project-claude.js rust [zielordner]` |
-| `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web` |
+| `templates/`                 | Vorlagen je Stack: `nvim-plugin`, `rust`, `cpp`, `tauri`, `web`; dazu `PROMPT/` (Prompt-Vorlagen fuer `:Cdx prompt`): `Base.md`, `base_workstation.md`, `full.md`, `tasks.md` verweisen per Regel-ID auf den rules-vault, ihre Langfassungen `*_standalone.md` stehen fuer sich (Sitzungen ohne `~/.claude/rules`). `TESTS/cdx/rule_refs_spec.lua` prueft, dass jede zitierte Regel-ID im Vault existiert, `TESTS/cdx/rule_drift_spec.lua`, dass kein Regeltext (Saetze ab 50 Zeichen) aus dem Vault in `CLAUDE.global.md`, den Kurz-Vorlagen oder den Repo-Vorlagen wiederkehrt |
 | `KONZEPT-multi-stack.md`     | Begruendung/Architektur der drei Schichten |
 | `merge-claude-settings.js`   | Gemeinsame Merge-Logik fuer `settings.json`, von beiden Setup-Skripten unten aufgerufen (verhindert, dass Windows- und Unix-Skript bei dieser Logik auseinanderlaufen) |
 | `luarc.repos-root.jsonc`     | LuaLS-Config fuer `$REPOS_DIR/.luarc.jsonc`, von beiden Setup-Skripten kopiert. Sitzungen mit cwd = `$REPOS_DIR` starten (Plugin `lua-lsp`) einen LuaLS ueber den ganzen Repos-Baum: ohne die Datei 5,4 GB, mit ihr 1,4 GB (gemessen 2026-11-18). Bewusst `.jsonc`, damit lsp.nvim sie nicht als Root-Marker nimmt |
 | `install-repos-luarc.ps1`/`.sh` | Kopiert `luarc.repos-root.jsonc` nach `<repos>/.luarc.jsonc` (eine abweichende Datei wird vorher gesichert). Von den Setup-Skripten aufgerufen und von `TESTS/cdx/luarc_repos_root_spec.lua` gegen einen Temp-Ordner geprueft |
+| `rules-vault.js`             | Gemeinsamer Helfer beider Setup-Skripte: `ensure <vault>` klont den rules-vault bzw. holt ihn per `git pull --ff-only` (nur sauber und auf `main`, sonst nur Warnung); `link <vault> <~/.claude> [--workstation]` verlinkt `rulesets/arbeit/kontext/*.md` nach `~/.claude/rules/rules-vault-<name>.md`. Geprueft von `TESTS/cdx/rules_vault_spec.lua` (Fake-Vault, Fake-`~/.claude`) |
 | `setup-claude-code.ps1`      | Windows: rollt die Vorlagen oben nach `~/.claude/` aus. Idempotent. |
 | `setup-claude-code.sh`       | Linux/macOS: dasselbe wie oben, plus `~/.claude/env.sh` fuer die Env-Variablen. Idempotent. |
 | `setup-git-signing.ps1/.sh`  | Commit-Signatur dieses Geraets: eigener SSH-Key (`~/.ssh/git-signing_ed25519`), `commit.gpgsign`, Eintrag in `git-allowed-signers`. Von beiden Setup-Skripten aufgerufen, auch allein lauffaehig. Idempotent. |
@@ -41,6 +42,21 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
   moeglich sind (kein Developer Mode, keine Admin-Rechte), wird stattdessen
   kopiert - dann muss man nach Aenderungen `setup-claude-code.ps1` erneut
   laufen lassen.
+- **`~/.claude/rules/`** (Arbeitsregeln aus dem rules-vault): Claude Code laedt
+  `~/.claude/rules/*.md` beim Start jeder Sitzung ohne Freigabedialog. Das
+  Setup legt je Datei `$RULES_VAULT/rulesets/arbeit/kontext/*.md` einen
+  Symlink `rules-vault-<name>.md` an (Fallback Kopie), auf der Workstation
+  (`NVIM_MACHINE_ROLE=workstation`) zusaetzlich `kontext/workstation/*.md` als
+  `rules-vault-workstation-<name>.md`. Eigene Eintraege erkennt es am Praefix
+  `rules-vault-`: verwaiste werden entfernt, fremde Dateien in `rules/` nie
+  angefasst. Weil jede Sitzung vom lokalen Vault abhaengt, klont das Setup ihn
+  bei Bedarf (`gh repo clone WKDSteve/rules-vault`, Rueckfall `git clone`) und
+  holt ihn per `git pull --ff-only`; mit uncommitteten Aenderungen, auf einem
+  anderen Branch oder bei einem Pull-Fehler nur eine Warnung. Ohne Vault oder
+  `kontext/`-Ordner: Hinweis, kein Fehler. Mit Symlinks wirkt eine Aenderung
+  im Vault nach dem Pull sofort, mit Kopien erst nach erneutem Setup.
+  `~/.claude` liegt im echten Profil, die MSIX-Virtualisierung der Claude-App
+  betrifft nur AppData.
 - **`settings.json`**: Wird **gemerged**, nicht ueberschrieben (Logik in
   `merge-claude-settings.js`, per `node` von beiden Setup-Skripten
   aufgerufen). Bestehende Eintraege (z. B. maschinenspezifische Permissions)
@@ -55,9 +71,9 @@ Ordner muesste man Regeln/Settings auf jedem Rechner von Hand nachpflegen.
   `$NVIM_MACHINE_ROLE` (`workstation` auf der Tricentis-Workstation, sonst
   nicht gesetzt) setzt das Skript nicht (auf der Workstation einmal von Hand:
   `setx NVIM_MACHINE_ROLE workstation`, siehe `WORKFLOW.md` Abschnitt 4); sie wird von `lua/machine.lua` der
-  nvim-Config und von den Claude-Regeln (Abschnitt „Maschine“ in
-  `CLAUDE.global.md`) gelesen und steht in den Prompt-Vorlagen
-  (`templates/PROMPT/`) für die Task-Tags `on-workstation` / `not-on-workstation`.
+  nvim-Config und von den Claude-Regeln (`MASCHINE-01` bis `MASCHINE-06`,
+  Kurzfassung im Abschnitt „Maschine“ von `CLAUDE.global.md`) gelesen und
+  entscheidet über die Task-Tags `on-workstation` / `not-on-workstation`.
   - **Windows**: als User-Env-Var gesetzt
     (`[Environment]::SetEnvironmentVariable(..., 'User')`) - gilt in neu
     gestarteten Shells/der Claude-Code-App.
@@ -119,10 +135,13 @@ Ablauf (beide Skripte, gleiches Prinzip):
    ersten Mal nach, validiert dass der Pfad existiert). Zeigt die
    Maschinenrolle `NVIM_MACHINE_ROLE` an (setzt sie nie; unbekannte Werte und
    ein AzureAD-/`TRI-`-Rechner ohne Rolle werden gemeldet).
+   Klont bzw. aktualisiert den rules-vault (`rules-vault.js ensure`) und
+   setzt danach `RULES_VAULT`.
 2. Verlinkt/kopiert `CLAUDE.global.md` nach `~/.claude/CLAUDE.md` (mit
    Backup, falls dort schon etwas anderes liegt).
 3. Merged `settings.global.json` in `~/.claude/settings.json` (mit Backup,
-   ueber `merge-claude-settings.js`).
+   ueber `merge-claude-settings.js`) und verlinkt die Kontext-Dokumente des
+   rules-vault nach `~/.claude/rules/` (`rules-vault.js link`, siehe oben).
 4. Richtet die Commit-Signatur ein (`setup-git-signing.*`): erzeugt bei Bedarf
    den Signing-Key, setzt `gpg.format ssh`/`commit.gpgsign true` und traegt
    das Geraet in `git-allowed-signers` ein. Neuer Eintrag: nvim-Config
