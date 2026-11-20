@@ -1,18 +1,29 @@
 -- Live check: mini.ai's "next"/"last" textobjects sit on capitals (`aN`/`iN`, `aL`/`iL`, lua/plugins/textobjects.lua)
 -- so Neovim 0.12's own `an`/`in` (incremental selection) stay free. Typed like a person would in the installed config:
 -- `ciN)` from inside the first pair changes the next pair, `ciL)` from inside the last pair changes the one before,
--- `daN)` deletes the next pair with its brackets. The buffer is a scratch buffer; nothing is written.
+-- `daN)` deletes the next pair with its brackets. The buffer is a scratch buffer; nothing is written. `c` and `d` go to
+-- the + register ('clipboard' is unnamedplus): its program is a recording stand-in (fixtures/stand_ins.lua) and the +
+-- register reads back what was copied (fixtures/clipboard_memory.lua), so the real clipboard is neither written nor read.
 return {
   id = "nvim-config.textobjects-next-last",
   title = "nvim-config: mini.ai iN/aN/iL/aL reach the next/last pair, an/in stay Neovim's",
   task = "nvim-config/live-runde-umsetzungen-aus-chat-2-in-einer-echten-sitzung-pr",
   config = "user",
+  fakes = { "win32yank", "wl-copy", "xclip", "xsel", "pbcopy" },
   sizes = { { rows = 24, cols = 100 } },
   steps = {
     {
       wait = "package.loaded['mini.ai'] ~= nil",
       timeout = 10000,
       note = "mini.ai is loaded (VeryLazy)",
+    },
+    {
+      lua = [[
+        local H = dofile(vim.fn.getcwd() .. "/TESTS/sheets/fixtures/helpers.lua")
+        H.runtime("stand_ins", vim.env.TESTING_FAKES, { "win32yank", "wl-copy", "xclip", "xsel", "pbcopy" })
+        H.runtime("clipboard_memory")
+      ]],
+      note = "the clipboard tool is a stand-in, the + register remembers the copy",
     },
     {
       lua = [[

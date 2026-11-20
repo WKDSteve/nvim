@@ -13,7 +13,11 @@ return {
   steps = {
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
-      lua = [[
+      -- Loaded as a chunk without a file name: runtime to `testing perf`'s trace, so a start through these
+      -- wrappers keeps the plugin that asked for it as its caller (a step's own chunk would make every start the
+      -- sheet's preparation).
+      lua = [==[
+        assert(load([[
         _G.__sync = {}
         local uv = vim.uv
         local function rec(kind, cmd, t0)
@@ -65,7 +69,8 @@ return {
           end
           return table.concat(out, "\n")
         end
-      ]],
+        ]], "=no_sync_probe"))()
+      ]==],
       note = "count synchronous process calls from here on",
     },
     {
