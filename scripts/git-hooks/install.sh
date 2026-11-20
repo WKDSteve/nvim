@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # install.sh -- install the git hooks of this directory into one or more repos.
 #
-#   bash scripts/git-hooks/install.sh [--commit-msg-only|--manual-push-only] <repo> [<repo> ...]
+#   bash scripts/git-hooks/install.sh [--commit-msg-only|--pre-commit-only|--manual-push-only] <repo> [<repo> ...]
 #
 # Installs two hooks, each as a one-liner that calls the script from this checkout
 # (later changes to the scripts need no reinstall):
