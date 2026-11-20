@@ -36,6 +36,27 @@ CI lints and format-checks this folder and runs every spec except `sync/` (the
 specs whose path contains `<part>`, e.g. `run.lua --skip=sync/`. The `sync/`
 specs stay local: they work on real git repositories and kill real process trees.
 
+## Test sheets
+
+`sheets/*.sheet.lua` are testing.nvim test sheets: each starts a child editor on
+the **installed config** (`config = "user"`) and types what a user would. The
+catalog `sheets/features.lua` lists the functionalities of this config that
+start a process; a sheet with `feature = "<id>"` checks one of them on fixtures
+(temp repos as `$REPOS_DIR`, recording stand-ins for the clipboard tool, `gh`,
+`winget`: `sheets/fixtures/`), so no real repo, account or clipboard is touched.
+They run locally only, by hand (no spec loads them, so neither `TESTS/run.lua`
+nor CI runs them; testing.nvim would make them a skip on CI anyway):
+
+```sh
+testing sheets run --all --root .            # every sheet, ~4 min
+testing perf .                               # the same, with the processes they start
+```
+
+In a worktree of this config set `TESTING_USER_CONFIG` to the worktree (else
+the sheets run on `%LOCALAPPDATA%\nvim`) and add the worktree to
+`TESTING_TRUST_ROOTS`. What only a person can check is in the vault task
+`nvim-config/abnahme-prozess-features-der-config-von-hand-zwischenablage`.
+
 ## Specs
 
 The specs of the task system (engine, CLI, editor front ends) moved with it into the `tasks.nvim` repo (`TESTS/` there).

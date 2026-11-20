@@ -7,6 +7,7 @@
 -- by machine_guard and the sheet does not run there (workstation rule of testing.nvim).
 return {
   id = "nvim-config.machine-build-key",
+  feature = "nvim-config.myplugins-machine",
   title = "nvim-config: B in :MyPlugins machine builds in a float in the repo's folder, re-checks after q",
   task = "nvim-config/live-check-structure-jump-and-bindings-check",
   config = "user",
