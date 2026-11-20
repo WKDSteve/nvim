@@ -31,7 +31,8 @@ return {
       note = "$REPOS_DIR has a fixture repo per listed name, $REPO_BACKUP_DIR is empty",
     },
     {
-      expect = "vim.fs.normalize(BACKUP.dir()) == OUT and vim.fn.filereadable(BUNDLE) == 0",
+      expect = [[vim.fs.normalize(vim.env.REPOS_DIR) == BASE and vim.fs.normalize(BACKUP.dir()) == OUT
+        and vim.fn.filereadable(BUNDLE) == 0]],
       note = "only the fixture is touched, and there is no backup yet",
     },
     { lua = "_G.STARTED = BACKUP.run()", note = "what the UIReady phase repo_backup runs" },
