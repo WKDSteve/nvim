@@ -252,7 +252,7 @@ reinschreiben, damit `nvim-lint`/LSP etwas meldet):
 > **Stand 2026-11-17:** teilweise überholt. Das Dashboard hat inzwischen ein
 > Ask-Panel (`/ask/stream` gegen jedes ModelRouter-Backend, `dashboard/index.html`),
 > und das Badge „Model: simulation (LLM folgt)“ gibt es nicht mehr. SSE und
-> Decision-Flow bleiben zu prüfen: `ai-desktop/dashboard-sse-decision-flow-e2e`.
+> Decision-Flow prüft seit 2026-11-21 `ai-desktop/e2e/decision-flow.spec.mjs`.
 
 **Wichtig zu wissen, bevor du testest:** das Dashboard (`http://127.0.0.1:8080/`)
 zeigt aktuell **ausschließlich** den alten Simulations-Agenten
@@ -403,7 +403,7 @@ Suite von ai.nvim; offene Punkte brauchen echte Keys, Dienste oder Stefans Auge
 - [x] `auto`-Resolution mit mind. 2 unterschiedlichen Verfügbarkeits-
       Kombinationen getestet _(auto 2026-11-16: ai.nvim/TESTS/ai/providers_spec.lua, `resolve('auto', order)`: erstes verfügbares, keins verfügbar, nie außerhalb der Order)_
 - [x] `<leader>aia`/`<leader>ais`/`<leader>aie` in normal + visual mode _(auto 2026-11-16: ai.nvim/TESTS/sheets/ai-quick-keys.sheet.lua, mit dem Standard-Präfix `<leader>a`; Auswahl und Diagnostics im Request. Fand den Kontext-Bug von `<leader>as`, behoben in `da79e8b`)_
-- [ ] ai-desktop-Dashboard im Browser geöffnet, SSE + Decision-Flow beobachtet _(machbar als Playwright-E2E in ai-desktop, dort noch nicht abgedeckt; bis dahin Handlauf)_
+- [x] ai-desktop-Dashboard im Browser geöffnet, SSE + Decision-Flow beobachtet ✅ _(auto 2026-11-21: ai-desktop/e2e/decision-flow.spec.mjs, echter Server und echter Decision-Banner des Simulations-Agenten, Allow und Deny, die Antwort kommt beim Server an; fand den 500 von `POST /decision`, behoben in `54d9367`)_
 - [ ] Notiert, welche der "bekannten Eigenheiten" (Abschnitt 10) in der
       Praxis tatsächlich störend auffallen (Grundlage für Priorisierung
       der Follow-up-Tasks) _(Handlauf, beim Ollama-/ai-desktop-Lauf; das Panel-Ruckeln ist überholt)_
