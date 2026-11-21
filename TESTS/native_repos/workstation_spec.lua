@@ -43,6 +43,7 @@ return function(H)
     userprofile = vim.env.USERPROFILE,
     ensure = toolchain.ensure,
     check = toolchain.check,
+    check_async = toolchain.check_async,
     notify = vim.notify,
     system = vim.system,
     yesno = dialog.yesno,
@@ -57,6 +58,7 @@ return function(H)
     package.loaded.machine, vim.env.NVIM_MACHINE_ROLE = saved.machine, saved.role
     vim.env.USERPROFILE, runner._terminal = saved.userprofile, saved.terminal
     toolchain.ensure, toolchain.check = saved.ensure, saved.check
+    toolchain.check_async = saved.check_async
     vim.notify, vim.system, dialog.yesno = saved.notify, saved.system, saved.yesno
     package.loaded["telescope.actions"] = saved.telescope_actions
     package.loaded["config.telescope"] = saved.telescope_cfg
@@ -77,6 +79,11 @@ return function(H)
       error("probe broke")
     end
     toolchain.check = function()
+      reached[#reached + 1] = "check"
+      error("probe broke")
+    end
+    -- a build checks its tools through check_async, after git answered (in the background)
+    toolchain.check_async = function()
       reached[#reached + 1] = "check"
       error("probe broke")
     end
@@ -217,6 +224,9 @@ return function(H)
     native.install("ai-desktop")
     native.deps("ai-desktop")
     native.build("ai-desktop")
+    vim.wait(5000, function()
+      return #reached >= 3
+    end, 10)
     eq(reached, { "ensure", "ensure", "check" }, "install, deps and build go on elsewhere")
     eq(blocked_message(":MyNative"), nil, "...without the block message")
 

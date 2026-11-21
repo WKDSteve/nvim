@@ -53,4 +53,5 @@ Sister of `:MyPlugins` for the native apps next to the plugin checkouts. The lis
   app is added: `docs/NOTES/builds/maintenance.md`.
 
 Code: `init.lua`, `toolchain.lua`, `lua/machine_guard.lua` (the workstation block); specs: `TESTS/native_repos/native_repos_spec.lua`,
-`TESTS/native_repos/workstation_spec.lua` (the workstation block, simulated).
+`TESTS/native_repos/workstation_spec.lua` (the workstation block, simulated), `TESTS/native_repos/async_spec.lua`
+(`list` and the tool probes never wait: git and the probes run in the background, the answer comes once).

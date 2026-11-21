@@ -26,14 +26,37 @@ local function exists(path)
   return uv.fs_stat(path) ~= nil
 end
 
+---Coroutines started by `M.check_async`: a probe running inside one hands the wait to the event loop instead of
+---blocking the editor (value: the function that resumes it).
+---@type table<thread, fun(res: vim.SystemCompleted|nil)>
+local async_probes = setmetatable({}, { __mode = "k" })
+
+local PROBE_TIMEOUT_MS = 30000
+
 ---Runs a short probe; a program that cannot start or hangs (30 s) counts as a failure, never as an error.
+---Inside `M.check_async` the probe yields until the program has finished; elsewhere it waits for it.
 ---@param argv string[]
 ---@return boolean ok, string stdout
 local function runs(argv)
-  local ok, res = pcall(function()
-    return vim.system(argv, { text = true }):wait(30000)
-  end)
-  if not ok or res.code ~= 0 then
+  local co = coroutine.running()
+  local resume = co and async_probes[co]
+  local ok, res
+  if resume then
+    local started = pcall(vim.system, argv, { text = true, timeout = PROBE_TIMEOUT_MS }, function(r)
+      vim.schedule(function()
+        resume(r)
+      end)
+    end)
+    if not started then
+      return false, ""
+    end
+    ok, res = true, coroutine.yield()
+  else
+    ok, res = pcall(function()
+      return vim.system(argv, { text = true }):wait(PROBE_TIMEOUT_MS)
+    end)
+  end
+  if not ok or not res or res.code ~= 0 then
     return false, ""
   end
   return true, res.stdout or ""
@@ -295,15 +318,57 @@ function M.check(ids, tools)
   return missing
 end
 
+---`M.check` without blocking the editor: the probes that start a program (vswhere, `cargo tauri --version`) run
+---in the background, the checks one after the other as before. `on_done` gets the missing tools once all are
+---checked -- right away when no probe had to start a program. A check that throws counts as missing, like in
+---`M.check`; should the whole run break, every tool counts as missing.
+---@param ids string[]
+---@param on_done fun(missing: table<string, boolean>)
+---@param tools? NativeRepos.Tool[] Default `M.list`
+function M.check_async(ids, on_done, tools)
+  local co = coroutine.create(function()
+    return M.check(ids, tools)
+  end)
+  local function step(...)
+    local ok, missing = coroutine.resume(co, ...)
+    if coroutine.status(co) ~= "dead" then
+      return
+    end
+    async_probes[co] = nil
+    if not ok or type(missing) ~= "table" then
+      missing = {}
+      for _, id in ipairs(ids) do
+        missing[id] = true
+      end
+    end
+    on_done(missing)
+  end
+  async_probes[co] = step
+  step()
+end
+
 ---Checks the tools and installs the missing ones that can be installed, one after the other. Output lines go
 ---to `items` (quickfix entries). `on_done` gets what is still missing and the by-hand line of each of those.
+---The checks run through `M.check_async`, the installs in the background: the editor never waits.
 ---@param ids string[]
 ---@param items table[]
 ---@param on_done fun(missing: table<string, boolean>, hints: string[])
 ---@param tools? NativeRepos.Tool[] Default `M.list`
 function M.ensure(ids, items, on_done, tools)
+  M.check_async(ids, function(missing)
+    M._ensure_missing(ids, missing, items, on_done, tools)
+  end, tools)
+end
+
+---@internal
+---The install part of `M.ensure`, once the first check is in.
+---@param ids string[]
+---@param missing table<string, boolean>
+---@param items table[]
+---@param on_done fun(missing: table<string, boolean>, hints: string[])
+---@param tools? NativeRepos.Tool[]
+function M._ensure_missing(ids, missing, items, on_done, tools)
   local known = by_id(tools)
-  local missing = M.check(ids, tools)
   local todo = vim.tbl_filter(function(id)
     return missing[id]
   end, ids)
@@ -315,16 +380,17 @@ function M.ensure(ids, items, on_done, tools)
     if not id then
       -- only what was missing is checked again (the probes start programs); an install that did not help
       -- keeps its by-hand line
-      local still = M.check(todo, tools)
-      on_done(
-        still,
-        M.hints(
-          vim.tbl_filter(function(t)
-            return still[t]
-          end, todo),
-          tools
+      M.check_async(todo, function(still)
+        on_done(
+          still,
+          M.hints(
+            vim.tbl_filter(function(t)
+              return still[t]
+            end, todo),
+            tools
+          )
         )
-      )
+      end, tools)
       return
     end
     local tool = known[id]
@@ -370,5 +436,6 @@ function M.ensure(ids, items, on_done, tools)
 end
 
 M._on_path = on_path
+M._runs = runs
 
 return M

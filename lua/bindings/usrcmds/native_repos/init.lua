@@ -49,30 +49,58 @@ function M.build_state(artifact_mtime, source_commit_time)
   return "current"
 end
 
+---Runs `argv` in the background and hands its result to `on_done` on the main loop, exactly once; a program that
+---cannot start answers a failed result (code -1) instead of raising.
+---@param argv string[]
+---@param on_done fun(res: { code: integer, stdout: string|nil })
+local function run_async(argv, on_done)
+  local started = pcall(vim.system, argv, { text = true }, function(res)
+    vim.schedule(function()
+      on_done(res)
+    end)
+  end)
+  if not started then
+    vim.schedule(function()
+      on_done({ code = -1, stdout = "" })
+    end)
+  end
+end
+
+---The build state of one app, from the artifact's age and the newest commit of its sources (git in the
+---background).
 ---@param native Plugins.Personal.Native
 ---@param dir string
----@return string state "not cloned"|"no artifact"|"missing"|"stale"|"current"
-local function state_of(native, dir)
+---@param on_done fun(state: string) "not cloned"|"no artifact"|"missing"|"stale"|"current"
+local function state_of(native, dir, on_done)
   if not uv.fs_stat(dir) then
-    return "not cloned"
+    on_done("not cloned")
+    return
   end
   if not native.artifact then
-    return "no artifact"
+    on_done("no artifact")
+    return
   end
   local stat = uv.fs_stat(dir .. "/" .. native.artifact)
   local cmd = { "git", "-C", dir, "log", "-1", "--format=%ct", "--" }
   vim.list_extend(cmd, native.sources or { "." })
-  local res = vim.system(cmd, { text = true }):wait()
-  local commit_time = res.code == 0 and tonumber(vim.trim(res.stdout or "")) or nil
-  return M.build_state(stat and stat.mtime.sec or nil, commit_time)
+  run_async(cmd, function(res)
+    local commit_time = res.code == 0 and tonumber(vim.trim(res.stdout or "")) or nil
+    on_done(M.build_state(stat and stat.mtime.sec or nil, commit_time))
+  end)
 end
 
 ---@param dir string
+---@param on_done fun(state: string)
+local function git_state(dir, on_done)
+  run_async({ "git", "-C", dir, "status", "--porcelain", "--branch" }, function(res)
+    on_done(M.git_state_text(res))
+  end)
+end
+
+---The `git:` column of `list` from `git status --porcelain --branch`.
+---@param res { code: integer, stdout: string|nil }
 ---@return string
-local function git_state(dir)
-  local res = vim
-    .system({ "git", "-C", dir, "status", "--porcelain", "--branch" }, { text = true })
-    :wait()
+function M.git_state_text(res)
   if res.code ~= 0 then
     return "no git"
   end
@@ -113,25 +141,59 @@ local function selected(only)
   return one and { one } or {}
 end
 
+---Asks git for the build state (and, with `with_git`, the git state) of every app in `list` at the same time
+---and calls `on_done` once all have answered, with the answers by app name. Never waits.
+---@param base string
+---@param list Plugins.Personal.Native[]
+---@param with_git boolean
+---@param on_done fun(builds: table<string, string>, gits: table<string, string>)
+local function collect_states(base, list, with_git, on_done)
+  local builds, gits = {}, {}
+  local open = 1 -- held until every query is started, so an answer that comes at once cannot finish early
+  local function settle()
+    open = open - 1
+    if open == 0 then
+      on_done(builds, gits)
+    end
+  end
+  for _, native in ipairs(list) do
+    local dir = base .. "/" .. native.name
+    open = open + 1
+    state_of(native, dir, function(build)
+      builds[native.name] = build
+      if with_git and build ~= "not cloned" then
+        git_state(dir, function(git)
+          gits[native.name] = git
+          settle()
+        end)
+      else
+        gits[native.name] = "-"
+        settle()
+      end
+    end)
+  end
+  settle()
+end
+
 function M.list()
   local base = base_dir()
   if not base then
     return
   end
-  local out, attention = {}, false
-  for _, native in ipairs(natives.list) do
-    local dir = base .. "/" .. native.name
-    local build = state_of(native, dir)
-    local git = build == "not cloned" and "-" or git_state(dir)
-    out[#out + 1] = ("%-15s git: %-14s build: %s"):format(native.name, git, build)
-    attention = attention or build == "not cloned" or build == "stale" or build == "missing"
-  end
-  local text = table.concat(out, "\n")
-  if attention then
-    notify.warn(text)
-  else
-    notify.info(text)
-  end
+  collect_states(base, natives.list, true, function(builds, gits)
+    local out, attention = {}, false
+    for _, native in ipairs(natives.list) do
+      local build = builds[native.name]
+      out[#out + 1] = ("%-15s git: %-14s build: %s"):format(native.name, gits[native.name], build)
+      attention = attention or build == "not cloned" or build == "stale" or build == "missing"
+    end
+    local text = table.concat(out, "\n")
+    if attention then
+      notify.warn(text)
+    else
+      notify.info(text)
+    end
+  end)
 end
 
 ---@param only? string
@@ -249,34 +311,13 @@ end
 
 local labels = { build = "Build", install = "Install", uninstall = "Uninstall" }
 
----Runs the build, install or uninstall command of the apps one after the other, output to the quickfix list.
----A build skips the apps whose tools are missing; an install first installs the tools it can (toolchain.ensure).
+---The part of `run` after the states are known: plan, then run the commands one after the other.
 ---@param kind "build"|"install"|"uninstall"
 ---@param only? string
-local function run(kind, only)
-  -- build and install make a native program run on this machine; on the workstation that is
-  -- what the EDR reports, so only the uninstall goes on there
-  if kind ~= "uninstall" and workstation.refused(":MyNative " .. kind) then
-    return
-  end
-  local base = base_dir()
-  if not base then
-    return
-  end
-  if running then
-    notify.warn("A build or install is already running")
-    return
-  end
-  local candidates, states = selected(only), {}
-  for _, native in ipairs(candidates) do
-    local dir = base .. "/" .. native.name
-    -- only a build asks git for the staleness; install and uninstall need nothing but "cloned"
-    if kind == "build" then
-      states[native.name] = state_of(native, dir)
-    else
-      states[native.name] = uv.fs_stat(dir) and "cloned" or "not cloned"
-    end
-  end
+---@param base string
+---@param candidates Plugins.Personal.Native[]
+---@param states table<string, string>
+local function run_planned(kind, only, base, candidates, states)
   local todo, hints
   if kind == "build" then
     todo, hints = M.plan_build(candidates, states, only ~= nil)
@@ -370,8 +411,18 @@ local function run(kind, only)
       if kind == "uninstall" then
         next_app()
       elseif kind == "build" then
-        hold_back(toolchain.check(toolchain.needed(todo)))
-        next_app()
+        -- the probes (vswhere, cargo tauri --version) run in the background; a throw in the answer
+        -- must end the run like one before it
+        toolchain.check_async(toolchain.needed(todo), function(missing)
+          local ok_next, err_next = pcall(function()
+            hold_back(missing)
+            next_app()
+          end)
+          if not ok_next then
+            running = false
+            notify.error(label .. " stopped: " .. tostring(err_next))
+          end
+        end)
       else
         notify.info("Install: checking the tools ...")
         toolchain.ensure(toolchain.needed(todo), items, function(missing, tool_hints)
@@ -418,6 +469,47 @@ local function run(kind, only)
     return
   end
   go()
+end
+
+---Runs the build, install or uninstall command of the apps one after the other, output to the quickfix list.
+---A build skips the apps whose tools are missing; an install first installs the tools it can (toolchain.ensure).
+---Nothing here waits for a program: a build asks git for the states of its apps in the background first.
+---@param kind "build"|"install"|"uninstall"
+---@param only? string
+local function run(kind, only)
+  -- build and install make a native program run on this machine; on the workstation that is
+  -- what the EDR reports, so only the uninstall goes on there
+  if kind ~= "uninstall" and workstation.refused(":MyNative " .. kind) then
+    return
+  end
+  local base = base_dir()
+  if not base then
+    return
+  end
+  if running then
+    notify.warn("A build or install is already running")
+    return
+  end
+  local candidates = selected(only)
+  if kind == "build" then
+    -- only a build asks git for the staleness; until the answers are in the command counts as running
+    running = true
+    collect_states(base, candidates, false, function(builds)
+      running = false
+      local ok, err = pcall(run_planned, kind, only, base, candidates, builds)
+      if not ok then
+        running = false
+        notify.error(labels[kind] .. " stopped: " .. tostring(err))
+      end
+    end)
+    return
+  end
+  -- install and uninstall need nothing but "cloned"
+  local states = {}
+  for _, native in ipairs(candidates) do
+    states[native.name] = uv.fs_stat(base .. "/" .. native.name) and "cloned" or "not cloned"
+  end
+  run_planned(kind, only, base, candidates, states)
 end
 
 ---@param only? string
