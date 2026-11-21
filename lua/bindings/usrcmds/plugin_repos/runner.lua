@@ -240,40 +240,63 @@ function M.stop(repo)
   end
 end
 
----Ask GitHub whether one runner (or all) is online, and whether it is currently busy.
+---How long one `gh api` call of `runner status` may take before it is killed (ms).
+M.STATUS_TIMEOUT_MS = 20000
+
+---The status line of one runner from the result of its `gh api` call, and whether it needs attention.
+---@param name string
+---@param res { code: integer, signal?: integer, stdout?: string, stderr?: string }
+---@return string line, boolean offline
+function M.status_line(name, res)
+  if res.code ~= 0 then
+    local why = vim.trim(res.stderr or "")
+    -- vim.system kills a call that outlives its `timeout` and reports exit code 124
+    if why == "" and (res.code == 124 or (res.signal or 0) ~= 0) then
+      why = ("no answer within %d s"):format(M.STATUS_TIMEOUT_MS / 1000)
+    end
+    return ("%-14s gh api failed: %s"):format(name, why), true
+  end
+  local ok, doc = pcall(vim.json.decode, res.stdout or "")
+  local runner = ok and type(doc) == "table" and doc.runners and doc.runners[1]
+  if not runner then
+    return ("%-14s no runner registered"):format(name), true
+  end
+  local state = runner.busy and (runner.status .. ", busy") or runner.status
+  return ("%-14s %s"):format(name, state), runner.status ~= "online"
+end
+
+---Ask GitHub whether one runner (or all) is online, and whether it is currently busy. The `gh api` calls run at the
+---same time and never block the editor (each one is killed after `STATUS_TIMEOUT_MS`); one message at the end lists
+---the runners in the order of `M.REPOS`.
 ---@param repo? string
 function M.status(repo)
   local names = repo and { repo } or M.REPOS
-  local out, any_offline = {}, false
-  for _, name in ipairs(names) do
-    local res = vim
-      .system({
-        "gh",
-        "api",
-        ("repos/%s/actions/runners"):format(owner_repo(name)),
-      }, { text = true })
-      :wait()
-    if res.code ~= 0 then
-      out[#out + 1] = ("%-14s gh api failed: %s"):format(name, vim.trim(res.stderr or ""))
-      any_offline = true
+  local lines, any_offline, pending = {}, false, #names
+  local function done(i, line, offline)
+    lines[i] = line
+    any_offline = any_offline or offline
+    pending = pending - 1
+    if pending > 0 then
+      return
+    end
+    local text = table.concat(lines, "\n")
+    if any_offline then
+      notify.warn(text)
     else
-      local ok, doc = pcall(vim.json.decode, res.stdout or "")
-      local runner = ok and type(doc) == "table" and doc.runners and doc.runners[1]
-      if not runner then
-        out[#out + 1] = ("%-14s no runner registered"):format(name)
-        any_offline = true
-      else
-        local state = runner.busy and (runner.status .. ", busy") or runner.status
-        out[#out + 1] = ("%-14s %s"):format(name, state)
-        any_offline = any_offline or runner.status ~= "online"
-      end
+      notify.info(text)
     end
   end
-  local text = table.concat(out, "\n")
-  if any_offline then
-    notify.warn(text)
-  else
-    notify.info(text)
+  for i, name in ipairs(names) do
+    local argv = { "gh", "api", ("repos/%s/actions/runners"):format(owner_repo(name)) }
+    local opts = { text = true, timeout = M.STATUS_TIMEOUT_MS }
+    local started, err = pcall(vim.system, argv, opts, function(res)
+      vim.schedule(function()
+        done(i, M.status_line(name, res))
+      end)
+    end)
+    if not started then
+      done(i, ("%-14s gh api failed: %s"):format(name, tostring(err)), true)
+    end
   end
 end
 
@@ -365,18 +388,25 @@ function M.autostart(action)
     notify.error(why or "autostart: nothing to do")
     return
   end
-  local res = vim.system(argv, { text = true }):wait()
-  local text = vim.trim((res.stdout or "") .. (res.stderr or ""))
-  if res.code == 0 then
-    notify.info(("autostart %s: %s"):format(action, text ~= "" and text or "ok"))
-  elseif action == "status" then
-    notify.warn(
-      ("autostart: no scheduled task '%s' (`:MyPlugins runner autostart on` creates it)"):format(
-        M.AUTOSTART_TASK
-      )
-    )
-  else
-    notify.error(("autostart %s failed (exit %d): %s"):format(action, res.code, text))
+  -- asynchronous: starting PowerShell alone takes a second or more, the editor must not wait for it
+  local started, err = pcall(vim.system, argv, { text = true }, function(res)
+    vim.schedule(function()
+      local text = vim.trim((res.stdout or "") .. (res.stderr or ""))
+      if res.code == 0 then
+        notify.info(("autostart %s: %s"):format(action, text ~= "" and text or "ok"))
+      elseif action == "status" then
+        notify.warn(
+          ("autostart: no scheduled task '%s' (`:MyPlugins runner autostart on` creates it)"):format(
+            M.AUTOSTART_TASK
+          )
+        )
+      else
+        notify.error(("autostart %s failed (exit %d): %s"):format(action, res.code, text))
+      end
+    end)
+  end)
+  if not started then
+    notify.error(("autostart %s: cannot start PowerShell: %s"):format(action, tostring(err)))
   end
 end
 

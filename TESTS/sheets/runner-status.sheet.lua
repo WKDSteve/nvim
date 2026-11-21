@@ -35,23 +35,29 @@ return {
             return c.argv[1] == "api"
           end, H.calls("gh"))
         end
+        -- The calls run at the same time, and the Windows stand-in loses log lines of simultaneous calls (testing.nvim
+        -- task fake-programs-gleichzeitige-aufrufe-unter-windows-verlieren): the message that names every repo is the
+        -- proof that each one was asked, the log only shows the shape of a call.
+        _G.ALL_NAMED = function()
+          for _, name in ipairs(REPOS) do
+            if not H.heard(("%-14s no runner registered"):format(name):gsub("%s+", " ")) then
+              return false
+            end
+          end
+          return true
+        end
       ]],
       note = "gh is a stand-in that answers nothing",
     },
     { keys = ":MyPlugins runner status<CR>" },
     {
-      wait = "#API() == #REPOS",
+      wait = "ALL_NAMED()",
       timeout = 60000,
-      note = "one gh api call per repo with a runner",
+      note = "one message names every repo with a runner (the stand-in registers none)",
     },
     {
-      expect = [[API()[1].argv[2]:find("/actions/runners$") ~= nil]],
+      expect = [[#API() >= 1 and API()[1].argv[2]:find("/actions/runners$") ~= nil]],
       note = "gh api repos/<owner>/<repo>/actions/runners",
-    },
-    {
-      wait = "H.heard(REPOS[1]) and H.heard(REPOS[#REPOS])",
-      timeout = 10000,
-      note = "the answer names every repo",
     },
     { keys = ":MyPlugins runner autostart status<CR>" },
     {

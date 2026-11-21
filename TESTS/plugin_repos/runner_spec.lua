@@ -189,6 +189,94 @@ local function spec(H)
   end
 end
 
+-- `runner status` and `runner autostart` never wait for their processes (a gh api call per runner, one after the
+-- other, froze the editor for every network round trip): the calls start at once, each with a timeout, and one
+-- message lists the runners in the order of REPOS when the last one has answered. vim.system is a fake whose wait()
+-- raises, so a synchronous call fails here instead of reaching GitHub.
+---@param H table
+local function async_status(H)
+  local eq, ok = H.eq, H.ok
+  local runner = require("bindings.usrcmds.plugin_repos.runner")
+  local saved = { system = vim.system, notify = vim.notify }
+  local calls, said = {}, {}
+  local passed, err = pcall(function()
+    ---@diagnostic disable-next-line: duplicate-set-field -- deliberate stub, restored below
+    vim.notify = function(msg, level)
+      said[#said + 1] = { msg = tostring(msg), level = level }
+    end
+    ---@diagnostic disable-next-line: duplicate-set-field -- deliberate stub, restored below
+    vim.system = function(argv, opts, on_exit)
+      calls[#calls + 1] = { argv = argv, opts = opts or {}, on_exit = on_exit }
+      ---@diagnostic disable-next-line: return-type-mismatch -- minimal fake of vim.SystemObj
+      return {
+        wait = function()
+          error("waited for " .. table.concat(argv, " "))
+        end,
+        kill = function() end,
+      }
+    end
+    local function settle()
+      vim.wait(2000, function()
+        return #said > 0
+      end, 10)
+    end
+
+    runner.status()
+    eq(#calls, #runner.REPOS, "runner status starts one gh api call per runner, all at once")
+    eq(calls[1].argv[1], "gh", "through gh")
+    H.has(calls[1].argv[3], "/actions/runners", "gh api repos/<owner>/<repo>/actions/runners")
+    ok((calls[1].opts.timeout or 0) > 0, "each call has a timeout")
+    ok(type(calls[1].on_exit) == "function", "and answers through a callback")
+    eq(#said, 0, "nothing is said before the answers")
+    -- the answers come back in reverse order: the first runner online and busy, the others not registered
+    for i = #calls, 1, -1 do
+      local stdout = i == 1
+          and vim.json.encode({ runners = { { status = "online", busy = true } } })
+        or "{}"
+      calls[i].on_exit({ code = 0, stdout = stdout, stderr = "" })
+    end
+    settle()
+    eq(#said, 1, "one message once every call has answered")
+    local text = said[1] and said[1].msg or ""
+    H.has(text, ("%-14s online, busy"):format(runner.REPOS[1]), "the busy runner")
+    H.has(
+      text,
+      ("%-14s no runner registered"):format(runner.REPOS[#runner.REPOS]),
+      "a runner without registration"
+    )
+    local first = text:find(runner.REPOS[1], 1, true) or math.huge
+    local second = text:find(runner.REPOS[2], 1, true) or -1
+    ok(first < second, "the lines are in the order of REPOS, not of the answers")
+
+    H.has(
+      runner.status_line("x", { code = 124, signal = 15, stderr = "" }),
+      "no answer within",
+      "a call killed by its timeout says so"
+    )
+    H.has(
+      runner.status_line("x", { code = 1, stderr = "HTTP 401" }),
+      "gh api failed: HTTP 401",
+      "gh's own error"
+    )
+
+    calls, said = {}, {}
+    runner.autostart("status")
+    eq(#calls, 1, "autostart status starts PowerShell once")
+    eq(#said, 0, "and does not wait for it")
+    calls[1].on_exit({ code = 1, stdout = "", stderr = "no task" })
+    settle()
+    H.has(
+      said[1] and said[1].msg or "",
+      "no scheduled task",
+      "the answer comes when PowerShell is done"
+    )
+  end)
+  vim.system, vim.notify = saved.system, saved.notify
+  if not passed then
+    error(err, 0)
+  end
+end
+
 -- start refuses on the workstation (lua/machine_guard.lua, its own spec: workstation_spec): the
 -- start here is the private machine's, whatever NVIM_MACHINE_ROLE this process has; put back on
 -- failure too
@@ -199,7 +287,10 @@ return function(H)
   role.is = function(r)
     return r == "default"
   end
-  local passed, err = pcall(spec, H)
+  local passed, err = pcall(function()
+    spec(H)
+    async_status(H)
+  end)
   role.is = saved_is
   if not passed then
     error(err, 0)
