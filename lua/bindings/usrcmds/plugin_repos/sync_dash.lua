@@ -127,6 +127,13 @@ function M.load_preview(rec, on_done)
           done()
           return
         end
+        if rec.blocking then
+          -- the pull's own re-check found them a moment ago: no second status + diff
+          parts.blocking = rec.blocking
+          parts.blocking_known = true
+          done()
+          return
+        end
         ops.sync_status(rec.path, t, function(text)
           local mine = text and classify.parse_status(text).files or nil
           ops.sync_incoming_files(rec.path, t, function(theirs)

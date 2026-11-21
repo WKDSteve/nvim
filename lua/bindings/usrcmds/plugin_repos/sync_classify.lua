@@ -68,6 +68,7 @@ local M = {}
 ---@field skipped boolean
 ---@field pulled integer|nil    Commits a successful pull brought in.
 ---@field preview string[]|nil  Triage preview lines (filled by the dashboard, never persisted).
+---@field blocking string[]|nil  The changed files in the way of the pull, as the pull's re-check found them (`dirty_blocked` only); the triage preview shows them without asking git again. Never persisted.
 ---@field preview_parts MyPlugins.SyncPreviewParts|nil  The git output `preview` was built from (`MyPlugins.SyncPreviewParts`), kept so the header can be rebuilt after a skip; never persisted.
 
 --- Order of the problem states in the dashboard (most blocking first).
@@ -341,8 +342,10 @@ function M.after_pull(rec, ok, err, after, incoming)
     return out
   end
   local first = err and vim.trim((err:match("^[^\r\n]*") or "")) or ""
-  if after and is_dirty(after) and #M.blocking_files(after.files, incoming) > 0 then
+  local blocking = after and is_dirty(after) and M.blocking_files(after.files, incoming) or {}
+  if after and #blocking > 0 then
     out.state = "dirty_blocked"
+    out.blocking = blocking
     out.dirty = true
     out.changed = after.changed + after.untracked
     out.detail = ("%d changed file(s) in the way%s"):format(

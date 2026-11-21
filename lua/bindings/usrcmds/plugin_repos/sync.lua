@@ -10,8 +10,8 @@
 ---   Phase 1  fetch     `git fetch --all --prune` of ALL repos first (`--jobs` at a time)
 ---   Phase 2  status    `git status --porcelain=v2 --branch` -> `sync_classify.classify`
 ---   Phase 3  pull      only repos that are behind: `git merge --ff-only @{u}` (local, no second fetch)
----   Phase 4  re-check  a failed pull is classified from a second status and the incoming files
----                      (never from stderr)
+---   Phase 4  re-check  a failed pull is classified from a status (phase 2's while it is recent,
+---                      `M.STATUS_REUSE_MS`) and the incoming files (never from stderr)
 ---   Phase 5  result    state file, one closing line, the triage dashboard when something is left
 ---
 --- Fetching everything before the first pull is the point: only then is it known which repos
@@ -232,6 +232,18 @@ local function chain()
   return handle, set
 end
 
+---How long the status a record was classified from also stands for the status after a failed
+---pull (ms). A failed `git merge --ff-only` leaves the tree as it was (git refuses before it
+---touches a file), so asking again right away only repeats the same answer -- with one repo,
+---or a pull that follows its status at once, that was a second `git status` within a fraction
+---of a second. An older status is asked for again: the user may have edited in the meantime.
+M.STATUS_REUSE_MS = 2000
+
+---The parsed status each record was classified from and when (`uv.hrtime`). Weak keys: it is
+---never persisted and goes with the record.
+---@type table<MyPlugins.SyncRecord, { st: MyPlugins.SyncStatus, at: integer }>
+local taken = setmetatable({}, { __mode = "k" })
+
 ---Status of one repo -> record. `fetch_err` makes it a `fetch_failed`.
 ---@param repo MyPlugins.SyncRepo
 ---@param fetch_err string|nil
@@ -245,13 +257,29 @@ local function status_record(repo, fetch_err, opts, on_done)
     if not st and not fetch_err and err then
       rec.detail = err
     end
+    if st then
+      taken[rec] = { st = st, at = loop.hrtime() }
+    end
     on_done(rec)
   end)
+end
+
+---The status `rec` was classified from, when it is recent enough to stand for a new one.
+---@param rec MyPlugins.SyncRecord
+---@return MyPlugins.SyncStatus|nil
+local function recent_status(rec)
+  local t = taken[rec]
+  if t and (loop.hrtime() - t.at) / 1e6 <= M.STATUS_REUSE_MS then
+    return t.st
+  end
+  return nil
 end
 
 ---Fast-forward a `behind` record to the already fetched upstream (local only, no network) and
 ---classify the outcome: a failure is `dirty_blocked` only when the incoming files intersect the
 ---changed ones (a second status + `diff --name-only`), else `pull_failed` with the real reason.
+---The second status is the one the record was classified from while that is recent (see
+---`M.STATUS_REUSE_MS`).
 ---@param rec MyPlugins.SyncRecord
 ---@param opts MyPlugins.SyncOpts
 ---@param on_done fun(record: MyPlugins.SyncRecord)
@@ -264,8 +292,8 @@ local function pull_record(rec, opts, on_done)
       on_done(classify.after_pull(rec, true, nil, nil))
       return
     end
-    set(ops.sync_status(rec.path, t, function(text)
-      local after = text and classify.parse_status(text) or nil
+    ---@param after MyPlugins.SyncStatus|nil
+    local function with_status(after)
       if not (after and (after.changed + after.untracked) > 0) then
         on_done(classify.after_pull(rec, false, err, after))
         return
@@ -273,6 +301,15 @@ local function pull_record(rec, opts, on_done)
       set(ops.sync_incoming_files(rec.path, t, function(incoming)
         on_done(classify.after_pull(rec, false, err, after, incoming))
       end))
+    end
+    local recent = recent_status(rec)
+    if recent then
+      set(nil)
+      with_status(recent)
+      return
+    end
+    set(ops.sync_status(rec.path, t, function(text)
+      with_status(text and classify.parse_status(text) or nil)
     end))
   end))
   return handle

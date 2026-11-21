@@ -162,7 +162,8 @@ Phases: resolve the list and the base dir → fetch all (`git fetch --all --prun
 each (`git status --porcelain=v2 --branch`) → fast-forward the repos that are behind (`git merge
 --ff-only @{u}`: purely local, the fetch above is the only network step, so `--no-fetch` never
 touches the network and "pulled N commit(s)" is the count that was merged) → a failed pull is
-classified from a *second status* → the result is saved, one closing
+classified from a status (the one of the status phase when it is under 2 s old -- a failed
+fast-forward changes nothing -- else a new one) → the result is saved, one closing
 line is shown, and the triage list opens when something is left. Only repos of
 `plugins.personal.core.list` are touched (never a directory scan), and when none of them is
 checked out locally (remote mode, a wrong directory) it says "no local checkouts in scope", saves
@@ -194,9 +195,10 @@ An `ahead` / `dirty` hint never counts against "up to date": the repo has everyt
 (`missing` / `not_git` are different: with any of them the closing line is a warning, says "N not
 cloned/not a repo" and its assurance only covers "all cloned repositories".) A behind repo
 with a dirty tree is **tried anyway**: the fast-forward works as long as the local changes do not
-touch the incoming files. When it fails, `dirty_blocked` needs proof: the second status shows local
+touch the incoming files. When it fails, `dirty_blocked` needs proof: the status shows local
 changes *and* `git diff --name-only HEAD...@{u}` shares a file with them (an untracked directory
 counts when an incoming file lives below it). Otherwise it is `pull_failed` with git's own reason.
+The triage preview shows those files without asking git again.
 
 **The closing line** (one notification, when the list closes or when nothing is left):
 

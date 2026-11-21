@@ -38,7 +38,7 @@ local function valid_record(r)
     and type(r.state) == "string"
 end
 
----Write the result. `records` are copied without their `preview`/`preview_parts`.
+---Write the result. `records` are copied without their `preview`/`preview_parts`/`blocking`.
 ---@param dir string
 ---@param records MyPlugins.SyncRecord[]
 ---@param opts? { path?: string, dry_run?: boolean, now?: integer }
@@ -52,6 +52,7 @@ function M.save(dir, records, opts)
     local copy = vim.deepcopy(r)
     copy.preview = nil
     copy.preview_parts = nil
+    copy.blocking = nil
     clean[#clean + 1] = copy
   end
   ---@type MyPlugins.SyncSaved
