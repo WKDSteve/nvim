@@ -215,9 +215,16 @@ local function async_status(H)
         kill = function() end,
       }
     end
+    -- only what runner says counts: owner_repo loads plugins.personal on first use, which notifies on a machine
+    -- without the local checkouts (CI: "No local repository folder found")
+    local function ours()
+      return vim.tbl_filter(function(m)
+        return m.msg:find("[usrcmds.plugin_repos.runner]", 1, true) ~= nil
+      end, said)
+    end
     local function settle()
       vim.wait(2000, function()
-        return #said > 0
+        return #ours() > 0
       end, 10)
     end
 
@@ -227,7 +234,7 @@ local function async_status(H)
     H.has(calls[1].argv[3], "/actions/runners", "gh api repos/<owner>/<repo>/actions/runners")
     ok((calls[1].opts.timeout or 0) > 0, "each call has a timeout")
     ok(type(calls[1].on_exit) == "function", "and answers through a callback")
-    eq(#said, 0, "nothing is said before the answers")
+    eq(#ours(), 0, "nothing is said before the answers")
     -- the answers come back in reverse order: the first runner online and busy, the others not registered
     for i = #calls, 1, -1 do
       local stdout = i == 1
@@ -236,8 +243,8 @@ local function async_status(H)
       calls[i].on_exit({ code = 0, stdout = stdout, stderr = "" })
     end
     settle()
-    eq(#said, 1, "one message once every call has answered")
-    local text = said[1] and said[1].msg or ""
+    eq(#ours(), 1, "one message once every call has answered")
+    local text = ours()[1] and ours()[1].msg or ""
     H.has(text, ("%-14s online, busy"):format(runner.REPOS[1]), "the busy runner")
     H.has(
       text,
@@ -262,11 +269,11 @@ local function async_status(H)
     calls, said = {}, {}
     runner.autostart("status")
     eq(#calls, 1, "autostart status starts PowerShell once")
-    eq(#said, 0, "and does not wait for it")
+    eq(#ours(), 0, "and does not wait for it")
     calls[1].on_exit({ code = 1, stdout = "", stderr = "no task" })
     settle()
     H.has(
-      said[1] and said[1].msg or "",
+      ours()[1] and ours()[1].msg or "",
       "no scheduled task",
       "the answer comes when PowerShell is done"
     )
