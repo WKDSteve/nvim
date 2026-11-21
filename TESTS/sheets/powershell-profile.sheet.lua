@@ -1,5 +1,5 @@
 -- Feature sheet: `:PowershellProfile` (lua/bindings/usrcmds/init.lua) asks Windows PowerShell for `$PROFILE` and opens
--- that file, typed in the installed config. PowerShell runs for real (synchronously: the editor waits for it); the
+-- that file, typed in the installed config. PowerShell runs for real (in the background, once per session); the
 -- file is only opened, never written. Without `powershell` on the PATH (Linux, macOS) the sheet is a reported skip;
 -- on CI and without an installed config: a skip.
 return {

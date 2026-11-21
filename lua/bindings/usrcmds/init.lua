@@ -96,20 +96,8 @@ usercmd.create("CwdHere", function()
   end
 end, { force = true })
 
+-- `$PROFILE` comes from a PowerShell started in the background, once per session
+-- (bindings/usrcmds/powershell_profile.lua): the editor never waits for it.
 usercmd.create("PowershellProfile", function()
-  if vim.fn.executable("powershell") ~= 1 then
-    notify.error("Error: powershell is not available on this system.")
-    return
-  end
-  -- argv array instead of io.popen with an embedded shell string
-  local res = vim
-    .system({ "powershell", "-NoProfile", "-Command", "[Console]::Write($PROFILE)" }, { text = true })
-    :wait()
-  local profile_path = res.code == 0 and res.stdout or nil
-
-  if profile_path and profile_path ~= "" then
-    vim.cmd("edit " .. vim.fn.fnameescape(profile_path))
-    return
-  end
-  notify.error("Error: could not determine the PowerShell profile path.")
+  require("bindings.usrcmds.powershell_profile").open()
 end, { desc = "Open the current PowerShell profile", force = true })
