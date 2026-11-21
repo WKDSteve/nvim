@@ -84,8 +84,9 @@ Gesetzt von `setup-claude-code.ps1` pro Maschine (User-Scope); Bedeutung:
 - Geteilte Checkouts: in den Repos unter `$REPOS_DIR` arbeiten oft mehrere
   Sitzungen. Fremde uncommittete Änderungen nie committen, zurücksetzen,
   formatieren oder stashen (nur `pull --rebase --autostash` legt sie sofort
-  zurück); nur eigene Dateien mit Pfad stagen, nie `git add -A`/`.` oder
-  `commit -a` (`GIT-05`, Flotte: `GIT-07`).
+  zurück); nur eigene Dateien mit Pfad stagen und mit Pfad committen
+  (`git commit -m … -- <pfade>`: der Index ist geteilt), nie `git add -A`/`.`
+  oder `commit -a` (`GIT-05`, Flotte: `GIT-07`).
 - Am Ende jeder Ausgabe eine laufende Liste aller Commits des Chats (Repo,
   SHA, kurze Beschreibung); grüner Haken = mit Reasoning über `normal`
   reviewed (reine Doku ohne Review), Stern = zusätzlich durch `ultracode`;
