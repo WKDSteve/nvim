@@ -84,7 +84,7 @@ geprüft**, `?` = keine Grundlage für eine Schätzung, zuerst einen Einstufungs
 | Stochastik | ? | – | 1 | 4 | M4 | Nachweis 4: Klausur Stochastik |
 | Theoretische Informatik | 1 | – | 1 | 4 | T1 | Nachweis 4: Klausur Theoretische Informatik (Automaten, Berechenbarkeit, NP) |
 | **Weitere** | | | | | | |
-| Elektronik & Digitaltechnik | ? | ? | – | – | – | Skripte vorhanden, kein Ziel gesetzt |
+| Elektronik & Digitaltechnik | ? | ? | 2 | 3 | `ALL/elektrotechnik-und-elektronik` | Stufen bauen aufeinander auf (Entscheidung 2026-11-21): Hobby T 2 / P 3, dann Bachelor T 3 / P 3, danach Digitaltechnik (`ALL/digitaltechnik-lernplan-anlegen-nach-hobby-und`). Noch nicht eingestuft; erster Nachweis: Labornetzteil mit Messprotokoll |
 | Wissenschaftliches Arbeiten | 1 | 2 | 2 | 3 | T2 | Strukturierte Notizen und Quellenarbeit mit litindex sind eine gute Basis. Nachweis 3: ein Paper gründlich lesen und schriftlich zusammenfassen |
 
 ## Weitere Ideen zu diesem Punkt
