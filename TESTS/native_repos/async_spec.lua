@@ -150,4 +150,7 @@ local function spec(H)
   eq(native.git_state_text({ code = 0, stdout = "## main\n" }), "clean", "nothing to say is clean")
 end
 
-return spec
+-- `return function(H)` literally: testing.nvim recognises this spec's dialect by that signature
+return function(H)
+  spec(H)
+end
