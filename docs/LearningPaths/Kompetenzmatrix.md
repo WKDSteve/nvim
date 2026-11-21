@@ -4,6 +4,10 @@ Wo stehe ich fachlich, gemessen am intellektuellen Niveau der akademischen Stufe
 Titel, sondern um das Können dahinter. Verknüpft mit dem [Lernplan](Lernplan.md); fehlende Bücher stehen
 in der [Beschaffungsliste]($REPOS_DIR/Literatur/Beschaffungsliste.md).
 
+Die Phasen und Blöcke in der Spalte „Lernplan“ (Phase 0–7, M1–M4, T1–T2) sind seit 2026-11-21 Lernpfade im tasks-vault:
+`ALL/se-phase-<n>-…` und `ALL/se-m1-…` bis `ALL/se-t2-…`, zusammen im Projekt `ALL/lernplan-software-engineering`;
+Rust zusätzlich im Projekt `tasks-desktop/rust-stack-der-app-familie`. Ihre Nachweise heben die Zeilen hier.
+
 ## Die Skala
 
 Jedes Gebiet bekommt **zwei** Werte auf derselben Skala:
