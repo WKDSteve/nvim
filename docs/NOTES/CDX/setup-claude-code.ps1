@@ -80,42 +80,32 @@ if (-not $trustRoots) {
     Write-Host "  TESTING_TRUST_ROOTS bereits gesetzt: $trustRoots"
 }
 
-# PATH: der Befehl `testing` (testing.nvim/bin, bin/testing.cmd), den Meldungen und Doku nennen
-# (z.B. "after a review: testing ci trust ..."). Ohne ihn gibt es den Befehl nicht. Roh ueber die Registry
-# gelesen und als REG_EXPAND_SZ geschrieben: [Environment]::SetEnvironmentVariable wuerde %VAR%-Eintraege aufloesen.
-$testingBin = Join-Path $reposDir 'testing.nvim\bin'
-if (Test-Path (Join-Path $testingBin 'testing.cmd')) {
+# PATH: die Befehle der Lua-Plugins aus ihren Checkouts, die Meldungen und Doku nennen: `testing`
+# (z.B. "after a review: testing ci trust ..."), `tasks` und `rules` (je <repo>/bin/<befehl>.cmd). Ohne sie gibt es
+# die Befehle nicht. Die Befehle der nativen Apps (tasks-desktop, hub-desktop, ...) legt deren install an
+# (%LOCALAPPDATA%\appkit-family\bin), nicht dieses Skript. Roh ueber die Registry gelesen und als REG_EXPAND_SZ
+# geschrieben: [Environment]::SetEnvironmentVariable wuerde %VAR%-Eintraege aufloesen.
+foreach ($cli in @(
+        @{ name = 'testing'; repo = 'testing.nvim' },
+        @{ name = 'tasks'; repo = 'tasks.nvim' },
+        @{ name = 'rules'; repo = 'rules.nvim' })) {
+    $cliBin = Join-Path $reposDir "$($cli.repo)\bin"
+    if (-not (Test-Path (Join-Path $cliBin "$($cli.name).cmd"))) {
+        Write-Host "  $cliBin fehlt: Befehl $($cli.name) nicht auf dem PATH ($($cli.repo) klonen/pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
+        continue
+    }
     $envKey = Get-Item 'HKCU:\Environment'
     $userPath = $envKey.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
     $entries = @($userPath -split ';' | Where-Object { $_ })
-    if ($entries | Where-Object { $_.TrimEnd('\') -ieq $testingBin }) {
-        Write-Host "  PATH enthaelt bereits $testingBin"
+    if ($entries | Where-Object { $_.TrimEnd('\') -ieq $cliBin }) {
+        Write-Host "  PATH enthaelt bereits $cliBin"
     } else {
-        Set-ItemProperty -Path 'HKCU:\Environment' -Name 'Path' -Value (($entries + $testingBin) -join ';') -Type ExpandString
+        Set-ItemProperty -Path 'HKCU:\Environment' -Name 'Path' -Value (($entries + $cliBin) -join ';') -Type ExpandString
         # Set-ItemProperty sendet kein WM_SETTINGCHANGE; das unveraenderte Neusetzen einer anderen Variable ueber .NET
         # tut es, damit neu gestartete Shells den PATH sehen.
         [Environment]::SetEnvironmentVariable('REPOS_DIR', $reposDir, 'User')
-        Write-Host "  PATH ergaenzt: $testingBin (neue Shells; die App erst nach einem Neustart)"
+        Write-Host "  PATH ergaenzt: $cliBin (neue Shells; die App erst nach einem Neustart)"
     }
-} else {
-    Write-Host "  $testingBin fehlt: Befehl testing nicht auf dem PATH (testing.nvim klonen/pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
-}
-
-# PATH: der Befehl `tasks` (tasks.nvim/bin, bin/tasks.cmd), wie `testing` oben.
-$tasksBin = Join-Path $reposDir 'tasks.nvim\bin'
-if (Test-Path (Join-Path $tasksBin 'tasks.cmd')) {
-    $envKey = Get-Item 'HKCU:\Environment'
-    $userPath = $envKey.GetValue('Path', '', 'DoNotExpandEnvironmentNames')
-    $entries = @($userPath -split ';' | Where-Object { $_ })
-    if ($entries | Where-Object { $_.TrimEnd('\') -ieq $tasksBin }) {
-        Write-Host "  PATH enthaelt bereits $tasksBin"
-    } else {
-        Set-ItemProperty -Path 'HKCU:\Environment' -Name 'Path' -Value (($entries + $tasksBin) -join ';') -Type ExpandString
-        [Environment]::SetEnvironmentVariable('REPOS_DIR', $reposDir, 'User')
-        Write-Host "  PATH ergaenzt: $tasksBin (neue Shells; die App erst nach einem Neustart)"
-    }
-} else {
-    Write-Host "  $tasksBin fehlt: Befehl tasks nicht auf dem PATH (tasks.nvim pullen, Skript erneut ausfuehren)." -ForegroundColor Yellow
 }
 
 # TASKS_VAULT: Wurzel des Repos tasks-vault (Task-Vault: Areas mit ROADMAP/tasks, Backlog, Notizen, TOOLS). Der Hub

@@ -69,7 +69,9 @@ Gesetzt von `setup-claude-code.ps1` pro Maschine (User-Scope); Bedeutung:
   Repo klonen und das Setup-Skript erneut laufen lassen),
   `$TESTING_TRUST_ROOTS` (ohne sie enden lokale testing.nvim-Läufe mit
   Exit 2; die CI vertraut über `CI=true`), `$TESTING_ALLOWED_SIGNERS`, `PATH` +=
-  `$REPOS_DIR/testing.nvim/bin`.
+  `$REPOS_DIR/{testing,tasks,rules}.nvim/bin` (Befehle `testing`, `tasks`,
+  `rules`). Die Befehle der nativen Apps (`hub-desktop`, `tasks-desktop`, …)
+  legt deren `install` in `%LOCALAPPDATA%\appkit-family\bin` an.
 - `$NVIM_MACHINE_ROLE` setzt das Skript nie, es zeigt sie nur an: auf einer
   (neuen) Workstation einmal von Hand setzen (`setx NVIM_MACHINE_ROLE
   workstation`, `WORKFLOW.md` Abschnitt 4) und die App neu starten.
