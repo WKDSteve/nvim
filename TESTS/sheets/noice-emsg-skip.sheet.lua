@@ -2,6 +2,8 @@
 -- E20, E23, E31, E351 and E37 are raised for real through the keys a person types and must show in no window, while an
 -- ordinary error after them still shows. E162 (a refused :qa) has a route to the mini view and must show. E418
 -- is left out: it has no safe trigger. The buffer is a scratch buffer; nothing is written.
+-- The mini view closes after its timeout (4 s), and under load the steps between :qa and the checks take longer than
+-- that: the checks read every line any window ever drew (`_G.__ever_shown`), not only what is on screen at the end.
 return {
   id = "nvim-config.noice-emsg-skip",
   title = "nvim-config: noice swallows E20/E23/E31/E351/E37, shows E162 and an ordinary error",
@@ -19,6 +21,22 @@ return {
             for _, l in ipairs(vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(w), 0, -1, false)) do
               if l:find(text, 1, true) then return true end
             end
+          end
+          return false
+        end
+        -- Every line any window drew since now: a view that closed again (mini after its timeout) still counts.
+        _G.__drawn = {}
+        vim.api.nvim_set_decoration_provider(vim.api.nvim_create_namespace("sheet_noice_emsg_seen"), {
+          on_win = function(_, _, buf, toprow, botrow)
+            for _, l in ipairs(vim.api.nvim_buf_get_lines(buf, toprow, botrow + 1, false)) do
+              _G.__drawn[l] = true
+            end
+            return false
+          end,
+        })
+        _G.__ever_shown = function(text)
+          for l in pairs(_G.__drawn) do
+            if l:find(text, 1, true) then return true end
           end
           return false
         end
@@ -63,11 +81,22 @@ return {
       timeout = 3000,
       note = "E162 was raised",
     },
+    {
+      wait = "_G.__ever_shown('E162')",
+      timeout = 5000,
+      note = "E162 goes to the mini view (its own route), it is not skipped",
+    },
     -- a refused :qa can leave a prompt (hit-enter or 'confirm'): close it before going on
     { input = "<Esc>" },
     {
       wait = "vim.api.nvim_get_mode().mode == 'n' and not vim.api.nvim_get_mode().blocking",
       timeout = 3000,
+    },
+    -- as under load: the mini view times out before the checks below run, and they still hold
+    {
+      wait = "not _G.__shown('E162')",
+      timeout = 15000,
+      note = "the mini view closed again after its timeout",
     },
     -- the control: an error no route skips
     { input = ":echoerr 'E9999: sheet probe'<CR>" },
@@ -82,14 +111,14 @@ return {
       timeout = 5000,
       note = "an ordinary error message still shows",
     },
-    { expect = "not _G.__shown('E20')", note = "no E20 (mark not set)" },
-    { expect = "not _G.__shown('E23')", note = "no E23 (no alternate file)" },
-    { expect = "not _G.__shown('E31')", note = "no E31 (no such mapping)" },
-    { expect = "not _G.__shown('E351')", note = "no E351 (cannot delete fold)" },
-    { expect = "not _G.__shown('E37')", note = "no E37 (no write since last change)" },
+    { expect = "not _G.__ever_shown('E20')", note = "no E20 (mark not set)" },
+    { expect = "not _G.__ever_shown('E23')", note = "no E23 (no alternate file)" },
+    { expect = "not _G.__ever_shown('E31')", note = "no E31 (no such mapping)" },
+    { expect = "not _G.__ever_shown('E351')", note = "no E351 (cannot delete fold)" },
+    { expect = "not _G.__ever_shown('E37')", note = "no E37 (no write since last change)" },
     {
-      expect = "_G.__shown('E162')",
-      note = "E162 goes to the mini view (its own route), it is not skipped",
+      expect = "_G.__ever_shown('E162') and not _G.__shown('E162')",
+      note = "E162 was shown in the mini view and closed again: the record holds what the screen no longer shows",
     },
   },
 }
