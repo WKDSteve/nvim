@@ -9,6 +9,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
       lua = [[
@@ -185,7 +189,10 @@ return {
       timeout = 3000,
       note = "x deletes one character again, as without marks",
     },
-    { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
+    {
+      expect = "SheetErrors.none()",
+      note = "no error message",
+    },
   },
   judge = {
     "The marks are easy to see while <C-n> is active, and the typed text shows at the first place while changing",

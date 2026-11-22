@@ -13,6 +13,10 @@ return {
   sizes = { { rows = 24, cols = 100 } },
   steps = {
     {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
+    {
       wait = "package.loaded['mini.ai'] ~= nil",
       timeout = 10000,
       note = "mini.ai is loaded (VeryLazy)",
@@ -82,6 +86,9 @@ return {
       note = "daN) deletes the next pair with its brackets",
     },
 
-    { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
+    {
+      expect = "SheetErrors.none()",
+      note = "no error message",
+    },
   },
 }

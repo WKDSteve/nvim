@@ -11,6 +11,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
       -- Loaded as a chunk without a file name: runtime to `testing perf`'s trace, so a start through these
@@ -97,7 +101,10 @@ return {
       max = 0,
       note = "no plugin starts a process synchronously (see _G.__report() in the child for which)",
     },
-    { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
+    {
+      expect = "SheetErrors.none()",
+      note = "no error message",
+    },
   },
   judge = {
     "The lens over the function reads well (reference count, no author line) and appeared without a noticeable delay",

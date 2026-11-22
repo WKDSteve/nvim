@@ -13,6 +13,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
       wait = "vim.fn.exists(':MyPlugins') == 2",
@@ -191,9 +195,11 @@ return {
       note = ":MyPlugins task done moves the task to the Backlog",
     },
 
+    -- noice reports the sheet's own vim.notify wrapper above at level error ("`vim.notify` has been overwritten by
+    -- another plugin?"): the sheet's doing, not the config's
     {
-      expect = "not vim.fn.execute('messages'):find('E%d+:')",
-      note = "no error message",
+      expect = "SheetErrors.none({ 'has been overwritten by another plugin' })",
+      note = "no error message but noice's note on the sheet's vim.notify wrapper",
     },
   },
   judge = {},

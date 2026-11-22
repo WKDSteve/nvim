@@ -101,10 +101,15 @@ function H.runtime(name, ...)
   return assert(load(text, "=" .. name))(...)
 end
 
----No error message on the way.
+-- loaded with the helpers, while the cwd is still the project root: a sheet may `:cd` away (or the config's root
+-- detection does when it opens a file) before its last step checks for errors
+local errors = dofile(vim.fn.getcwd() .. "/TESTS/sheets/fixtures/errors.lua")
+
+---No error message on the way (fixtures/errors.lua: `:messages`, noice's history and lib.nvim's popups).
+---@param ignore? string[] texts of errors the sheet raises on purpose
 ---@return boolean
-function H.no_errors()
-  return not vim.fn.execute("messages"):find("E%d+:")
+function H.no_errors(ignore)
+  return errors.none(ignore)
 end
 
 return H

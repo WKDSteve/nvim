@@ -8,6 +8,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
       lua = [[
@@ -36,7 +40,10 @@ return {
       expect = "tonumber(_G.__report_title():match('%((%d+)%)')) <= 100",
       note = "at most 100 findings (around 50 is the known state; far more means the tool is suspect)",
     },
-    { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
+    {
+      expect = "SheetErrors.none()",
+      note = "no error message",
+    },
   },
   judge = {
     "Sample against the notes tree: one reported keymap is really missing there, one not reported is really there",

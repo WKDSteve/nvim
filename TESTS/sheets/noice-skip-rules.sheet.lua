@@ -12,6 +12,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     { wait = "package.loaded['noice'] ~= nil", timeout = 15000, note = "noice is loaded" },
     {
@@ -60,6 +64,10 @@ return {
       end)()]],
       note = "nui.nvim is a dependency of noice and neo-tree, not a plugin of its own",
     },
-    { expect = "not vim.fn.execute('messages'):find('E%d+:')", note = "no error message" },
+    -- the BufReadPost noise above is a notify at ERROR on purpose: noice skips it, its history keeps it
+    {
+      expect = "SheetErrors.none({ 'BufReadPost Autocommands for' })",
+      note = "no error message but the one sent on purpose",
+    },
   },
 }

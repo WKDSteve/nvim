@@ -16,6 +16,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     -- not `settle`: the config keeps timers running, the editor is never idle
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
@@ -50,7 +54,7 @@ return {
       note = "the buffer is the file now",
     },
     {
-      expect = "not vim.fn.execute('messages'):find('E%d+:')",
+      expect = "SheetErrors.none()",
       note = "no error message (no E32)",
     },
 
@@ -84,7 +88,7 @@ return {
       note = "the buffer stays open, saved (the last buffer is not closed)",
     },
     {
-      expect = "not vim.fn.execute('messages'):find('E%d+:')",
+      expect = "SheetErrors.none()",
       note = "still no error message",
     },
   },

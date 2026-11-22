@@ -10,6 +10,10 @@ return {
   config = "user",
   sizes = { { rows = 30, cols = 120 } },
   steps = {
+    {
+      lua = "_G.SheetErrors = dofile(vim.fn.getcwd() .. '/TESTS/sheets/fixtures/errors.lua')",
+      note = "the no-error check, loaded while the cwd is the project root",
+    },
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     {
       lua = [[
@@ -94,7 +98,7 @@ return {
     },
     { expect = "vim.wo.foldexpr == _G.__foldexpr", note = "foldexpr is still the same" },
     {
-      expect = "not vim.fn.execute('messages'):find('E%d+:')",
+      expect = "SheetErrors.none()",
       note = "no error message on the way",
     },
   },
