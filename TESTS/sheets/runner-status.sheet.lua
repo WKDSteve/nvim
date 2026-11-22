@@ -32,14 +32,14 @@ return {
         -- log.
         _G.STARTED = H.runtime("stand_ins", vim.env.TESTING_FAKES, { "gh" })
         _G.REPOS = require("bindings.usrcmds.plugin_repos.runner").REPOS
-        -- Only the `gh api` calls: the same stand-in also catches other plugins of the config that start gh
-        -- (github_stats.nvim's clone of its data repository), which keeps them off the network too.
+        -- Only the `gh api .../actions/runners` calls: the same stand-in also catches other plugins of the config that
+        -- start gh (github_stats.nvim's clone of its data repository), which keeps them off the network too.
         _G.API = function()
           return vim.tbl_filter(function(c)
-            return c.program == "gh" and c.argv[1] == "api"
+            return c.program == "gh" and c.argv[1] == "api" and tostring(c.argv[2]):find("/actions/runners$") ~= nil
           end, STARTED)
         end
-        -- Each repo of REPOS asked exactly once, for its own runners, and nothing else asked.
+        -- Each repo of REPOS asked exactly once, for its own runners, and no other runner query.
         _G.EACH_ASKED_ONCE = function()
           local api = API()
           if #api ~= #REPOS then
