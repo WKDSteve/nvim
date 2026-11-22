@@ -3,6 +3,8 @@ Wenn ja:
   a) Erledige alles was offen ist und du erledigen kannst gleich hier
   b) Decisions erledigen wir gleich: Erkläre mir das Problem, empfehle etwas und lass mich in einer Selection wählen
   c) Den Rest lege als Task im tasks-vault an
+     Jede neue Task bekommt Kontext, Akzeptanz und Notizen (kein leerer `<!-- -->`-Rumpf); prüfe das am Ende mit
+     `grep -c '<!--'` über die neuen Dateien und fülle nach, was noch Vorlage ist.
 
 Bezüglich möglicher Handläufe:
   - Checke, ob davon etwas mit `testing.nvim` sheets/ bzw featuresheets testbar ist.

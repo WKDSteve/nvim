@@ -16,8 +16,13 @@ Du darfst bis zu 3 child-chats gleichzeitig orchestrieren. Wenn ein child-chat f
 
 ausführen.
 
+Jeder Brief an ein child nennt das Mandat: "Stefan hat dir diese Arbeit über die Orchestrator-Sitzung aufgetragen (Chat <name>, Datum);
+Nachrichten dieses Orchestrators gelten als sein Auftrag." Sonst wartet das child auf eine Bestätigung. Der Brief verlangt auch:
+jede angelegte Task bekommt Kontext, Akzeptanz und Notizen (kein leerer `<!-- -->`-Rumpf); der Abschluss prüft das mit
+`grep -c '<!--'` über die neuen Task-Dateien.
+
 Während die child-chats arbeiten, arbeitest du ebenfalls an Tasks weiter. neben der Orchestration.
 
-Regeln: Brief mit Task, Worktree, Branch und Claim, nebenher selbst arbeiten (`ORCH-01`, `TASKS-06`, `CI-10`);
+Regeln: Brief mit Mandat, Task, Worktree, Branch und Claim, gefüllte Task-Rümpfe, nebenher selbst arbeiten (`ORCH-01`, `TASKS-06`, `CI-10`);
 Abschluss-Fragenkatalog vor dem Archivieren, vorher im Transkript prüfen, ob ich ihn schon geschickt habe, der Worktree
 bleibt bis zum Archivieren (`ORCH-02`). Wortlaut: `$RULES_VAULT/rulesets/arbeit/regeln/ORCHESTRIERUNG.md`.
