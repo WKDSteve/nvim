@@ -16,4 +16,8 @@ Du darfst bis zu 3 child-chats gleichzeitig orchestrieren. Wenn ein child-chat f
 
 ausführen.
 
-Während die child-chats arbeiten, arbeitest du ebenfalls an Tasks weiter, neben der Orchestration.
+Während die child-chats arbeiten, arbeitest du ebenfalls an Tasks weiter. neben der Orchestration.
+
+Regeln: Brief mit Task, Worktree, Branch und Claim, nebenher selbst arbeiten (`ORCH-01`, `TASKS-06`, `CI-10`);
+Abschluss-Fragenkatalog vor dem Archivieren, vorher im Transkript prüfen, ob ich ihn schon geschickt habe, der Worktree
+bleibt bis zum Archivieren (`ORCH-02`). Wortlaut: `$RULES_VAULT/rulesets/arbeit/regeln/ORCHESTRIERUNG.md`.

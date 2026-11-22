@@ -9,3 +9,7 @@ Bezüglich möglicher Handläufe:
 
   Das ist mir immer lieber, weil die Tests dann dauerhaft bleiben und bei anderen Änderungen im Repo nochmals geprüft werden können.
   Alles was trotzdem händisch bleibt bitte als "Abnahme- Liste" in den tasks-vault eintragen. also `needs-live-test`-Tag.
+
+(Abschluss-Fragenkatalog: `ORCH-02`; Tasks anlegen `TASKS-03`, `TASKS-09`.)
+
+Lege einen Katalog der Tasks/Features/Feedback des ganze Chats hier + alle seine child chats an - von Beginn  bis hierher (auch eventuell archivierte) - update regelmäßig und lege ihn als Report im Backlog/tasks-vault an. Feedback gleich analysieren und ev. als Tasks anlegen.
