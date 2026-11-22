@@ -2,6 +2,9 @@
 -- and let an ordinary notify through to the mini view. A message counts as shown when any window's buffer holds its
 -- text; the noise is sent first and a plain notify after it, so by the time the plain one shows, the noise would
 -- have shown too. "No signature help" is sent as a notify of its text: the route matches the text, not the LSP call.
+-- The mini view closes after its timeout (4 s), and under load a wrongly shown noise message can be gone before a
+-- check looks: the "not shown" checks read every line any window ever drew (fixtures/drawn.lua), after the mini view
+-- closed again.
 return {
   id = "nvim-config.noice-skip",
   title = "nvim-config: noice skips the known noise, an ordinary notify still shows, nui.nvim is a dependency",
@@ -13,16 +16,10 @@ return {
     { wait = "package.loaded['noice'] ~= nil", timeout = 15000, note = "noice is loaded" },
     {
       lua = [[
-        -- Whether any window shows `text`.
-        _G.__shown = function(text)
-          for _, w in ipairs(vim.api.nvim_list_wins()) do
-            for _, l in ipairs(vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(w), 0, -1, false)) do
-              if l:find(text, 1, true) then return true end
-            end
-          end
-          return false
-        end
+        _G.D = dofile(vim.fn.getcwd() .. "/TESTS/sheets/fixtures/drawn.lua")
+        D.start()
       ]],
+      note = "every drawn line is recorded from here on",
     },
     { lua = "vim.notify('Buffer is not modifiable', vim.log.levels.WARN)" },
     { lua = "vim.notify('No signature help available', vim.log.levels.INFO)" },
@@ -31,17 +28,24 @@ return {
     },
     { lua = "vim.notify('sheet probe: an ordinary message')" },
     {
-      wait = "_G.__shown('sheet probe: an ordinary message')",
+      wait = "D.now('sheet probe: an ordinary message')",
       timeout = 5000,
       note = "an ordinary notify shows",
     },
+    -- as under load: the mini view times out before the checks below run, and they still hold
     {
-      expect = "not _G.__shown('Buffer is not modifiable')",
-      note = "no 'Buffer is not modifiable'",
+      wait = "not D.now('sheet probe: an ordinary message')",
+      timeout = 15000,
+      note = "the mini view closed again after its timeout",
     },
-    { expect = "not _G.__shown('No signature help')", note = "no 'No signature help'" },
     {
-      expect = "not _G.__shown('Error detected while processing BufReadPost')",
+      expect = "D.ever('sheet probe: an ordinary message')",
+      note = "the record holds what the screen no longer shows",
+    },
+    { expect = "not D.ever('Buffer is not modifiable')", note = "no 'Buffer is not modifiable'" },
+    { expect = "not D.ever('No signature help')", note = "no 'No signature help'" },
+    {
+      expect = "not D.ever('Error detected while processing BufReadPost')",
       note = "no BufReadPost noise",
     },
     {

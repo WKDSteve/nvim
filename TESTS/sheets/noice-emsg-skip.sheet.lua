@@ -3,7 +3,7 @@
 -- ordinary error after them still shows. E162 (a refused :qa) has a route to the mini view and must show. E418
 -- is left out: it has no safe trigger. The buffer is a scratch buffer; nothing is written.
 -- The mini view closes after its timeout (4 s), and under load the steps between :qa and the checks take longer than
--- that: the checks read every line any window ever drew (`_G.__ever_shown`), not only what is on screen at the end.
+-- that: the checks read every line any window ever drew (fixtures/drawn.lua), not only what is on screen at the end.
 return {
   id = "nvim-config.noice-emsg-skip",
   title = "nvim-config: noice swallows E20/E23/E31/E351/E37, shows E162 and an ordinary error",
@@ -15,31 +15,9 @@ return {
     { wait = "package.loaded['noice'] ~= nil", timeout = 15000, note = "noice is loaded" },
     {
       lua = [[
-        -- Whether any window shows `text`.
-        _G.__shown = function(text)
-          for _, w in ipairs(vim.api.nvim_list_wins()) do
-            for _, l in ipairs(vim.api.nvim_buf_get_lines(vim.api.nvim_win_get_buf(w), 0, -1, false)) do
-              if l:find(text, 1, true) then return true end
-            end
-          end
-          return false
-        end
-        -- Every line any window drew since now: a view that closed again (mini after its timeout) still counts.
-        _G.__drawn = {}
-        vim.api.nvim_set_decoration_provider(vim.api.nvim_create_namespace("sheet_noice_emsg_seen"), {
-          on_win = function(_, _, buf, toprow, botrow)
-            for _, l in ipairs(vim.api.nvim_buf_get_lines(buf, toprow, botrow + 1, false)) do
-              _G.__drawn[l] = true
-            end
-            return false
-          end,
-        })
-        _G.__ever_shown = function(text)
-          for l in pairs(_G.__drawn) do
-            if l:find(text, 1, true) then return true end
-          end
-          return false
-        end
+        -- what the windows show now and every line they drew from here on (a mini view that closed again counts)
+        _G.D = dofile(vim.fn.getcwd() .. "/TESTS/sheets/fixtures/drawn.lua")
+        D.start()
         -- keepalt: the alternate file stays empty, so <C-^> below raises E23 instead of switching buffers
         vim.cmd("keepalt enew")
         vim.bo.buftype = "nofile"
@@ -82,7 +60,7 @@ return {
       note = "E162 was raised",
     },
     {
-      wait = "_G.__ever_shown('E162')",
+      wait = "D.ever('E162')",
       timeout = 5000,
       note = "E162 goes to the mini view (its own route), it is not skipped",
     },
@@ -94,7 +72,7 @@ return {
     },
     -- as under load: the mini view times out before the checks below run, and they still hold
     {
-      wait = "not _G.__shown('E162')",
+      wait = "not D.now('E162')",
       timeout = 15000,
       note = "the mini view closed again after its timeout",
     },
@@ -107,17 +85,17 @@ return {
     },
     {
       -- the text of the message, not the typed command (that one says "echoerr")
-      wait = "_G.__shown('E9999: sheet probe') and vim.fn.getcmdtype() == ''",
+      wait = "D.now('E9999: sheet probe') and vim.fn.getcmdtype() == ''",
       timeout = 5000,
       note = "an ordinary error message still shows",
     },
-    { expect = "not _G.__ever_shown('E20')", note = "no E20 (mark not set)" },
-    { expect = "not _G.__ever_shown('E23')", note = "no E23 (no alternate file)" },
-    { expect = "not _G.__ever_shown('E31')", note = "no E31 (no such mapping)" },
-    { expect = "not _G.__ever_shown('E351')", note = "no E351 (cannot delete fold)" },
-    { expect = "not _G.__ever_shown('E37')", note = "no E37 (no write since last change)" },
+    { expect = "not D.ever('E20')", note = "no E20 (mark not set)" },
+    { expect = "not D.ever('E23')", note = "no E23 (no alternate file)" },
+    { expect = "not D.ever('E31')", note = "no E31 (no such mapping)" },
+    { expect = "not D.ever('E351')", note = "no E351 (cannot delete fold)" },
+    { expect = "not D.ever('E37')", note = "no E37 (no write since last change)" },
     {
-      expect = "_G.__ever_shown('E162') and not _G.__shown('E162')",
+      expect = "D.ever('E162') and not D.now('E162')",
       note = "E162 was shown in the mini view and closed again: the record holds what the screen no longer shows",
     },
   },
