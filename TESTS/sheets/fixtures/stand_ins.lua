@@ -13,12 +13,18 @@
 -- Called as `chunk(dir, names)`, `dir` = `vim.env.TESTING_FAKES`. A sheet loads it with `load(text, "=stand_ins")`,
 -- never `dofile`: a chunk without a file name is runtime to `testing perf`'s trace, so the config's own line stays the
 -- caller of the start (a `dofile` from `TESTS/` would make every start the sheet's).
+--
+-- Returns the list of redirected starts, recorded here in the editor before the stand-in runs, in the shape of
+-- testing.nvim's `read()` (`{ program, argv }`, `argv` without the program, as the config passed it). The stand-ins'
+-- own log is not enough on Windows: simultaneous calls of a `.cmd` stand-in lose their records (11 parallel `gh api`
+-- left 0 to 4 of 11; testing.nvim task fake-programs-gleichzeitige-aufrufe-unter-windows-verlieren).
 local dir, names = ...
 local windows = vim.fn.has("win32") == 1
 local path_of = {}
 for _, name in ipairs(names) do
   path_of[name] = dir .. "/" .. name .. (windows and ".cmd" or "")
 end
+local started = {}
 
 local function redirect(cmd)
   if type(cmd) ~= "table" or type(cmd[1]) ~= "string" then
@@ -29,6 +35,7 @@ local function redirect(cmd)
   if not path then
     return cmd
   end
+  started[#started + 1] = { program = name, argv = vim.list_slice(cmd, 2) }
   local copy = { path }
   for i = 2, #cmd do
     copy[i] = windows and (tostring(cmd[i]):gsub("[&|<>^%%]", "_")) or cmd[i]
@@ -50,3 +57,5 @@ local fn_system = vim.fn.system
 rawset(vim.fn, "system", function(cmd, ...)
   return fn_system(redirect(cmd), ...)
 end)
+
+return started

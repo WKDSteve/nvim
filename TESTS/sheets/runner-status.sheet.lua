@@ -26,18 +26,39 @@ return {
       lua = [[
         vim.opt.shortmess:append("I")
         _G.H = dofile(vim.fn.getcwd() .. "/TESTS/sheets/fixtures/helpers.lua")
-        H.runtime("stand_ins", vim.env.TESTING_FAKES, { "gh" })
+        -- The calls run at the same time, and the Windows stand-in loses log records of simultaneous calls
+        -- (testing.nvim task fake-programs-gleichzeitige-aufrufe-unter-windows-verlieren: 0 to 4 of 11 were left).
+        -- So the calls are counted where the config starts them (the list stand_ins returns), not in the stand-in's
+        -- log.
+        _G.STARTED = H.runtime("stand_ins", vim.env.TESTING_FAKES, { "gh" })
         _G.REPOS = require("bindings.usrcmds.plugin_repos.runner").REPOS
         -- Only the `gh api` calls: the same stand-in also catches other plugins of the config that start gh
         -- (github_stats.nvim's clone of its data repository), which keeps them off the network too.
         _G.API = function()
           return vim.tbl_filter(function(c)
-            return c.argv[1] == "api"
-          end, H.calls("gh"))
+            return c.program == "gh" and c.argv[1] == "api"
+          end, STARTED)
         end
-        -- The calls run at the same time, and the Windows stand-in loses log lines of simultaneous calls (testing.nvim
-        -- task fake-programs-gleichzeitige-aufrufe-unter-windows-verlieren): the message that names every repo is the
-        -- proof that each one was asked, the log only shows the shape of a call.
+        -- Each repo of REPOS asked exactly once, for its own runners, and nothing else asked.
+        _G.EACH_ASKED_ONCE = function()
+          local api = API()
+          if #api ~= #REPOS then
+            return false
+          end
+          for _, name in ipairs(REPOS) do
+            local want = "^repos/[^/]+/" .. vim.pesc(name) .. "/actions/runners$"
+            local n = 0
+            for _, c in ipairs(api) do
+              n = n + ((#c.argv == 2 and tostring(c.argv[2]):find(want)) and 1 or 0)
+            end
+            if n ~= 1 then
+              return false
+            end
+          end
+          return true
+        end
+        -- The stand-in answers nothing, so a message naming every repo as not registered shows that each call ran
+        -- through the stand-in and its answer reached the report.
         _G.ALL_NAMED = function()
           for _, name in ipairs(REPOS) do
             if not H.heard(("%-14s no runner registered"):format(name):gsub("%s+", " ")) then
@@ -56,8 +77,8 @@ return {
       note = "one message names every repo with a runner (the stand-in registers none)",
     },
     {
-      expect = [[#API() >= 1 and API()[1].argv[2]:find("/actions/runners$") ~= nil]],
-      note = "gh api repos/<owner>/<repo>/actions/runners",
+      expect = "EACH_ASKED_ONCE()",
+      note = "gh api repos/<owner>/<repo>/actions/runners, once for each repo",
     },
     { keys = ":MyPlugins runner autostart status<CR>" },
     {
