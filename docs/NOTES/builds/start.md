@@ -1,8 +1,31 @@
 # Native Apps starten, stoppen, prüfen
 
 Die Befehle für die installierten Apps, in einem normalen PowerShell (nicht aus einer Claude-Sitzung, die AppData
-und HKCU umleitet). Installationsorte und Bauen: [toolchain.md](toolchain.md). Kurze Befehle wie `tasks-desktop status`
-und ein Startmenü-Eintrag mit dem App-Namen sind geplant (Vault: `ALL/native-apps-startmenue-path-status`).
+und HKCU umleitet). Installationsorte und Bauen: [toolchain.md](toolchain.md).
+
+Kurze Befehle unter dem App-Namen (`hub-desktop status` statt des ganzen Pfads) legt jedes `install` an, sobald die App
+appkit ab `v0.77.0` nutzt: ein Starter in `%LOCALAPPDATA%\appkit-family\bin`, der einmal in den Benutzer-PATH kommt
+(Plan im Vault: `ALL/cli-befehle-der-app-familien`). Nach dem ersten `install` ein **neues** Terminal öffnen. Bisher
+umgestellt: hub-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
+
+## hub-desktop
+
+```powershell
+hub-desktop                  # Hub starten, falls er nicht läuft, und die Seite öffnen
+hub-desktop open             # dasselbe
+hub-desktop start --open     # im Hintergrund starten (Tray-Icon), Seite öffnen
+hub-desktop stop             # stoppen (auch: quit)
+hub-desktop restart          # stoppen und neu starten
+hub-desktop status           # läuft er? Prozess, Port, Version; Exit 0 ja, 1 nein (--json für Skripte)
+hub-desktop link             # einmaliger Kopplungs-Link, ohne ihn zu öffnen
+hub-desktop logs -f          # Log des Hubs im Hintergrund mitlesen
+hub-desktop paths            # Programm, Einstellungen, Log, Befehl
+hub-desktop autostart status # startet er mit der Anmeldung? (on|off|status)
+hub-desktop help status      # Hilfe zu einem Befehl
+```
+
+Vor dem ersten `install` mit appkit `v0.77.0` (oder wenn der Befehl fehlt) der lange Weg:
+`& "$env:LOCALAPPDATA\hub-desktop\bin\hub-desktop.exe" install`.
 
 ## tasks-desktop
 
