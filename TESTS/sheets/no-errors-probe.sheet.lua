@@ -22,6 +22,19 @@ return {
     { wait = "package.loaded['lazy'] ~= nil", timeout = 10000, note = "the config is up" },
     { wait = "package.loaded['noice'] ~= nil", timeout = 15000, note = "noice is loaded" },
     { expect = "E.none()", note = "the config starts without an error" },
+    {
+      expect = [[(function()
+        local name = 'noice.message.manager'
+        local saved = package.loaded[name]
+        package.loaded[name] = nil
+        local ok = pcall(E.none)
+        -- a require would have loaded it again (testing.nvim's and vim.loader's loaders come before a preload)
+        local required = package.loaded[name] ~= nil
+        package.loaded[name] = saved
+        return ok and not required
+      end)()]],
+      note = "the check does not load noice where it is not loaded",
+    },
     { lua = [[vim.schedule(function() error('sheet probe lua error') end)]] },
     {
       wait = "E.has(E.from_messages(), 'sheet probe lua error')",

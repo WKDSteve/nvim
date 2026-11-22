@@ -38,11 +38,12 @@ function M.from_messages()
   return vim.tbl_filter(is_error, blocks)
 end
 
----The messages at level error in noice's history (none without noice).
+---The messages at level error in noice's history (none while noice is not loaded: a `require` here would make
+---lazy.nvim load and set up noice, so the check itself would change the editor it checks).
 ---@return string[]
 function M.from_noice()
-  local ok, manager = pcall(require, "noice.message.manager")
-  if not ok or type(manager.get) ~= "function" then
+  local manager = package.loaded["noice.message.manager"]
+  if type(manager) ~= "table" or type(manager.get) ~= "function" then
     return {}
   end
   local found = {}
