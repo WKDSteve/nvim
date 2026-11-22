@@ -680,6 +680,11 @@ return {
     --     show_conflicts = true, -- the potential provider conflicts (formatting, diagnostics)
     --   },
     --
+    --   -- Stop a server whose buffers are all out of sight and start it again when one
+    --   -- is shown: minutes per server name; a server not named (or false) is never
+    --   -- stopped. `idle_stop_minutes = false` turns it off. See `lsp.core.idle_stop`.
+    --   idle_stop_minutes = { lua_ls = 10, marksman = 10 },
+    --
     --   -- Extra tools, each with its own switch.
     --   tools = {
     --     eslint_prettier = {
@@ -690,7 +695,10 @@ return {
     --     ts_type_lookup = { enable = true },
     --     -- How the help for a deprecated symbol is shown: "hover" (a float, focus
     --     -- stays) | "help" (`:help`).
-    --     deprecated_help = { enable = true, display = "hover" },
+    --     -- `help_pages`: extra help files searched first, per filetype
+    --     -- (`{ lua = { "luvref" } }`). `keymap`: buffer-local key (every lua_ls
+    --     -- buffer) for the help of the last deprecated symbol; false binds none.
+    --     deprecated_help = { enable = true, keymap = "<leader>oh", display = "hover", help_pages = {} },
     --   },
     --
     --   -- Filetype-specific quality-of-life setup under lsp/languages/**.

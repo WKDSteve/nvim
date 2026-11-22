@@ -172,6 +172,9 @@ return {
       --   -- startup cost of loading it when a root is huge (e.g. a session started in
       --   -- %TEMP%); beyond the cap the live search takes over.
       --   max_paths = 300000,
+      --   -- Whether a session started in the home folder (or a drive) indexes it as a
+      --   -- default root; off, the profile would fill the cache up to `max_paths`.
+      --   index_home = false,
       -- },
 
       -- Whole-line path extraction.
@@ -491,6 +494,11 @@ return {
         -- },
 
         -- Keys borrowed globally while a hover is on screen, handed back on close.
+        -- Read the text out of the picture the float draws (images.nvim's OCR, tesseract)
+        -- in a scratch split, borrowed for every hover; a hover with no picture answers
+        -- with one line.
+        -- ocr_keys = { ocr = { "gO" } },
+
         -- scroll_keys = { down = { "<M-PageDown>", "<C-Down>" }, up = { "<M-PageUp>", "<C-Up>" } },
         -- resize_keys = {
         --   larger = { "+" }, smaller = { "-" },
@@ -911,6 +919,9 @@ return {
           -- Show the entry in the file tree: closes the picker, the tree opens with its
           -- cursor on the entry (only when a tree that can reveal a path is loaded).
           -- reveal_in_tree = { "<M-s>", "<leader>ft" },
+          -- Read the text of an image entry (images.nvim's OCR, tesseract) in a scratch
+          -- split; closes the picker. Does something only for an image.
+          -- ocr_image = { "<M-u>", "<leader>io" },
           -- Switch between the targets of a tab group (telescope + snacks). On
           -- <Tab>/<S-Tab> they only switch while a group is active (`<leader>s`);
           -- in every other picker they keep the engine's own multi-select.
@@ -942,6 +953,7 @@ return {
         --   weights = { filename = 1.0, content = 1.0, both = 25 }, -- `both` = flat bonus for a file matched by name AND content
         --   limit = 2000, -- max merged results kept after ranking
         --   timeout = 3000, -- per-command (rg / fd) wait in ms
+        --   debounce = 30, -- ms before a changed prompt starts a search
         --   frecency = {
         --     enabled = false, -- recency/frequency ranking boost
         --     weight = 1.0,

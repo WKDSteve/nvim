@@ -434,6 +434,9 @@ return {
       -- "select".
       -- picker = {
       --   engine = "auto",
+      --   -- Give glyphs that already occur in the buffer a small bonus and offer the
+      --   -- ones `picks` lacks (the file brings its own vocabulary).
+      --   buffer_boost = true,
       -- },
 
       -- Emoji checkbox cycles (`:Emojis toggle [set]`). Order matters twice: it

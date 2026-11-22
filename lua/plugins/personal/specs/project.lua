@@ -685,6 +685,10 @@ return {
         -- Off on the workstation until its Falcon check (task
         -- gitsuite.nvim/abnahme-dashboard-fetch-on-open-und-cli-mit-echten-repos-che) passes.
         fetch_on_open = not require("machine").is("workstation"),
+        -- `gf` and fetch on open ask GitHub first (one GraphQL query per page) and fetch
+        -- only the repositories whose default branch moved; needs a token. false
+        -- fetches every one.
+        -- fetch_precheck = false,
         -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
         -- focused default. "behind" = only repositories behind their upstream
         -- (as of the last fetch); "all" = every repository on the page.
@@ -1155,6 +1159,35 @@ return {
       -- How many pages of a scanned PDF `:Case pdf` reads by OCR: the first pages
       -- identify the document, and tesseract takes seconds per page.
       -- pdf_ocr_max_pages = 10,
+      -- The error catalog `:Case log view` marks entries with (`]k`): what a message in a
+      -- log means and where it was seen. Follows `repo_root`; `$CASEDESK_LOG_PATTERNS_FILE`
+      -- overrides it (`NONE`: no catalog). A missing file is no error.
+      -- log_patterns_file = "<repo_root>/Workflow/log-patterns.conf",
+      -- `:Case log view [file]`: the reading copy of a log, one row per entry.
+      -- log_view = {
+      --   -- Where the reading copy opens ("right", "left", "above", "below").
+      --   split = "right",
+      --   -- How an Android page source dump starts out: "labelled", "all" or "clickable".
+      --   pagesource_mode = "labelled",
+      --   -- Overrides of the view's buffer-local keys by action name (`{ quit = false }`).
+      --   keys = {},
+      --   -- Log formats of your own, or changes to the built-in ones by `id`.
+      --   formats = {},
+      --   -- Fold repeated entries in a row into one row `xN`.
+      --   collapse = true,
+      --   -- Method prefixes of the program's own stack frames (they stay visible).
+      --   own_frames = { "Tricentis." },
+      --   -- Time column at the start: "original", "utc" or "relative".
+      --   time_mode = "original",
+      --   -- Minutes without an entry from which a gap row is shown (0: none).
+      --   gap_minutes = 5,
+      --   -- Milliseconds from which the distance to the entry before is shown (negative: never).
+      --   delta_ms = 250,
+      --   -- Columns of the timeline (`gl`).
+      --   timeline_columns = 72,
+      --   -- Milliseconds from which a request counts as slow on the timeline (0: never).
+      --   slow_ms = 5000,
+      -- },
       -- The installation prefixes of SAP Resolve links (`.../Incident/<prefix>_<nr>_<year>`):
       -- `:Case new` proposes a Resolve link with the one used last (the first one at
       -- the start). Which case gets which is not known yet; the person corrects the
@@ -1865,6 +1898,15 @@ return {
       --   -- (adds an autocommand on task buffers).
       --   -- ask_finish = false,
       -- },
+      -- Attach the learning tree view (`:Tasks learn`) by itself to a learning path or a
+      -- task with `## Lernpunkte` when it is shown (group `TasksLearnAuto`).
+      -- learning = { auto = false },
+      -- XP per learning point, the level reached and the open rewards in the learning
+      -- tree view, plus one quiet line when a level is reached. false hides all of it.
+      -- gamification = true,
+      -- The AI functions of the ai family (handing a task to an agent): false none at
+      -- all, true always offered, "auto" only where ai.nvim or ai-desktop is found.
+      -- ai = "auto",
       -- Keys: action name -> key, or false to switch that action's key off. Unnamed actions keep their default.
       -- keys = {
       --   -- Dashboard list window.
@@ -1886,6 +1928,8 @@ return {
       --   --   assign = "P", -- give marked (else current) tasks a plan and a stage
       --   --   move_down = "J", -- stage view: move the task down in its stage
       --   --   move_up = "K", -- stage view: move the task up in its stage
+      --   --   agent = "gh", -- hand the task to an agent (ai family)
+      --   --   agent_run = "gH", -- hand it over and start at once
       --   -- },
       --   -- Dashboard input window (normal and insert mode).
       --   -- dashboard_input = {
@@ -1906,6 +1950,8 @@ return {
       --   --   assign = "<M-a>",
       --   --   move_down = "<M-j>",
       --   --   move_up = "<M-k>",
+      --   --   agent = "<M-h>",
+      --   --   agent_run = "<M-H>",
       --   -- },
       --   -- Buffer-local keys of the `:Tasks new` form.
       --   -- form = {
@@ -1915,6 +1961,16 @@ return {
       --   --   cancel = "q",
       --   --   cancel_ctrl = "<C-q>",
       --   --   help = "g?",
+      --   --   icon = "<C-e>", -- pick an icon
+      --   -- },
+      --   -- Buffer-local keys of the learning tree view (`:Tasks learn`); false = none by default.
+      --   -- learning = {
+      --   --   cycle = false,
+      --   --   promote = false,
+      --   --   unpromote = false,
+      --   --   image = false,
+      --   --   follow = false,
+      --   --   xp = false,
       --   -- },
       -- },
     },

@@ -905,7 +905,11 @@ return {
           -- Font-size zoom factor (1.0 = 100%); `:MDView zoom` changes it live.
           -- zoom = 1.0,
           -- Overlays that start enabled (`:MDView overlay`); for presenting.
-          -- overlays = { toc = false },
+          -- overlays = { toc = false, keycast = false },
+          -- The keycast overlay (overlays.keycast): which keys it shows. "normal":
+          -- commands only, no typed text | "insert_protected": Insert and command-line
+          -- text too, never a password prompt or :terminal | "all": every key.
+          -- keycast = { scope = "normal" },
           -- Show every blank line as extra vertical space instead of one
           -- paragraph gap (`:MDView blanklines`).
           -- preserve_blank_lines = false,
