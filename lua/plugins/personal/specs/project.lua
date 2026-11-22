@@ -108,6 +108,13 @@ return {
     -- ui.contextmenu at module load, before setup() runs. ui.nvim is already
     -- loaded eagerly; the entry documents the dependency.
     dependencies = { "WKDSteve/lib.nvim", "WKDSteve/ui.nvim" },
+    init = function()
+      -- A test sheet's child editor (testing.nvim sets TESTING_NVIM_DIR there) attaches its UI a few ms after start,
+      -- too late for github_stats.nvim's own no-UI check: opt out of the start-up `gh repo clone` explicitly.
+      if (vim.env.TESTING_NVIM_DIR or "") ~= "" then
+        vim.g.github_stats_no_clone_on_start = true
+      end
+    end,
     config = function()
       require("github_stats").setup({
         -- Notify at startup whether a fetch was performed or not.
