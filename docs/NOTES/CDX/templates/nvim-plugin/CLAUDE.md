@@ -26,3 +26,4 @@ grüner CI je System, `scripts/test.sh ci remote` (`CI-06`); vor einem Push, der
 Werkzeug-Hinweise zu `ci commit`: ein schon geprüfter Commit kommt aus dem Gedächtnis (`(kept result)`); `-- --cached`
 lässt Commit und Basis einen Cache teilen; `--json=<datei>` liefert `testing-ci-commit/1`; `--keep` lässt die Worktrees
 zum Nachstellen stehen (die `rerun`-Zeile nennt den Befehl). Auf der Workstation läuft kein Runner (`FALCON-11`).
+- Git: In einer Cloud-Sitzung (`CLAUDE_CODE_REMOTE` gesetzt) nie auf `main` pushen, nur auf den eigenen Branch `claude/…`; gelandet wird lokal per Rebase, der Geräteschlüssel signiert dabei (`GIT-09`). Das „auf main pushen“ (`GIT-01`) gilt nur lokal.

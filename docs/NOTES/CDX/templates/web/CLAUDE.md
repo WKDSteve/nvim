@@ -30,3 +30,4 @@
 - **Nach `pnpm build` ist das eingebettete Binary alt**, wenn die Oberfläche in ein
   Binary eingebettet wird (Tauri/Rust): erst das Binary neu bauen (bei `include_dir`
   genügt `touch` auf die einbettende Datei), dann den Browser-Test starten.
+- Git: In einer Cloud-Sitzung (`CLAUDE_CODE_REMOTE` gesetzt) nie auf `main` pushen, nur auf den eigenen Branch `claude/…`; gelandet wird lokal per Rebase, der Geräteschlüssel signiert dabei (`GIT-09`). Das „auf main pushen“ (`GIT-01`) gilt nur lokal.
