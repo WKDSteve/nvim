@@ -25,6 +25,20 @@ hub-desktop autostart status # startet er mit der Anmeldung? (on|off|status)
 hub-desktop help status      # Hilfe zu einem Befehl
 ```
 
+Für die ganze Familie:
+
+```powershell
+hub-desktop apps             # jede App: installiert, läuft, Port, Autostart, Befehl im Terminal, Version (--json)
+hub-desktop start --all      # dazu die Hubs von tasks, rules, testing im Hintergrund, ohne Seite
+hub-desktop stop --all       # dazu die laufenden Hubs der anderen bitten zu stoppen
+hub-desktop cli status       # Befehle der Familie (tasks-desktop, ...): Starter ok? Ordner auf dem PATH? Exit 1 sonst
+hub-desktop cli repair       # Starter aller installierten Apps anlegen, die von entfernten Apps wegnehmen
+```
+
+`hub-desktop install` legt nach dem eigenen Befehl auch die Befehle der **anderen installierten Apps** an
+(`tasks-desktop`, `rules-desktop`, `testing-desktop`, `docmap-desktop`; `ai-desktop` nie auf der Workstation). Wer
+hub-desktop installiert, hat also alle Befehle; `cli status` zeigt, ob das stimmt.
+
 Vor dem ersten `install` mit appkit `v0.77.0` (oder wenn der Befehl fehlt) der lange Weg:
 `& "$env:LOCALAPPDATA\hub-desktop\bin\hub-desktop.exe" install`.
 
