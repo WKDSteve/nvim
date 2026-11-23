@@ -6,7 +6,7 @@ und HKCU umleitet). Installationsorte und Bauen: [toolchain.md](toolchain.md).
 Kurze Befehle unter dem App-Namen (`hub-desktop status` statt des ganzen Pfads) legt jedes `install` an, sobald die App
 appkit ab `v0.77.0` nutzt: ein Starter in `%LOCALAPPDATA%\appkit-family\bin`, der einmal in den Benutzer-PATH kommt
 (Plan im Vault: `ALL/cli-befehle-der-app-familien`). Nach dem ersten `install` ein **neues** Terminal öffnen. Bisher
-umgestellt: hub-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
+umgestellt: hub-desktop, tasks-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
 
 ## hub-desktop
 
@@ -29,17 +29,25 @@ Vor dem ersten `install` mit appkit `v0.77.0` (oder wenn der Befehl fehlt) der l
 
 ## tasks-desktop
 
-Installiert über `install.ps1` oder `scripts\build-install.ps1` nach `%LOCALAPPDATA%\tasks-desktop\bin`.
+Installiert über `install.ps1` oder `scripts\build-install.ps1` nach `%LOCALAPPDATA%\tasks-desktop\bin`; das Programm
+heißt `tasks-hub.exe`, der Befehl im Terminal `tasks-desktop` (ab appkit `v0.77.0`).
 
 ```powershell
-& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" start --open      # im Hintergrund starten, Browser öffnen
-& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" open --launch     # Kopplungs-Link für den laufenden Hub öffnen
-& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" stop              # stoppen
-& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" autostart status  # startet er mit der Anmeldung? (on|off|status)
-& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" --version
+tasks-desktop                  # Hub starten, falls er nicht läuft, und die Seite öffnen
+tasks-desktop open             # dasselbe
+tasks-desktop start --open     # im Hintergrund starten, Seite öffnen
+tasks-desktop stop             # stoppen (auch: quit)
+tasks-desktop restart          # stoppen und neu starten
+tasks-desktop status           # läuft er? Prozess, Port, Version; Exit 0 ja, 1 nein (--json für Skripte)
+tasks-desktop link             # einmaliger Kopplungs-Link, ohne ihn zu öffnen (mit Tailnet auch der fürs Handy)
+tasks-desktop logs -f          # Log des Hubs im Hintergrund mitlesen
+tasks-desktop paths            # Programm, Einstellungen, Log, Befehl
+tasks-desktop autostart status # startet er mit der Anmeldung? (on|off|status)
+tasks-desktop help             # alle Befehle, auch setup, devices, phone, areas
 ```
 
-Einen Befehl `status` gibt es nicht. Läuft der Hub: `Get-Process tasks-hub`.
+Vor dem ersten `install` mit appkit `v0.77.0` der lange Weg:
+`& "$env:LOCALAPPDATA\tasks-desktop\bin\tasks-hub.exe" install`.
 
 ## rules-desktop
 
