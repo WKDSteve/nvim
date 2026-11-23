@@ -6,7 +6,7 @@ und HKCU umleitet). Installationsorte und Bauen: [toolchain.md](toolchain.md).
 Kurze Befehle unter dem App-Namen (`hub-desktop status` statt des ganzen Pfads) legt jedes `install` an, sobald die App
 appkit ab `v0.77.0` nutzt: ein Starter in `%LOCALAPPDATA%\appkit-family\bin`, der einmal in den Benutzer-PATH kommt
 (Plan im Vault: `ALL/cli-befehle-der-app-familien`). Nach dem ersten `install` ein **neues** Terminal öffnen. Bisher
-umgestellt: hub-desktop, tasks-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
+umgestellt: hub-desktop, tasks-desktop, rules-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
 
 ## hub-desktop
 
@@ -51,17 +51,25 @@ Vor dem ersten `install` mit appkit `v0.77.0` der lange Weg:
 
 ## rules-desktop
 
-Installiert nach `%LOCALAPPDATA%\rules-desktop\bin`, dieselben Befehle wie tasks-desktop.
+Installiert nach `%LOCALAPPDATA%\rules-desktop\bin`; das Programm heißt `rules-hub.exe`, der Befehl im Terminal
+`rules-desktop` (ab appkit `v0.77.0`), mit denselben Befehlen wie `tasks-desktop`.
 
 ```powershell
-& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" start --open
-& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" open --launch
-& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" stop
-& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" autostart status
-& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" --version
+rules-desktop                  # Hub starten, falls er nicht läuft, und die Seite öffnen
+rules-desktop open             # dasselbe
+rules-desktop start --open     # im Hintergrund starten, Seite öffnen
+rules-desktop stop             # stoppen (auch: quit)
+rules-desktop restart          # stoppen und neu starten
+rules-desktop status           # läuft er? Prozess, Port, Version; Exit 0 ja, 1 nein (--json für Skripte)
+rules-desktop link             # einmaliger Kopplungs-Link, ohne ihn zu öffnen
+rules-desktop logs -f          # Log des Hubs im Hintergrund mitlesen
+rules-desktop paths            # Programm, Einstellungen, Log, Befehl
+rules-desktop autostart status # startet er mit der Anmeldung? (on|off|status)
+rules-desktop help             # alle Befehle
 ```
 
-Läuft er: `Get-Process rules-hub`.
+Vor dem ersten `install` mit appkit `v0.77.0` der lange Weg:
+`& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" install`.
 
 ## Auf der Workstation (CrowdStrike Falcon)
 
