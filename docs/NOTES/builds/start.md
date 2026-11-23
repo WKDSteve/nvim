@@ -6,7 +6,8 @@ und HKCU umleitet). Installationsorte und Bauen: [toolchain.md](toolchain.md).
 Kurze Befehle unter dem App-Namen (`hub-desktop status` statt des ganzen Pfads) legt jedes `install` an, sobald die App
 appkit ab `v0.77.0` nutzt: ein Starter in `%LOCALAPPDATA%\appkit-family\bin`, der einmal in den Benutzer-PATH kommt
 (Plan im Vault: `ALL/cli-befehle-der-app-familien`). Nach dem ersten `install` ein **neues** Terminal öffnen. Bisher
-umgestellt: hub-desktop, tasks-desktop, rules-desktop. Die übrigen Apps folgen; bis dahin gelten ihre langen Befehle unten.
+umgestellt: hub-desktop, tasks-desktop, rules-desktop, testing-desktop. docmap-desktop und ai-desktop folgen; bis dahin
+gelten ihre langen Befehle unten.
 
 ## hub-desktop
 
@@ -70,6 +71,30 @@ rules-desktop help             # alle Befehle
 
 Vor dem ersten `install` mit appkit `v0.77.0` der lange Weg:
 `& "$env:LOCALAPPDATA\rules-desktop\bin\rules-hub.exe" install`.
+
+## testing-desktop
+
+Installiert nach `%LOCALAPPDATA%\testing-desktop\bin`; das Programm heißt `testing-hub.exe`, der Befehl im Terminal
+`testing-desktop` (ab appkit `v0.77.0`), mit denselben Befehlen wie `tasks-desktop` und dazu `phone` für die Kopplung
+mit testing mobil.
+
+```powershell
+testing-desktop                  # Hub starten, falls er nicht läuft, und die Seite öffnen
+testing-desktop open             # dasselbe
+testing-desktop start --open     # im Hintergrund starten, Seite öffnen
+testing-desktop stop             # stoppen (auch: quit)
+testing-desktop restart          # stoppen und neu starten
+testing-desktop status           # läuft er? Prozess, Port, Version; Exit 0 ja, 1 nein (--json für Skripte)
+testing-desktop link             # einmaliger Kopplungs-Link, ohne ihn zu öffnen
+testing-desktop logs -f          # Log des Hubs im Hintergrund mitlesen
+testing-desktop paths            # Programm, Einstellungen, Log, Befehl
+testing-desktop autostart status # startet er mit der Anmeldung? (on|off|status)
+testing-desktop phone pair       # QR-Code zum Koppeln des Handys; phone list | level | revoke
+testing-desktop help             # alle Befehle
+```
+
+Vor dem ersten `install` mit appkit `v0.77.0` der lange Weg:
+`& "$env:LOCALAPPDATA\testing-desktop\bin\testing-hub.exe" install`.
 
 ## Auf der Workstation (CrowdStrike Falcon)
 
