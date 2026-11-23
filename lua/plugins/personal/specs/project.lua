@@ -1805,7 +1805,12 @@ return {
       -- Pick the vault by the working directory at setup(): the first rule whose folder
       -- holds the cwd wins over `vault`; a rule for an unnamed vault is skipped.
       -- e.g. { { match = "~/work", vault = "work" } }.
-      -- vault_rules = {},
+      -- Work repos (cwd in WKDBook-Tricentis or tricentis-vault) use the work vault, everything else `vault`.
+      -- Read once at setup(); a later `:cd` needs `:TasksVault switch <name>`.
+      vault_rules = (vim.env.REPOS_DIR and vim.env.REPOS_DIR ~= "") and {
+        { match = vim.env.REPOS_DIR .. "/WKDBook-Tricentis", vault = "tricentis" },
+        { match = vim.env.REPOS_DIR .. "/tricentis-vault", vault = "tricentis" },
+      } or {},
       -- Folders that are areas although they hold neither ROADMAP/ nor Backlog/.
       -- Default: {}.
       extra_areas = { "ALL", "nvim-config", "docmap-desktop", "migrate.nvim" },
