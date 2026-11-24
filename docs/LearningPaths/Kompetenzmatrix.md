@@ -86,6 +86,7 @@ geprüft**, `?` = keine Grundlage für eine Schätzung, zuerst einen Einstufungs
 | **Weitere** | | | | | | |
 | Elektronik & Digitaltechnik | ? | ? | 2 | 3 | `ALL/elektrotechnik-und-elektronik` | Stufen bauen aufeinander auf (Entscheidung 2026-11-21): Hobby T 2 / P 3, dann Bachelor T 3 / P 3, danach Digitaltechnik (`ALL/digitaltechnik-lernplan-anlegen-nach-hobby-und`). Noch nicht eingestuft; erster Nachweis: Labornetzteil mit Messprotokoll |
 | SAP im Support (Tosca im SAP-Umfeld) | ? | ? | T 3 / P 1 | offen | `Learning/sap-bei-tricentis` (Tricentis-Vault) | Ziel 12 Monate laut Stefan, 2026-11-24: Trade-offs und typische Fehler kennen, Fälle sicher einordnen (T 3); Praxis nur Tutorials und Beispiele, weil kein eigenes SAP-System da ist (P 1). Ziel 24 Monate noch nicht gesetzt. Noch nicht eingestuft; erster Nachweis: eine Fallanalyse an einem erfundenen Fall und die Entscheidungsliste „SolEx-Fall“ |
+| VDI und Application Delivery (Horizon, Citrix, DaaS) | ? | ? | T 3 / P 2 | offen | `Learning/vdi-daas-und-app-delivery` (Tricentis-Vault) | Ziel 12 Monate laut Stefan, 2026-11-24: Trade-offs und typische Fehler kennen (T 3), ein Lab selbst aufbauen (P 2); 24-Wochen-Plan mit 5 Stunden pro Woche. Ziel 24 Monate noch nicht gesetzt. Noch nicht eingestuft; erster Nachweis: ein selbst gebautes Golden Image (Woche 6) |
 | Wissenschaftliches Arbeiten | 1 | 2 | 2 | 3 | T2 | Strukturierte Notizen und Quellenarbeit mit litindex sind eine gute Basis. Nachweis 3: ein Paper gründlich lesen und schriftlich zusammenfassen |
 
 ## Weitere Ideen zu diesem Punkt
@@ -108,3 +109,4 @@ geprüft**, `?` = keine Grundlage für eine Schätzung, zuerst einen Einstufungs
 | 2026-10-29 | Erste Einstufung (Schätzung Claude, ungeprüft) |
 | 2026-10-29 | Bestand um rund 1.560 Bücher in fünf Themen-Repos erweitert; Hinweise bei IT-Security und ML/KI ergänzt, Einstufung unverändert |
 | 2026-11-24 | Neue Zeile „SAP im Support“: Ziel 12 Monate T 3 / P 1 (Stefan), heute nicht eingestuft |
+| 2026-11-24 | Neue Zeile „VDI und Application Delivery“: Ziel 12 Monate T 3 / P 2 (Stefan), heute nicht eingestuft |
