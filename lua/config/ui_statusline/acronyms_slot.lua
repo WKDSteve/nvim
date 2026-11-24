@@ -2,7 +2,7 @@
 --- The text of the personal `expand` slot (ui.slots, kind `expand`): the
 --- acronym notes of the WKDBook-Tricentis repo, shown as one foldable float.
 ---
---- Three files hold acronyms; all of them are shown, one after the other, each
+--- Four files hold acronyms and short terms; all of them are shown, one after the other, each
 --- under a header that names its source. A file that is not there (another
 --- machine) is skipped and listed at the end; when none is there the function
 --- raises a plain message, which the slot reports instead of opening an empty
@@ -14,7 +14,8 @@ local M = {}
 ---@type string[]
 M.sources = {
   "Terminologie/Tosca_Component_Akronyms.md",
-  "MyDomains/Tosca/Cheetsheets/Tosca_Akronyms.md",
+  "Terminologie/Terminologie.md",
+  "MyDomains/Tosca/Cheatsheets/Tosca_Akronyms.md",
   "MyDomains/Tosca/Notes/SAP/Akronyms.md",
 }
 

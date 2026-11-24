@@ -116,6 +116,7 @@ local specs = {
   "sync/sync_assist_spec.lua",
   "sync/sync_busy_spec.lua",
   "sync/sync_picker_action_spec.lua",
+  "ui_statusline_acronyms_slot_spec.lua",
   "ui_statusline_testing_ci_spec.lua",
   "multicursor/multicursor_spec.lua",
   "config_telemetry/export_dir_spec.lua",
