@@ -848,6 +848,19 @@ return {
           or nil,
       },
 
+      -- Monthly goal (docs/goal.md in casedesk.nvim): the cases of this month against the
+      -- target, as the first line of the pin (right aligned, `12/35 ↑+2`), and `:Cases goal`.
+      -- What counts is open (task `Tricentis/monatsziel-35-cases-mit-alex-klaeren-was-zaehlt`
+      -- in the tricentis-vault): "assigned" = created this month, "closed", "worked".
+      goal = {
+        enabled = true,
+        target = 35,
+        metric = "assigned",
+        -- holidays = "AT", -- region whose public holidays are no working days of the pace
+        -- areas = { "SAP" }, -- count only these areas; nil counts all
+        -- symbols = { ahead = "↑", on = "→", behind = "↓" },
+      },
+
       -- Worklog (docs/worklog.md in casedesk.nvim): record when which case was worked
       -- on; `:Cases worklog last month` estimates the time per case. Off by default.
       worklog = {
