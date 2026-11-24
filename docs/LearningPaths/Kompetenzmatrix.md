@@ -85,6 +85,7 @@ geprüft**, `?` = keine Grundlage für eine Schätzung, zuerst einen Einstufungs
 | Theoretische Informatik | 1 | – | 1 | 4 | T1 | Nachweis 4: Klausur Theoretische Informatik (Automaten, Berechenbarkeit, NP) |
 | **Weitere** | | | | | | |
 | Elektronik & Digitaltechnik | ? | ? | 2 | 3 | `ALL/elektrotechnik-und-elektronik` | Stufen bauen aufeinander auf (Entscheidung 2026-11-21): Hobby T 2 / P 3, dann Bachelor T 3 / P 3, danach Digitaltechnik (`ALL/digitaltechnik-lernplan-anlegen-nach-hobby-und`). Noch nicht eingestuft; erster Nachweis: Labornetzteil mit Messprotokoll |
+| SAP im Support (Tosca im SAP-Umfeld) | ? | ? | T 3 / P 1 | offen | `Learning/sap-bei-tricentis` (Tricentis-Vault) | Ziel 12 Monate laut Stefan, 2026-11-24: Trade-offs und typische Fehler kennen, Fälle sicher einordnen (T 3); Praxis nur Tutorials und Beispiele, weil kein eigenes SAP-System da ist (P 1). Ziel 24 Monate noch nicht gesetzt. Noch nicht eingestuft; erster Nachweis: eine Fallanalyse an einem erfundenen Fall und die Entscheidungsliste „SolEx-Fall“ |
 | Wissenschaftliches Arbeiten | 1 | 2 | 2 | 3 | T2 | Strukturierte Notizen und Quellenarbeit mit litindex sind eine gute Basis. Nachweis 3: ein Paper gründlich lesen und schriftlich zusammenfassen |
 
 ## Weitere Ideen zu diesem Punkt
@@ -106,3 +107,4 @@ geprüft**, `?` = keine Grundlage für eine Schätzung, zuerst einen Einstufungs
 |---|---|
 | 2026-10-29 | Erste Einstufung (Schätzung Claude, ungeprüft) |
 | 2026-10-29 | Bestand um rund 1.560 Bücher in fünf Themen-Repos erweitert; Hinweise bei IT-Security und ML/KI ergänzt, Einstufung unverändert |
+| 2026-11-24 | Neue Zeile „SAP im Support“: Ziel 12 Monate T 3 / P 1 (Stefan), heute nicht eingestuft |
