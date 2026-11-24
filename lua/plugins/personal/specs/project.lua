@@ -848,6 +848,21 @@ return {
           or nil,
       },
 
+      -- Worklog (docs/worklog.md in casedesk.nvim): record when which case was worked
+      -- on; `:Cases worklog last month` estimates the time per case. Off by default.
+      worklog = {
+        enabled = true,
+        -- Folder of the log; nil = `worklog/` beside `usage_path`. Every machine writes
+        -- its own file, so a synced folder is fine.
+        -- dir = nil,
+        -- A longer pause ends a span at its last touch.
+        -- idle_minutes = 5,
+        -- A longer span is written in pieces of this length.
+        -- flush_minutes = 5,
+        -- Longest gap inside one sitting, in the summaries.
+        -- session_gap_minutes = 30,
+      },
+
       -- Paths. Normally only `repo_root` needs setting; `root`, `cases_root`,
       -- `workflow_templates_dir`, `sla_doc_path` and every built-in area's `dir`
       -- follow it unless set explicitly (an explicit value is never recomputed).
