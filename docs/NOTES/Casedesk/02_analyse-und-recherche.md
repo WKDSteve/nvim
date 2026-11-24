@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/02_analyse-und-recherche.md

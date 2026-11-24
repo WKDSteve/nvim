@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/01_neuer-case.md

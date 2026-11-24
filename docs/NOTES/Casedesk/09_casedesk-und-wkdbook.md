@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/09_casedesk-und-wkdbook.md

@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/10_casedesk-web.md

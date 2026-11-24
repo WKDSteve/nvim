@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/05_ki-anonymisieren-uebersetzen.md

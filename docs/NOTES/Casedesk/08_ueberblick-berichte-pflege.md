@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/08_ueberblick-berichte-pflege.md

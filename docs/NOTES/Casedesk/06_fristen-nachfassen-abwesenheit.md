@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/06_fristen-nachfassen-abwesenheit.md

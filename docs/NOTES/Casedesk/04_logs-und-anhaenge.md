@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/04_logs-und-anhaenge.md

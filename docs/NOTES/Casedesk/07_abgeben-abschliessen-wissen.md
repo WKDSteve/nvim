@@ -1,0 +1,1 @@
+E:/repos/casedesk.nvim/docs/workflows/07_abgeben-abschliessen-wissen.md
