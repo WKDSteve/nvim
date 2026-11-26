@@ -60,6 +60,7 @@ local specs = {
   "plugin_repos/runner_spec.lua",
   "plugin_repos/binaries_spec.lua",
   "plugin_repos/runner_env_spec.lua",
+  "plugin_repos/runner_names_spec.lua",
   "plugin_repos/runner_detached_spec.lua",
   "plugin_repos/list_vaults_spec.lua",
   "plugin_repos/sync_status_reuse_spec.lua",

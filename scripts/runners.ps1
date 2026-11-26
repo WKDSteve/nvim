@@ -31,6 +31,11 @@
   Repos: names (tasks.nvim) or `all` (every folder below the runner root). Exit code 0 when every named
   runner is in the wanted state, 1 when not, 2 for wrong usage.
 
+  More than one runner per repository: a further instance lives in <root>\<repo>+<n> (setup-runner.ps1 -Instance <n>,
+  registered as <COMPUTERNAME>-<repo>-<n>) and takes jobs of the same run in parallel. A repository name stands for
+  all its instances (`ensure tasks-desktop` starts tasks-desktop and tasks-desktop+2); `tasks-desktop+2` names one
+  (scripts/runner_names.ps1).
+
 .EXAMPLE
   pwsh scripts/runners.ps1 status all
   pwsh scripts/runners.ps1 ensure tasks.nvim rules.nvim
@@ -57,21 +62,22 @@ if (-not (Test-Path $Root)) {
   exit 2
 }
 
-$names = if ($Repo -contains 'all') { Get-ChildItem $Root -Directory | Where-Object { $_.Name -notmatch '^[_.]' } | Select-Object -ExpandProperty Name } else { $Repo }
+. (Join-Path $PSScriptRoot 'runner_names.ps1')
+$names = @(Expand-RunnerFolder $Root $Repo)
 foreach ($n in $names) {
   if (-not (Test-Path (Join-Path $Root "$n\run.cmd"))) { Write-Output "unknown runner: $n (no $Root\$n\run.cmd)"; exit 2 }
 }
 
 function Get-Listener([string] $name) {
-  $dir = (Join-Path $Root $name).ToLowerInvariant()
   Get-CimInstance Win32_Process -Filter "Name = 'Runner.Listener.exe'" |
-    Where-Object { $_.ExecutablePath -and $_.ExecutablePath.ToLowerInvariant().StartsWith($dir) }
+    Where-Object { Test-RunnerOwnsPath $Root $name $_.ExecutablePath }
 }
 
 function ConvertTo-Remote([string] $name, [int] $code, [string] $json) {
   # missing = GitHub does not know a runner with this machine's name for the repo
   if ($code -ne 0 -or -not $json) { return @{ status = 'unknown'; busy = $false } }
-  $r = ($json | ConvertFrom-Json).runners | Where-Object { $_.name -like "*-$name" } | Select-Object -First 1
+  $suffix = Get-RunnerRemoteSuffix $name
+  $r = ($json | ConvertFrom-Json).runners | Where-Object { $_.name -like "*$suffix" } | Select-Object -First 1
   if (-not $r) { return @{ status = 'missing'; busy = $false } }
   return @{ status = $r.status; busy = [bool] $r.busy }
 }
@@ -79,19 +85,26 @@ function ConvertTo-Remote([string] $name, [int] $code, [string] $json) {
 function Get-RemoteMany([string[]] $list) {
   # One `gh api` per repo takes about a second; eleven in a row were 12 s, and the wait loop and the final
   # status line each asked again (26 s for `ensure all` with nothing to start). Several at a time (PowerShell 7).
+  # One question per repository, also when it has several runner folders (tasks-desktop, tasks-desktop+2).
   $answers = @{}
+  $repos = @($list | ForEach-Object { Get-RunnerRepo $_ } | Select-Object -Unique)
   if ($PSVersionTable.PSVersion.Major -ge 7) {
-    $got = $list | ForEach-Object -ThrottleLimit 6 -Parallel {
+    $got = $repos | ForEach-Object -ThrottleLimit 6 -Parallel {
       $out = gh api "repos/$($using:Owner)/$_/actions/runners" 2>$null
       [pscustomobject]@{ Name = $_; Code = $LASTEXITCODE; Json = ($out -join "`n") }
     }
   } else {
-    $got = foreach ($n in $list) {
+    $got = foreach ($n in $repos) {
       $out = gh api "repos/$Owner/$n/actions/runners" 2>$null
       [pscustomobject]@{ Name = $n; Code = $LASTEXITCODE; Json = ($out -join "`n") }
     }
   }
-  foreach ($g in $got) { $answers[$g.Name] = ConvertTo-Remote -name $g.Name -code $g.Code -json $g.Json }
+  $byRepo = @{}
+  foreach ($g in $got) { $byRepo[$g.Name] = $g }
+  foreach ($n in $list) {
+    $g = $byRepo[(Get-RunnerRepo $n)]
+    $answers[$n] = ConvertTo-Remote -name $n -code $g.Code -json $g.Json
+  }
   return $answers
 }
 
