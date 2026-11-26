@@ -1,4 +1,5 @@
--- TESTS/cdx/cloud_push_guard_spec.lua -- the cloud push guard (rule GIT-09) and its installer.
+-- TESTS/cdx/cloud_push_guard_spec.lua -- the cloud push guard (rule GIT-09) and its installer. The hook itself goes
+-- into public repositories, so it must not name a rule by its id (appkit's tools/check-rule-ids.py fails on that).
 --
 -- docs/NOTES/CDX/install-cloud-push-guard.js puts docs/NOTES/CDX/hooks/cloud-push-guard.mjs into a repository's
 -- .claude/hooks/ and its PreToolUse entry into .claude/settings.json, and lets both through a .gitignore that hides
@@ -201,12 +202,14 @@ return function(H)
     { "git push origin HEAD", false, branch_repo },
     { "git push origin HEAD:main", true, branch_repo },
   }
+  local id = H.read(hook):match("%f[%w](%u+%-%d%d)%f[%W]")
+  ok(id == nil, "the hook names no rule by its id: " .. tostring(id))
   for _, c in ipairs(cases) do
     local r = run(c[1], c[3] or main_repo, cloud)
     local where = c[3] and " (on claude/x)" or " (on main)"
     if c[2] then
       eq(r.code, 2, "refused: " .. c[1] .. where .. " " .. (r.stderr or ""))
-      has(r.stderr, "GIT-09", "the refusal names GIT-09: " .. c[1])
+      has(r.stderr, "Push your own branch instead", "the refusal says what to do: " .. c[1])
     else
       eq(r.code, 0, "allowed: " .. c[1] .. where .. " " .. (r.stderr or ""))
     end

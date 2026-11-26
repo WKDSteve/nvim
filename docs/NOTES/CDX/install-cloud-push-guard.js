@@ -3,7 +3,7 @@
 // its PreToolUse entry (matcher Bash) to <repo>/.claude/settings.json. Idempotent; every other key of settings.json
 // stays as it is. When the repository's .gitignore hides `.claude/` (`.claude/`, `/.claude/` or `.claude/*`), the
 // line becomes `/.claude/*` with exceptions for settings.json and hooks/, so both files can be committed. The vaults
-// are refused: there a cloud session pushes to main on purpose (rule GIT-09).
+// are refused: there a cloud session pushes to main on purpose.
 //
 // Usage: node install-cloud-push-guard.js [--check] <repo>...
 //   --check  change nothing; exit 1 when a repository lacks the guard or has an old copy
