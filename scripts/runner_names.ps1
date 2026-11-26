@@ -17,11 +17,12 @@ function Get-RunnerRemoteSuffix([string] $folder) {
 }
 
 # Whether a program path lies in the folder of this runner: <root>\<folder>\ with the backslash, so the folder
-# tasks-desktop does not claim the listener of tasks-desktop+2. Case does not matter (Windows paths).
+# tasks-desktop does not claim the listener of tasks-desktop+2. Case does not matter (Windows paths). Built by hand,
+# not with Join-Path: pwsh on Linux (the hosted CI) would join with / and no Windows path would ever match.
 function Test-RunnerOwnsPath([string] $root, [string] $folder, [string] $path) {
   if (-not $path) { return $false }
-  $dir = (Join-Path $root $folder).ToLowerInvariant().TrimEnd('\') + '\'
-  return $path.ToLowerInvariant().StartsWith($dir)
+  $dir = ($root.Replace('/', '\').TrimEnd('\') + '\' + $folder + '\').ToLowerInvariant()
+  return $path.Replace('/', '\').ToLowerInvariant().StartsWith($dir)
 }
 
 # The runner folders a request names: `all` is every folder below the root (none that starts with _ or .); a name
