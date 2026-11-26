@@ -43,21 +43,46 @@ function ignoredBy(root, rel) {
  * needs no change. Throws when another rule (a nested .gitignore, info/exclude, a global file) hides them.
  */
 function gitignoreFix(root) {
-  const rules = [ignoredBy(root, SETTINGS_REL), ignoredBy(root, HOOK_REL)].filter(Boolean);
+  const settingsRule = ignoredBy(root, SETTINGS_REL);
+  const hookRule = ignoredBy(root, HOOK_REL);
+  const rules = [settingsRule, hookRule].filter(Boolean);
   if (rules.length === 0) return null;
   const file = path.join(root, '.gitignore');
   const lines = fs.readFileSync(file, 'utf8').split('\n');
   for (const rule of rules) {
     const own = path.resolve(root, rule.source) === file;
     const known = ['.claude/', '/.claude/', '.claude', '/.claude', '.claude/*', '/.claude/*'].includes(rule.pattern);
-    if (!own || !known || lines[rule.line - 1].trim() !== rule.pattern) {
+    if (!own || !known || lines[rule.line - 1].trim() !== rule.pattern || rule.line !== rules[0].line) {
       throw new Error(`${rule.source}:${rule.line} \`${rule.pattern}\` hides .claude/; let it through by hand`);
     }
   }
   const at = rules[0].line - 1;
   const eol = lines[at].endsWith('\r') ? '\r' : '';
-  lines.splice(at, 1, `/.claude/*${eol}`, `!/.claude/settings.json${eol}`, `!/.claude/hooks/${eol}`);
+  // `.claude/*` stays and gets only the exceptions it lacks; a rule for the folder itself cannot have exceptions,
+  // so it becomes `/.claude/*` with both
+  const folder = !rules[0].pattern.endsWith('*');
+  const add = [];
+  if (folder || settingsRule) add.push(`!/.claude/settings.json${eol}`);
+  if (folder || hookRule) add.push(`!/.claude/hooks/${eol}`);
+  lines.splice(at, 1, folder ? `/.claude/*${eol}` : lines[at], ...add);
   return lines.join('\n');
+}
+
+/**
+ * The new text of settings.json. Without a `hooks` key the block is added in front of the closing brace and every
+ * other byte stays as it was (a repository may format its JSON its own way); otherwise the whole file is rewritten.
+ */
+function settingsText(oldText, settings) {
+  const next = withGuard(settings);
+  if (oldText === null || settings.hooks !== undefined || typeof settings !== 'object' || Array.isArray(settings)) {
+    return `${JSON.stringify(next, null, 2)}\n`;
+  }
+  const end = oldText.lastIndexOf('}');
+  const head = oldText.slice(0, end).replace(/\s*$/, '');
+  const indent = oldText.match(/\n([ \t]+)"/)?.[1] ?? '  ';
+  const block = JSON.stringify(next.hooks, null, indent).replace(/\n/g, `\n${indent}`);
+  const text = `${head}${head.endsWith('{') ? '' : ','}\n${indent}"hooks": ${block}\n}${oldText.slice(end + 1)}`;
+  return oldText.includes('\r\n') ? text.replace(/\r?\n/g, '\r\n') : text;
 }
 
 /** The settings object with the guard's entry in place (a new object; `settings` is not changed). */
@@ -105,7 +130,7 @@ function install(repo, opts = {}) {
       throw new Error(`${settingsPath}: not JSON (${e.message})`);
     }
   }
-  const nextText = `${JSON.stringify(withGuard(settings), null, 2)}\n`;
+  const nextText = settingsText(oldText, settings);
   const settingsSame = oldText !== null && JSON.stringify(settings) === JSON.stringify(JSON.parse(nextText));
   const ignoreText = gitignoreFix(root);
 

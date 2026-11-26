@@ -119,6 +119,36 @@ return function(H)
   has(err.stdout, "error", "an unknown rule is an error")
   has(err.stdout, "*.json", "it names the rule")
 
+  -- a repository's own JSON format stays; `.claude/*` keeps its line and gets only the missing exception
+  local styled = repo("main", "styled")
+  local styled_json = '{\n  "env": { "X": "1" },\n  "permissions": {\n    "allow": ["a"]\n  }\n}\n'
+  H.write(styled .. "/.claude/settings.json", styled_json)
+  H.write(styled .. "/.gitignore", "dist/\n.claude/*\n!.claude/settings.json\n")
+  commit_all(styled)
+  has(
+    vim.system({ "node", installer, styled }, { text = true }):wait().stdout,
+    "installed",
+    "styled: installed"
+  )
+  local styled_text = H.read(styled .. "/.claude/settings.json")
+  eq(
+    styled_text:sub(1, #styled_json - 3),
+    styled_json:sub(1, #styled_json - 3),
+    "every old byte stays"
+  )
+  has(styled_text, '"allow": ["a"]', "the one-line array stays one line")
+  eq(
+    vim.json.decode(styled_text).hooks.PreToolUse[1].matcher,
+    "Bash",
+    "the hook block is valid JSON"
+  )
+  local styled_ignore = H.read(styled .. "/.gitignore")
+  eq(select(2, styled_ignore:gsub("settings%.json", "")), 1, "no second settings.json exception")
+  has(styled_ignore, "\n.claude/*\n", "the .claude/* line stays")
+  has(styled_ignore, "\n!.claude/settings.json\n", "the old exception stays")
+  has(styled_ignore, "!/.claude/hooks/", "the hooks exception is added")
+  ok(not ignored(styled, ".claude/hooks/cloud-push-guard.mjs"), "styled: the hook is not ignored")
+
   -- a new project gets the guard from new-project-claude.js
   local fresh = repo("main", "fresh")
   local np = vim
