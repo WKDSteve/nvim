@@ -107,6 +107,27 @@ foreach ($cli in @(
         Write-Host "  PATH ergaenzt: $cliBin (neue Shells; die App erst nach einem Neustart)"
     }
 }
+# Kontrolle wie in einer neuen PowerShell: der PATH aus der Registry, darin <befehl>.cmd. Ein Alias oder eine Funktion
+# gleichen Namens (Profil, z.B. zoxide) gewinnt in PowerShell vor dem .cmd: das wird genannt. Ohne Shim geht immer die
+# lange Form, als einfache Zeile zum Kopieren (ohne Prompt-Zeichen).
+$freshPath = @(
+    [Environment]::GetEnvironmentVariable('Path', 'Machine'),
+    [Environment]::GetEnvironmentVariable('Path', 'User')
+) -join ';'
+foreach ($name in @('testing', 'tasks', 'rules')) {
+    $shim = $freshPath -split ';' | Where-Object { $_ } |
+        ForEach-Object { Join-Path ([Environment]::ExpandEnvironmentVariables($_)) "$name.cmd" } |
+        Where-Object { Test-Path $_ } | Select-Object -First 1
+    $shadow = Get-Command $name -CommandType Alias, Function -ErrorAction SilentlyContinue | Select-Object -First 1
+    if (-not $shim) {
+        Write-Host "  $name nicht auf dem PATH einer neuen Shell; Ersatz:" -ForegroundColor Yellow
+        Write-Host "    nvim -n -i NONE --headless -u NONE -l $($reposDir.Replace('\', '/'))/$name.nvim/scripts/$name.lua <befehl>"
+    } elseif ($shadow) {
+        Write-Host "  $name ist in dieser PowerShell ein $($shadow.CommandType) ($($shadow.Definition)) und ueberdeckt $shim" -ForegroundColor Yellow
+    } else {
+        Write-Host "  $name -> $shim (neue PowerShell pruefen: Get-Command $name)"
+    }
+}
 
 # TASKS_VAULT: Wurzel des Repos tasks-vault (Task-Vault: Areas mit ROADMAP/tasks, Backlog, Notizen, TOOLS). Der Hub
 # von tasks-desktop und die CLI von tasks.nvim lesen sie; der Vault ist seit 2026-10-12 ein eigenes Repo, nicht
