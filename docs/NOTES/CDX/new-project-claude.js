@@ -50,4 +50,12 @@ function copyTree(src, dst) {
 }
 
 copyTree(path.join(templatesDir, stack), target);
+
+// Every repository gets the cloud push guard (rule GIT-09); it needs a git checkout to check .gitignore.
+if (fs.existsSync(path.join(target, '.git'))) {
+  const { install } = require('./install-cloud-push-guard.js');
+  console.log(`  cloud-push-guard: ${install(target, { ownTree: true })}`);
+} else {
+  console.log('  cloud-push-guard: kein git-Checkout, nach `git init` nachholen: node install-cloud-push-guard.js .');
+}
 console.log('Fertig. CLAUDE.md und .claude/settings.json im Repo anpassen und mit ins Repo committen.');

@@ -98,6 +98,7 @@ local specs = {
   "cdx/rule_refs_spec.lua",
   "cdx/rule_drift_spec.lua",
   "cdx/new_project_claude_spec.lua",
+  "cdx/cloud_push_guard_spec.lua",
   "execute/execute_spec.lua",
   "strip_coauthor/git_spec.lua",
   "strip_coauthor/repin_spec.lua",
