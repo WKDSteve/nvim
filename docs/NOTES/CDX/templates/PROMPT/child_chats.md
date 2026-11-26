@@ -23,6 +23,15 @@ jede angelegte Task bekommt Kontext, Akzeptanz und Notizen (kein leerer `<!-- --
 
 Während die child-chats arbeiten, arbeitest du ebenfalls an Tasks weiter. neben der Orchestration.
 
+Den Brief zuerst als Datei ablegen, dann starten; ein Befund gehört genau einem child, zwei childs nie zur selben Zeit im
+selben Repo; `start_session` mit `cwd` in Backslash-Form (`E:\repos\x`). Jeder Brief nennt außerdem:
+- `tasks` liegt in der Git-Bash nicht auf dem PATH: `nvim -n -i NONE --headless -u NONE -l "$REPOS_DIR/tasks.nvim/scripts/tasks.lua" <befehl> … --vault=<absoluter pfad>`
+- Befehle auf eine geclaimte Task (`done`, `unclaim`, `set status=…`) mit `--by=<Name>`
+- Vault-Arbeit in einem eigenen Vault-Worktree, wenn der geteilte Checkout schmutzig ist; nach einem Rebase will der
+  pre-push-Hook des Vaults einen neu erzeugten Index (`tasks index`), nie `--no-verify`
+- ein mit geändertes Basis-Repo (appkit, lib.nvim) bekommt vor dem Push denselben vollen Lauf (`CI-02`)
+- was nur in den Notizen oder im Bericht steht, ist erst erledigt, wenn es eine Task ist
+
 Regeln: Brief mit Mandat, Task, Worktree, Branch und Claim, gefüllte Task-Rümpfe, nebenher selbst arbeiten (`ORCH-01`, `TASKS-06`, `CI-10`);
 Abschluss-Fragenkatalog vor dem Archivieren, vorher im Transkript prüfen, ob ich ihn schon geschickt habe, der Worktree
-bleibt bis zum Archivieren (`ORCH-02`). Wortlaut: `$RULES_VAULT/rulesets/arbeit/regeln/ORCHESTRIERUNG.md`.
+bleibt bis zum Archivieren (`ORCH-02`); App- und CLI-Fallen (`ORCH-04`). Wortlaut: `$RULES_VAULT/rulesets/arbeit/regeln/ORCHESTRIERUNG.md`.
