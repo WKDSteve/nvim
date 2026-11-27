@@ -1,6 +1,7 @@
 -- TESTS/bindings/copy_ctrl_c_spec.lua -- <C-c> in bindings.mappings.general: in visual mode it
--- yanks the selection to `+`; in normal mode it copies the whole buffer only in a file window
--- (buftype "", also in a float such as :UI zen) and says so; a terminal, prompt or picker buffer is never copied.
+-- yanks the selection to `+`; in normal mode it copies the whole buffer in EVERY buffer (a file,
+-- a nofile plugin view or picker list, a float, a terminal's scrollback) and says so, so no plugin
+-- view has to bind it again.
 -- The copy goes to register `a` here: this runner has no fake clipboard, and a spec must not
 -- write the user's `+` (XP-08).
 
@@ -30,40 +31,31 @@ return function(H)
     eq(vim.fn.getregtype("a"), "V", "linewise")
     eq(notes[#notes], "Copied 3 lines of copy_me.txt", "and it says what it copied")
 
-    -- not a file window: nothing is copied, nothing is said
-    local n = #notes
+    -- a plugin view (nofile): copied like a file
     vim.fn.setreg("a", "before")
     local nofile = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_buf_set_lines(nofile, 0, -1, false, { "picker", "lines" })
+    vim.api.nvim_buf_set_lines(nofile, 0, -1, false, { "view", "lines" })
     vim.api.nvim_win_set_buf(0, nofile)
-    eq(general.copy_file(0, "a"), nil, "a nofile (picker/prompt) buffer is not copied")
+    eq(general.copy_file(0, "a"), 2, "a nofile plugin view is copied")
+    eq(vim.fn.getreg("a", 1, 1), { "view", "lines" }, "its whole text")
+    eq(notes[#notes], "Copied 2 lines of [No Name]", "an unnamed buffer is said so")
 
-    -- a picker's float holds a nofile buffer: not copied
+    -- a float over it: copied too
     local float = vim.api.nvim_open_win(
       nofile,
       true,
       { relative = "editor", row = 1, col = 1, width = 10, height = 2 }
     )
-    eq(general.copy_file(float, "a"), nil, "a picker float is not copied")
+    vim.fn.setreg("a", "before")
+    eq(general.copy_file(float, "a"), 2, "a float is copied")
     vim.api.nvim_win_close(float, true)
 
+    -- a terminal buffer: its scrollback is copied
     local term = vim.api.nvim_create_buf(false, true)
     vim.api.nvim_open_term(term, {})
     vim.api.nvim_win_set_buf(0, term)
     eq(vim.bo[term].buftype, "terminal", "a terminal buffer")
-    eq(general.copy_file(0, "a"), nil, "a terminal buffer (its scrollback) is not copied")
-
-    eq(vim.fn.getreg("a"), "before", "the register kept its value")
-    eq(#notes, n, "no message for a window that is not copied")
-
-    -- a file in a float (`:UI zen` edits there) is copied like in a split
-    local zen = vim.api.nvim_open_win(
-      file,
-      true,
-      { relative = "editor", row = 1, col = 1, width = 10, height = 2 }
-    )
-    eq(general.copy_file(zen, "a"), 3, "a file buffer in a float is copied")
-    vim.api.nvim_win_close(zen, true)
+    ok(general.copy_file(0, "a") >= 1, "a terminal buffer is copied")
   end)
   vim.notify = orig_notify
   if not cok then

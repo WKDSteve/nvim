@@ -191,7 +191,7 @@ toggle are gone. A count picks the terminal: `3<A-h>` opens terminal "3".
 | Key | Mode | Effect | desc | Source |
 | --- | --- | --- | --- | --- |
 | `<Esc>` | n | Clear a Copilot NES overlay if one is up, else `:noh` | `Clear copilot NES overlays or nohl` | `nvchad.lua` |
-| `<C-c>` | n | Whole file to the system clipboard, with a message; only for a file buffer (`buftype == ""`, a float such as `:UI zen` included), elsewhere (picker, prompt, help, terminal) nothing | `[General] Copy whole file` | `general.lua` |
+| `<C-c>` | n | Whole buffer to the system clipboard, with a message, in every buffer (file, plugin view, picker list, float, terminal scrollback); a plugin that needs the key itself maps it buffer-locally | `[General] Copy whole file` | `general.lua` |
 | `<C-c>` | x | Selection to the system clipboard (`"+y`) | `[General] Copy selection to system clipboard` | `general.lua` |
 | `<leader>nvt` | n | NvChad theme switcher (`nvchad.themes`, compact, borderless) | `[nvchad] Themes switcher` | `nvchad.lua` |
 | `<leader>fm` | n, x | Format via `conform`, `lsp_fallback`, 3 s timeout | `[General] Format file` | `nvchad.lua` |

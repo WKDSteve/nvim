@@ -12,18 +12,16 @@
 
 local M = {}
 
----Copy the whole buffer of `win` into `reg` (linewise) and say so -- for a
----file buffer only (`buftype == ""`); a picker, prompt, help or terminal
----buffer is not copied. A float is fine: `:UI zen` edits the file in one.
+---Copy the whole buffer of `win` into `reg` (linewise) and say so -- whatever
+---the buffer is (file, plugin view, picker list, help, terminal scrollback,
+---float): `<C-c>` copies everything, so no plugin view has to bind it again.
+---A plugin that needs `<C-c>` for itself maps it buffer-locally.
 ---@param win integer Window handle, 0 = current.
 ---@param reg string Register name, `+` for the system clipboard.
----@return integer|nil lines Lines copied, nil when the buffer is not a file buffer.
+---@return integer lines Lines copied.
 function M.copy_file(win, reg)
   win = win == 0 and vim.api.nvim_get_current_win() or win
   local buf = vim.api.nvim_win_get_buf(win)
-  if vim.bo[buf].buftype ~= "" then
-    return nil
-  end
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
   vim.fn.setreg(reg, lines, "V")
   local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":t")
@@ -89,10 +87,10 @@ function M.setup()
   map("n", "<Esc>", function()
     vim.cmd("noh")
   end, { desc = "[General] Clear search highlight" })
-  -- <C-c> copies what is selected; with nothing selected, the whole file --
-  -- but only in a file window. A picker, prompt, float or terminal buffer
-  -- (terminal.nvim's <C-c> leaves terminal mode, a second one landed here)
-  -- used to be copied silently, which reads as "Ctrl+C copied the old text".
+  -- <C-c> copies what is selected; with nothing selected, the whole buffer,
+  -- in every buffer (a message popup, a report or a picker list included) and
+  -- with a message saying what was copied. Terminal mode keeps terminal.nvim's
+  -- <C-c> (leaves terminal mode); this is the normal-mode map.
   map("x", "<C-c>", '"+y', { desc = "[General] Copy selection to system clipboard" })
   map("n", "<C-c>", function()
     M.copy_file(0, "+")
