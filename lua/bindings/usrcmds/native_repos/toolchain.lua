@@ -37,7 +37,7 @@ local PROBE_TIMEOUT_MS = 30000
 ---Inside `M.check_async` the probe yields until the program has finished; elsewhere it waits for it.
 ---@param argv string[]
 ---@return boolean ok, string stdout
-local function runs(argv)
+local function start_probe(argv)
   local co = coroutine.running()
   local resume = co and async_probes[co]
   local ok, res
@@ -60,6 +60,33 @@ local function runs(argv)
     return false, ""
   end
   return true, res.stdout or ""
+end
+
+-- A probe's answer is kept for a short while: `:MyNative build` and `deps` typed one after the other started
+-- vswhere (~0.8 s) again for the same answer. An install changes what is there, so `M.forget_probes` runs
+-- before the check that follows one.
+local PROBE_TTL_MS = 30000
+---@type table<string, { at: number, ok: boolean, out: string }>
+local probe_memo = {}
+
+---Runs a short probe (see `start_probe`), answering from the kept result of the same command when it is young.
+---@param argv string[]
+---@return boolean ok, string stdout
+local function runs(argv)
+  local key = table.concat(argv, "\0")
+  local now = uv.hrtime() / 1e6
+  local kept = probe_memo[key]
+  if kept and now - kept.at < PROBE_TTL_MS then
+    return kept.ok, kept.out
+  end
+  local ok, out = start_probe(argv)
+  probe_memo[key] = { at = uv.hrtime() / 1e6, ok = ok, out = out }
+  return ok, out
+end
+
+---Drops the kept probe results: the next check starts its programs again.
+function M.forget_probes()
+  probe_memo = {}
 end
 
 ---Whether `dir` is an entry of $PATH (Windows: case and slashes do not count).
@@ -379,7 +406,10 @@ function M._ensure_missing(ids, missing, items, on_done, tools)
     local id = install[index]
     if not id then
       -- only what was missing is checked again (the probes start programs); an install that did not help
-      -- keeps its by-hand line
+      -- keeps its by-hand line; an install may have changed the answer of a kept probe
+      if #install > 0 then
+        M.forget_probes()
+      end
       M.check_async(todo, function(still)
         on_done(
           still,

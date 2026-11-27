@@ -21,6 +21,9 @@ local function spec(H)
   local started = {}
   local function stand_in()
     started = {}
+    -- answers kept from an earlier step would hide the start this spec counts
+    toolchain.forget_probes()
+    native.forget_commit_times()
     vim.system = function(argv, _opts, on_exit)
       local entry = {
         argv = argv,

@@ -81,11 +81,74 @@ local function state_of(native, dir, on_done)
     return
   end
   local stat = uv.fs_stat(dir .. "/" .. native.artifact)
-  local cmd = { "git", "-C", dir, "log", "-1", "--format=%ct", "--" }
-  vim.list_extend(cmd, native.sources or { "." })
-  run_async(cmd, function(res)
-    local commit_time = res.code == 0 and tonumber(vim.trim(res.stdout or "")) or nil
+  M.commit_time(dir, native.sources, function(commit_time)
     on_done(M.build_state(stat and stat.mtime.sec or nil, commit_time))
+  end)
+end
+
+-- `git log -1` per checkout: the answer is kept for a short while and a second asker while it runs shares it
+-- (`list`, `build` and `deps` typed one after the other asked git the same question again, ~0.9 s each).
+local COMMIT_TTL_MS = 30000
+---@type table<string, { at: integer, time: integer|nil }>
+local commit_memo = {}
+---@type table<string, fun(time: integer|nil)[]>
+local commit_waiting = {}
+
+---@param dir string
+---@param sources string[]|nil
+---@return string
+local function commit_key(dir, sources)
+  return dir .. "\0" .. table.concat(sources or { "." }, "\0")
+end
+
+---Forgets the kept `git log` answers of one checkout (all of them without `dir`): call it when the repo changed
+---(build, clone, pull) so the next question goes to git.
+---@param dir? string
+function M.forget_commit_times(dir)
+  if not dir then
+    commit_memo = {}
+    return
+  end
+  local prefix = dir .. "\0"
+  for key in pairs(commit_memo) do
+    if key:sub(1, #prefix) == prefix then
+      commit_memo[key] = nil
+    end
+  end
+end
+
+---The commit time (seconds) of the newest commit touching `sources` in `dir`, nil when git cannot say. Answers on
+---the main loop; never waits.
+---@param dir string
+---@param sources string[]|nil
+---@param on_done fun(time: integer|nil)
+function M.commit_time(dir, sources, on_done)
+  local key = commit_key(dir, sources)
+  local kept = commit_memo[key]
+  if kept and (uv.hrtime() / 1e6 - kept.at) < COMMIT_TTL_MS then
+    local time = kept.time
+    vim.schedule(function()
+      on_done(time)
+    end)
+    return
+  end
+  if commit_waiting[key] then
+    table.insert(commit_waiting[key], on_done)
+    return
+  end
+  commit_waiting[key] = { on_done }
+  local cmd = { "git", "-C", dir, "log", "-1", "--format=%ct", "--" }
+  vim.list_extend(cmd, sources or { "." })
+  run_async(cmd, function(res)
+    local time = res.code == 0 and tonumber(vim.trim(res.stdout or "")) or nil
+    local waiting = commit_waiting[key]
+    commit_waiting[key] = nil
+    if time then
+      commit_memo[key] = { at = uv.hrtime() / 1e6, time = time }
+    end
+    for _, cb in ipairs(waiting or {}) do
+      cb(time)
+    end
   end)
 end
 
@@ -205,6 +268,7 @@ function M.clone(only)
   local todo = selected(only)
   ops.run_sequential(todo, function(native, on_done)
     ops.clone_one({ repo = native.repo, name = native.name }, base, function(status, err)
+      M.forget_commit_times(base .. "/" .. native.name)
       on_done(status ~= "failed", err)
     end)
   end, function(native)
@@ -243,6 +307,7 @@ function M.pull(only)
         return
       end
       ops.pull_one(dir, function(ok, err, changed)
+        M.forget_commit_times(dir)
         if ok then
           notes[#notes + 1] = native.name .. (changed and ": pulled" or ": up to date")
         end
@@ -378,6 +443,7 @@ local function run_planned(kind, only, base, candidates, states)
     local argv = native[kind]
     local started, err = pcall(vim.system, argv, { text = true, cwd = dir }, function(res)
       vim.schedule(function()
+        M.forget_commit_times(dir) -- the build or install may have changed the checkout
         items[#items + 1] =
           { text = ("== %s: %s"):format(native.name, res.code == 0 and "ok" or "FAILED") }
         if res.code ~= 0 then

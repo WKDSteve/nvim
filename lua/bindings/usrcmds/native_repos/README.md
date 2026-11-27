@@ -54,4 +54,7 @@ Sister of `:MyPlugins` for the native apps next to the plugin checkouts. The lis
 
 Code: `init.lua`, `toolchain.lua`, `lua/machine_guard.lua` (the workstation block); specs: `TESTS/native_repos/native_repos_spec.lua`,
 `TESTS/native_repos/workstation_spec.lua` (the workstation block, simulated), `TESTS/native_repos/async_spec.lua`
-(`list` and the tool probes never wait: git and the probes run in the background, the answer comes once).
+(`list` and the tool probes never wait: git and the probes run in the background, the answer comes once),
+`TESTS/native_repos/memo_spec.lua` (`git log -1` per checkout and the tool probes such as `vswhere` are asked once
+for 30 s, whichever of `list`, `build` or `deps` asks; a clone, pull, build or install forgets the checkout's
+answer, an install forgets the probes before the re-check).
