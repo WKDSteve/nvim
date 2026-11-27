@@ -8,6 +8,85 @@ local M = {}
 local lib = require("lib")
 local is_terminal_buf, delete_terminal_buf = lib.is_terminal_buf, lib.delete_terminal_buf
 
+---@return integer[]  # listed, modified file buffers (terminals and other special buffers excluded)
+function M.unsaved_buffers()
+  local out = {}
+  for _, b in ipairs(vim.api.nvim_list_bufs()) do
+    if
+      vim.api.nvim_buf_is_loaded(b)
+      and vim.bo[b].buflisted
+      and vim.bo[b].buftype == ""
+      and vim.bo[b].modified
+    then
+      out[#out + 1] = b
+    end
+  end
+  return out
+end
+
+--- Quit everything, but ask first when a buffer has unsaved changes: Save all and quit /
+--- Discard and quit / Cancel (the default). An unnamed buffer cannot be written without a name, so
+--- when one is left after "Save all" the editor stays open and shows that buffer instead.
+---@param quit? fun()  # what actually quits (default `qa!`); injectable for tests
+---@return nil
+function M.quit_all(quit)
+  quit = quit or function()
+    vim.cmd("qa!")
+  end
+  local dirty = M.unsaved_buffers()
+  if #dirty == 0 then
+    quit()
+    return
+  end
+
+  local names = {}
+  for i, b in ipairs(dirty) do
+    local name = vim.api.nvim_buf_get_name(b)
+    names[i] = "  " .. (name == "" and "[No Name]" or vim.fn.fnamemodify(name, ":~:."))
+  end
+  local question = ("%d buffer%s with unsaved changes:\n%s"):format(
+    #dirty,
+    #dirty == 1 and "" or "s",
+    table.concat(names, "\n")
+  )
+
+  require("lib.nvim.ui.kit").confirm({
+    title = "Quit",
+    question = question,
+    choices = { "Save all and quit", "Discard and quit", "Cancel" },
+    default = "Cancel",
+    kind = "warn",
+    on_answer = function(choice)
+      if choice == "Discard and quit" then
+        quit()
+      elseif choice == "Save all and quit" then
+        local unnamed
+        for _, b in ipairs(dirty) do
+          if vim.api.nvim_buf_is_valid(b) and vim.bo[b].modified then
+            if vim.api.nvim_buf_get_name(b) == "" then
+              unnamed = unnamed or b
+            else
+              local wrote, err = pcall(vim.api.nvim_buf_call, b, function()
+                vim.cmd("silent write")
+              end)
+              if not wrote then
+                vim.notify("Quit: could not write buffer: " .. tostring(err), vim.log.levels.ERROR)
+                return
+              end
+            end
+          end
+        end
+        if unnamed then
+          vim.api.nvim_win_set_buf(0, unnamed)
+          vim.notify("Quit: this buffer has no name, save it with :w <name>", vim.log.levels.WARN)
+        else
+          quit()
+        end
+      end
+    end,
+  })
+end
+
 ---@return nil
 function M.setup()
   local map = require("lib.nvim.bindings.keymap")
@@ -30,8 +109,8 @@ function M.setup()
   -- Windows
   -- ---------------------------------------------------------------------------
   map("n", "<leader>Q", function()
-    vim.cmd("qa!")
-  end, { desc = "[Windows] Force quit all" })
+    M.quit_all()
+  end, { desc = "[Windows] Quit all (asks when buffers are unsaved)" })
 
   -- Window closing
   map({ "n", "v" }, "<leader>q", "<Cmd>close!<CR>", { desc = "[Windows] Close window" })

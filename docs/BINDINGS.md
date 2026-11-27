@@ -37,7 +37,7 @@ paraphrased, and a drift report stays meaningful only while they match.
 | --- | --- | --- | --- | --- |
 | `<leader>bn` | n | `:enew` | `[Buffers] New` | `buf_win_tab.lua` |
 | `<leader>bx` | n | Close the current buffer and go to the next; terminal buffers go through `lib.delete_terminal_buf` instead of `nvim_buf_delete` | `[Buffers] Close current, go to next` | `buf_win_tab.lua` |
-| `<leader>Q` | n | `:qa!` | `[Windows] Force quit all` | `buf_win_tab.lua` |
+| `<leader>Q` | n | Quit all; with unsaved buffers a kit dialog asks: Save all and quit / Discard and quit / Cancel | `[Windows] Quit all (asks when buffers are unsaved)` | `buf_win_tab.lua` |
 | `<leader>q` | n, v | `:close!` | `[Windows] Close window` | `buf_win_tab.lua` |
 | `<leader>q` | i | Leave insert for one command, then `:close` | `[Windows] Close window (insert)` | `buf_win_tab.lua` |
 | `<leader>q` | t | Leave terminal mode, then `:close` | `[Windows] Close window (terminal)` | `buf_win_tab.lua` |
