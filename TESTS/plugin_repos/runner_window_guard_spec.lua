@@ -19,6 +19,12 @@ return function(H)
   local script = vim.fs.joinpath(vim.fn.getcwd(), "scripts", "runner_window_guard.ps1")
   ok(vim.uv.fs_stat(script) ~= nil, "the spec runs from the root of the config")
 
+  -- The watcher's working folder is never the log folder: called from a packaged app (the Claude desktop app), a
+  -- folder made under AppData\Local lands in the app's virtual view, WMI does not see it and the start fails (8).
+  local text = table.concat(vim.fn.readfile(script), "\n")
+  ok(text:find("CurrentDirectory = $env:USERPROFILE", 1, true), "the watcher starts in the profile")
+  ok(not text:find("CurrentDirectory = $LogDir", 1, true), "never in the log folder")
+
   ---@param args string[]
   ---@param env table|nil
   ---@return integer, string

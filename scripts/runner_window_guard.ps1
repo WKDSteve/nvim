@@ -117,7 +117,10 @@ if ($Ensure) {
   $line = "conhost.exe --headless `"$pwsh`" -NoProfile -NonInteractive -File `"$logger`" -Seconds $Seconds -OutFile `"$out`""
   # Not tracked by a runner's orphan cleanup when a hook or a job step calls this.
   $env:RUNNER_TRACKING_ID = ''
-  $made = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $line; CurrentDirectory = $LogDir }
+  # The profile as the working folder, not the log folder: a caller inside a packaged app (the Claude desktop app)
+  # writes AppData\Local into its own virtual view, where WMI does not see the folder it just made (exit 8). The
+  # logger makes its folder itself.
+  $made = Invoke-CimMethod -ClassName Win32_Process -MethodName Create -Arguments @{ CommandLine = $line; CurrentDirectory = $env:USERPROFILE }
   if ($made.ReturnValue -ne 0) {
     Write-Output "warning: window-guard could not start its watcher (Win32_Process.Create: $($made.ReturnValue))"
     exit 0
