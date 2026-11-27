@@ -24,7 +24,10 @@ jede angelegte Task bekommt Kontext, Akzeptanz und Notizen (kein leerer `<!-- --
 Während die child-chats arbeiten, arbeitest du ebenfalls an Tasks weiter. neben der Orchestration.
 
 Den Brief zuerst als Datei ablegen, dann starten; ein Befund gehört genau einem child, zwei childs nie zur selben Zeit im
-selben Repo; `start_session` mit `cwd` in Backslash-Form (`E:\repos\x`). Jeder Brief nennt außerdem:
+selben Repo; `start_session` mit `cwd` in Backslash-Form (`E:\repos\x`). Vor dem Start den Brief prüfen:
+`node $REPOS_DIR/tasks-vault/TOOLS/scripts/brief-check/brief-check.mjs <brief.md>` (Commits, Tasks, Pfade und Namen,
+die der Brief nennt, gegen `origin/main`); was `MISSING` oder `NOT-ON-MAIN` ist, korrigieren oder im Brief als
+„ungeprüft“ kennzeichnen. Jeder Brief nennt außerdem:
 - `tasks` liegt in der Git-Bash nicht auf dem PATH: `nvim -n -i NONE --headless -u NONE -l "$REPOS_DIR/tasks.nvim/scripts/tasks.lua" <befehl> … --vault=<absoluter pfad>`
 - Befehle auf eine geclaimte Task (`done`, `unclaim`, `set status=…`) mit `--by=<Name>`
 - Vault-Arbeit in einem eigenen Vault-Worktree, wenn der geteilte Checkout schmutzig ist; nach einem Rebase will der
