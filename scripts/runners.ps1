@@ -21,8 +21,10 @@
             start and ensure also write the job-started hook that keeps foreign code off the runner (pull requests,
             foreign actors, unreviewed commits of public repositories; testing.nvim docs/RUNNER-GUARD.md); -NoGuard
             leaves that out, `testing ci trust <owner/repo>` releases a commit after you reviewed it
-            start and ensure also give each runner the longer wait for its worker and the cargo job limit
-            (scripts/runner_env.ps1)
+            start and ensure also give each runner the longer wait for its worker, the cargo job limit and the
+            job-completed hook of the window guard (scripts/runner_env.ps1), and keep the guard's watcher running
+            (scripts/runner_window_guard.ps1 -Ensure: one window logger for the machine; each job's log then lists
+            the windows the job opened)
     stop   stop the runner processes (a running job is cancelled)
     check   are the tools the workflows rely on here (git, gh, nvim, cargo, jq, shellcheck, Inno Setup, ...)? One
             line per tool, exit 1 when one is missing; also finds a ~/.cargo/bin whose programs vanished
@@ -156,6 +158,8 @@ switch ($Action) {
     # On a busy machine a worker misses the 30 s of its hand-over and the job is lost before its first step, and
     # unlimited cargo builds of several runners at once drive the CPU to 100 % (CARGO_BUILD_JOBS=4).
     & (Join-Path $PSScriptRoot 'runner_env.ps1') -Root $Root -Name $names
+    # The jobs' windows: one watcher for the machine, read by each runner's job-completed hook. Never stops a start.
+    try { & (Join-Path $PSScriptRoot 'runner_window_guard.ps1') -Ensure } catch { Write-Output "warning: window-guard: $($_.Exception.Message)" }
     # Foreign code must not reach the runner: the job-started hook (testing.nvim, docs/RUNNER-GUARD.md) refuses pull
     # requests, foreign actors and unreviewed commits of public repositories. It lives in each runner's .env, which
     # the runner reads at its start, so this is the moment to (re)write it. Idempotent; -NoGuard leaves it out

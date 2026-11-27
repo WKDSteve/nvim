@@ -36,6 +36,7 @@ return function(H)
   local own = vim.fs.joinpath(root, "own", ".env")
   local set = vim.fs.joinpath(root, "set", ".env")
   local set_by_hand = "CARGO_BUILD_JOBS=2\nGITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=600\n"
+    .. "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=C:\\own\\hook.ps1\n"
   write(hooked, hook)
   write(own, "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\n")
   write(set, set_by_hand)
@@ -93,32 +94,51 @@ return function(H)
   eq(code, 1, "-Check fails while a .env lacks a setting")
   ok(
     said:find(
-      "missing  hooked lacks GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT, CARGO_BUILD_JOBS",
+      "missing  hooked lacks GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT, CARGO_BUILD_JOBS, ACTIONS_RUNNER_HOOK_JOB_COMPLETED",
       1,
       true
     ),
     said
   )
   ok(said:find("missing  empty lacks", 1, true), "a runner without .env lacks everything")
-  ok(said:find("missing  own lacks CARGO_BUILD_JOBS in", 1, true), "names only what is missing")
+  ok(
+    said:find("missing  own lacks CARGO_BUILD_JOBS, ACTIONS_RUNNER_HOOK_JOB_COMPLETED in", 1, true),
+    "names only what is missing"
+  )
   ok(said:find("ok       set", 1, true), "a .env set by hand is ok")
   eq(read(hooked), hook, "-Check writes nothing")
 
   local first = run()
-  local lines = "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\nCARGO_BUILD_JOBS=4\n"
+  -- The job-completed hook of the window guard: the script next to runner_env.ps1, a path of this machine.
+  local completed =
+    read(vim.fs.joinpath(root, "empty", ".env")):match("ACTIONS_RUNNER_HOOK_JOB_COMPLETED=([^\n]+)")
+  ok(completed and completed:match("runner_job_completed%.ps1$"), tostring(completed))
+  ok(
+    vim.uv.fs_stat(completed) ~= nil,
+    "the hook names a file that is there: " .. tostring(completed)
+  )
+  local hook_line = "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=" .. completed .. "\n"
+  local lines = "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\nCARGO_BUILD_JOBS=4\n" .. hook_line
   eq(read(hooked), hook .. "\n" .. lines, "the hook stays and the settings join it")
   eq(read(vim.fs.joinpath(root, "empty", ".env")), lines, "a runner without .env gets one")
   eq(
     read(own),
-    "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\nCARGO_BUILD_JOBS=4\n",
-    "a value set by hand stays, the missing setting joins it"
+    "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\nCARGO_BUILD_JOBS=4\n" .. hook_line,
+    "a value set by hand stays, the missing settings join it"
   )
   eq(read(set), set_by_hand, "a .env with every setting set by hand stays as it is")
   ok(
-    first:find("hooked now waits 300 s for its worker and builds with 4 cargo jobs", 1, true),
+    first:find(
+      "hooked now waits 300 s for its worker and builds with 4 cargo jobs and reports the windows of each job",
+      1,
+      true
+    ),
     "says what changed"
   )
-  ok(first:find("own now builds with 4 cargo jobs", 1, true), "and only what was missing")
+  ok(
+    first:find("own now builds with 4 cargo jobs and reports the windows of each job", 1, true),
+    "and only what was missing"
+  )
   ok(not first:find("set now", 1, true), "and nothing for a runner that had it all")
   ok(
     first:find("warning: broken", 1, true),

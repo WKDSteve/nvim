@@ -19,6 +19,12 @@
     3.7 times slower, browser tests of other repositories red at their 30 s limit). Four per job keep a
     lone build reasonably fast and a crowd of them near the core count.
 
+  ACTIONS_RUNNER_HOOK_JOB_COMPLETED=<this folder>\runner_job_completed.ps1
+    After each job the window guard (scripts/runner_window_guard.ps1) lists the windows the job opened, as warnings
+    in its log: a test step that starts a console program with a console of its own opens a Windows Terminal window
+    that takes the focus at the machine (2026-11-26: 104 of them during one round of CI runs). The job-started hook
+    belongs to the guard of testing.nvim; this one is free.
+
   -Started records the .env a runner is started with (a copy, .env.started); `runners.ps1 start|ensure` calls it
   right before it starts the runner. The time of the .env says nothing: `testing ci runner-guard install`
   rewrites the .env of every runner on each start, changed or not.
@@ -46,7 +52,8 @@ $ErrorActionPreference = 'Stop'
 # Name, value and what the runner gains, in the order they join a .env.
 $settings = @(
   @{ Name = 'GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT'; Value = '300'; Says = 'waits 300 s for its worker' },
-  @{ Name = 'CARGO_BUILD_JOBS'; Value = '4'; Says = 'builds with 4 cargo jobs' }
+  @{ Name = 'CARGO_BUILD_JOBS'; Value = '4'; Says = 'builds with 4 cargo jobs' },
+  @{ Name = 'ACTIONS_RUNNER_HOOK_JOB_COMPLETED'; Value = (Join-Path $PSScriptRoot 'runner_job_completed.ps1'); Says = 'reports the windows of each job' }
 )
 # `pwsh -File` hands a list over as one string with commas.
 $names = @($Name | ForEach-Object { $_ -split ',' })
