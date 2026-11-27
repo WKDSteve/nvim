@@ -624,6 +624,7 @@ return {
     opts = {
       -- Toggle whole feature families off; a disabled family registers no routes
       -- at all (`:Git conflict ours` then fails like an unknown scope).
+      -- Values: true | false for each. Default: all true.
       -- features = {
       --   conflict = true, -- :Git conflict *
       --   hunk = true, -- :Git hunk *
@@ -636,12 +637,14 @@ return {
       -- },
 
       -- Top-level user command name; rename it if `:Git` collides with something.
+      -- Values: a command name (string, capitalised). Default: "Git".
       -- commands = {
       --   git = "Git",
       -- },
 
       -- Default keymaps; each is a string lhs, a list of lhs, or `false` to drop
       -- that one mapping.
+      -- Values: a string | a list of strings | false. Defaults as listed below.
       -- keymaps = {
       --   blame_full = "<leader>gb", -- :Git blame full
       --   ui_lazygit = "<leader>lg", -- :Git ui lazygit
@@ -655,6 +658,7 @@ return {
       --   -- Self-hosted GitHub/GitLab/Codeberg(Gitea) instances keyed by host,
       --   -- e.g. { ["git.example.org"] = "gitlab" }; only the three public hosts
       --   -- are recognized out of the box.
+      --   -- Values: a table host -> "github" | "gitlab" | "codeberg". Default: {}.
       --   hosts = {},
       -- },
 
@@ -662,89 +666,147 @@ return {
       --   -- Opt-in: save/load the window/tab layout (sessions.nvim, optional soft
       --   -- dependency) around a `:Git branch switch` checkout. Off because an
       --   -- automatic load can discard unsaved buffers.
+      --   -- Values: true | false. Default: false.
       --   sessions = false,
       -- },
 
       dashboard = {
-        -- Directory `:Git dashboard` scans by default; "" resolves to $REPOS_DIR.
+        -- Directory `:Git dashboard` scans by default.
+        -- Values: a directory path (string); "" resolves to $REPOS_DIR. Default: "".
         -- base_dir = "",
         -- Repositories shown on the default page in addition to the scan. This
         -- config is a git repo of its own but lives outside `$REPOS_DIR`, so the
         -- normal scan never finds it; listing it surfaces it alongside every other
         -- plugin checkout in `:MyPlugins dashboard`/`:Git dashboard`. Each entry
         -- must itself be a repository (one that isn't is reported and skipped).
-        -- Default: {}.
+        -- Values: a list of repository paths. Default: {}.
         extra_paths = { vim.fn.stdpath("config") },
-        -- Named extra pages, `{ name = string, paths = string[] }`; a path is a
-        -- repository or a directory scanned for its git-repository children.
+        -- Named extra pages (flip with <C-l>/<C-h>); a path is a repository or a
+        -- directory scanned for its git-repository children.
+        -- Values: a list of `{ name = string, paths = string[] }`. Default: {}.
         -- groups = {},
         -- `<RightMouse>` on the dashboard opens a menu of the same row/whole-page
         -- actions the keys already run (lib.nvim.contextmenu.bind_buffer),
         -- instead of ui.nvim's global one. Off disables the binding only --
         -- every key still works.
+        -- Values: true | false. Default: true.
         -- context_menu = true,
-        -- `gf` (fetch the whole page) runs this many fetches at once. Fetch only reads
-        -- the remote; push and pull stay one after another.
+        -- `gf` (fetch the whole page), the syncs `gS`/`gs` and fetch on open run this
+        -- many fetches at once. Fetch only reads the remote; push and pull stay one
+        -- after another.
+        -- Values: a whole number from 1 to 16. Default: 4.
         -- fetch_jobs = 4,
         -- `:Git dashboard` fetches the page it opens with, each repository as soon as its
         -- row is read, and redraws the row once its fetch is through (the `gf` most
         -- openings are followed by, without asking). Off: opening never reaches the network.
         -- Off on the workstation until its Falcon check (task
         -- gitsuite.nvim/abnahme-dashboard-fetch-on-open-und-cli-mit-echten-repos-che) passes.
+        -- Values: true | false. Default: false (here: on, except on the workstation).
         fetch_on_open = not require("machine").is("workstation"),
         -- `gf` and fetch on open ask GitHub first (one GraphQL query per page) and fetch
-        -- only the repositories whose default branch moved; needs a token. false
-        -- fetches every one.
-        -- fetch_precheck = false,
+        -- only the repositories whose default branch moved; needs a token (`gh auth
+        -- login`, or github_stats' token variable). Other branches, repositories
+        -- without a GitHub remote and any failure fall back to a normal fetch.
+        -- Values: false (fetch every repository) | "github". NOT `true`: that is rejected
+        -- and the value stays false. Default: false.
+        -- Measured on 2026-11-27 (83 repositories): see task
+        -- gitsuite.nvim/abnahme-github-vorabcheck-an-den-80-repos-messen-vorher-nach.
+        -- fetch_precheck = "github",
+          fetch_precheck = "false",
         -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
         -- focused default. "behind" = only repositories behind their upstream
         -- (as of the last fetch); "all" = every repository on the page.
+        -- Values: "behind" | "all". Default: "behind".
         -- pull_scope = "behind",
       },
 
       -- `:Git plugins log` (the newest commits of an installed plugin or any clone)
       -- and `:Git plugins report` (what the last update changed / what the next one
       -- would bring). Both read local state only - no fetch, no install, no change
-      -- to any clone.
-      -- plugins = {
-      --   -- Where the installed plugins come from: "auto" (the first available of
-      --   -- lazy.nvim, vim.pack, plain clones) or a list of "lazy" | "pack" | "clones".
-      --   sources = "auto",
-      --   -- Folders of clones for the "clones" source; empty = stdpath("data")/lazy
-      --   -- and stdpath("data")/site/pack/*/{start,opt}.
-      --   roots = {},
-      --   -- Commits `:Git plugins log` shows when no count is given.
-      --   log_limit = 50,
-      --   -- Timeout of each git process, in milliseconds.
-      --   timeout_ms = 30000,
-      --   -- `:Git plugins report`: also take dir-mode plugins (your own repos).
-      --   include_local = false,
-      --   -- "updated" = what the last update changed (from each clone's reflog),
-      --   -- "pending" = what the next update would bring (as of the last fetch).
-      --   mode = "updated",
-      --   -- Commits kept per plugin in a report; more are cut and marked.
-      --   max_commits = 1000,
-      --   -- git processes at once while a report is built (fewer with a virus scanner).
-      --   parallel = 4,
-      --   -- Plugins updated within this many seconds of each other are one run.
-      --   run_window_s = 300,
-      --   -- Keep merge commits in the commit lists.
-      --   merges = false,
-      --   -- Stored reports (stdpath("state")/gitsuite/plugins_reports.json): how many
-      --   -- and for how many days. The newest report is never dropped.
-      --   keep_reports = 20,
-      --   max_age_days = 365,
-      --   -- After `:Lazy sync`: "off" = nothing (no listener), "toast" = build and
-      --   -- store the `updated` report and show a toast that never takes focus,
-      --   -- "open" = also open the report.
-      --   after_sync = "off",
-      -- },
-
-      -- AI summary of one plugin's update in `:Git plugins report`: only on the key
-      -- `gS` in the report buffer (never automatic). The digest is marked
-      -- `untrusted` (commit messages of other people's repos); the answer is shown
-      -- as a labelled quote. EXPLICIT provider, never "auto"; bulk guard rails on.
+      -- to any clone (`report --mode=pending --fetch` aside, see `fetch_jobs` below).
       plugins = {
+        -- Where the installed plugins come from.
+        -- Values: "auto" (the first available of lazy.nvim, vim.pack, plain clones) | a
+        -- list of "lazy" | "pack" | "clones". Default: "auto".
+        -- sources = "auto",
+        -- Folders of clones for the "clones" source; empty = stdpath("data")/lazy
+        -- and stdpath("data")/site/pack/*/{start,opt}.
+        -- Values: a list of directory paths. Default: {}.
+        -- roots = {},
+        -- Commits `:Git plugins log` shows when no count is given.
+        -- Values: a whole number from 1 to 1000000. Default: 50.
+        -- log_limit = 50,
+        -- Timeout of each git process, in milliseconds.
+        -- Values: a whole number from 1 to 2147483647. Default: 30000.
+        -- timeout_ms = 30000,
+        -- `:Git plugins report`: also take dir-mode plugins (your own repos).
+        -- Values: true | false. Default: false.
+        -- include_local = false,
+        -- "updated" = what the last update changed (from each clone's reflog),
+        -- "pending" = what the next update would bring (as of the last fetch).
+        -- Values: "updated" | "pending". Default: "updated".
+        -- mode = "updated",
+        -- Commits kept per plugin in a report; more are cut and marked.
+        -- Values: a whole number from 1 to 1000000. Default: 1000.
+        -- max_commits = 1000,
+        -- git processes at once while a report is built (fewer with a virus scanner).
+        -- Values: a whole number from 1 to 64. Default: 4.
+        -- parallel = 4,
+        -- `:Git plugins report --mode=pending --fetch` (never without the flag): how many
+        -- clones are fetched at once, the timeout of each fetch in milliseconds, and from
+        -- how many clones on it asks first (`--yes` skips the question).
+        -- Values: fetch_jobs 1 to 16; fetch_timeout_ms 1 to 3600000; fetch_confirm a
+        -- whole number. Defaults: 2, 60000, 5.
+        -- fetch_jobs = 2,
+        -- fetch_timeout_ms = 60000,
+        -- fetch_confirm = 5,
+        -- Plugins updated within this many seconds of each other are one run.
+        -- Values: a whole number of seconds. Default: 300.
+        -- run_window_s = 300,
+        -- Keep merge commits in the commit lists.
+        -- Values: true | false. Default: false.
+        -- merges = false,
+        -- Stored reports (stdpath("state")/gitsuite/plugins_reports.json): how many
+        -- and for how many days. The newest report is never dropped.
+        -- Values: whole numbers. Defaults: 20 and 365.
+        -- keep_reports = 20,
+        -- max_age_days = 365,
+        -- The report tab's seen marks (`m`/`M`, in plugins_seen.json): a mark older
+        -- than this many days is dropped on the next write.
+        -- Values: a whole number of days. Default: 180.
+        -- seen_ttl_days = 180,
+        -- The report tab draws its state glyphs (↑ ↓ ✗ ↻ •) in plain ASCII
+        -- (^ v x @ *) for a terminal or font without them; the words stay.
+        -- Values: true | false. Default: false.
+        -- ascii = false,
+        -- After `:Lazy sync`: "off" = nothing (no listener), "toast" = build and
+        -- store the `updated` report and show a toast that never takes focus,
+        -- "open" = also open the report.
+        -- Values: "off" | "toast" | "open". Default: "off".
+        -- after_sync = "off",
+        -- The breaking-change heuristic of the report (commit messages only).
+        -- breaking = {
+        --   -- Commits whose subject (without its `type(scope):` prefix) repeats at
+        --   -- least this often are folded into one expandable group. Default: 5.
+        --   collapse_repeats = 5,
+        --   -- `vim.regex` patterns on the subject: a match is never flagged.
+        --   -- Values: a list of patterns. Default: {}.
+        --   ignore = {},
+        --   -- Per plugin (by name): { ignore = { patterns }, force = { commit hashes
+        --   -- that are always breaking }, style = "none"|"conventional" (the project
+        --   -- does not / does use conventional commits, instead of guessing) }.
+        --   -- Default: {}.
+        --   plugins = {},
+        -- },
+        -- Key in the report buffer that asks for the AI summary of the plugin under the
+        -- cursor (needs the `summarize` hook below).
+        -- Values: a key (string). Default: "gS".
+        -- summarize_key = "gS",
+        -- AI summary of one plugin's update in `:Git plugins report`: only on the key
+        -- `gS` in the report buffer (never automatic). The digest is marked
+        -- `untrusted` (commit messages of other people's repos); the answer is shown
+        -- as a labelled quote. EXPLICIT provider, never "auto"; bulk guard rails on.
+        -- Values: false (off, no key, no network) | function(input, done). Default: false.
         summarize = function(input, done)
           local ok, ai = pcall(require, "ai")
           if not ok then
@@ -763,34 +825,6 @@ return {
             end
           end)
         end,
-        -- The report tab draws its state glyphs (↑ ↓ ✗ ↻ •) in plain ASCII
-        -- (^ v x @ *) for a terminal or font without them; the words stay.
-        -- ascii = false,
-        -- The breaking-change heuristic of the report (commit messages only).
-        -- breaking = {
-        --   -- Commits whose subject (without its `type(scope):` prefix) repeats at
-        --   -- least this often are folded into one expandable group.
-        --   collapse_repeats = 5,
-        --   -- `vim.regex` patterns on the subject: a match is never flagged.
-        --   ignore = {},
-        --   -- Per plugin (by name): { ignore = { patterns }, force = { commit hashes
-        --   -- that are always breaking }, style = "none"|"conventional" (the project
-        --   -- does not / does use conventional commits, instead of guessing) }.
-        --   plugins = {},
-        -- },
-        -- The report tab's seen marks (`m`/`M`, in plugins_seen.json): a mark older
-        -- than this many days is dropped on the next write.
-        -- seen_ttl_days = 180,
-        -- `:Git plugins report --mode=pending --fetch` (never without the flag) fetches
-        -- this many clones at once.
-        -- fetch_jobs = 2,
-        -- Timeout of each of those fetches, in milliseconds.
-        -- fetch_timeout_ms = 60000,
-        -- From this many clones on the fetch asks first (`--yes` skips the question).
-        -- fetch_confirm = 5,
-        -- Key in the report buffer that asks for the AI summary of the plugin under the
-        -- cursor (needs the `summarize` hook above).
-        -- summarize_key = "gS",
       },
 
       -- Indicator for `:Git dashboard`/`:Git dashboard update` (both report into
