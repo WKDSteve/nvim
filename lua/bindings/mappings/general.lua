@@ -89,8 +89,8 @@ function M.setup()
   end, { desc = "[General] Clear search highlight" })
   -- <C-c> copies what is selected; with nothing selected, the whole buffer,
   -- in every buffer (a message popup, a report or a picker list included) and
-  -- with a message saying what was copied. Terminal mode keeps terminal.nvim's
-  -- <C-c> (leaves terminal mode); this is the normal-mode map.
+  -- with a message saying what was copied. Terminal mode is untouched: <C-c>
+  -- there is the shell's interrupt, terminal.nvim copies the buffer on <C-S-c>.
   map("x", "<C-c>", '"+y', { desc = "[General] Copy selection to system clipboard" })
   map("n", "<C-c>", function()
     M.copy_file(0, "+")
