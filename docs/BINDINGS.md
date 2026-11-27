@@ -114,7 +114,10 @@ A count prefix is not special-cased and performs a single trimmed paste.
 
 | Key | Mode | Effect | desc | Source |
 | --- | --- | --- | --- | --- |
-| `<C-r>` | n | `g+` — redo along the undo *branch*, so a plugin's auto-change cannot strand a redo | `Redo (branch-aware)` | `editing.lua` |
+| `u` | n | Undo; after a change made from a Visual selection (`d`, `c`, …) the text comes back **and the selection is selected again** (v, V and blockwise). A count (`3u`) is a plain undo | `Undo (restores the Visual selection)` | `undo_select.lua` |
+| `u` | x | Only while the selection is the one an undo just restored and has not been moved: take it off (the next `u` is the real undo). Otherwise Vim's "lowercase the selection" | `Take the restored selection off (else lowercase)` | `undo_select.lua` |
+| `<C-r>` | n | `g+` — redo along the undo *branch*, so a plugin's auto-change cannot strand a redo. Right after the selection was taken off: select it again first, the next `<C-r>` is the real redo | `Redo (branch-aware, re-marks the Visual selection)` | `undo_select.lua` |
+| `<C-r>` | x | Only on a restored selection: leave it and redo for real. Otherwise nothing | `Redo from a restored selection` | `undo_select.lua` |
 | `<leader><CR>` | n | Open a blank line below, cursor stays put | `Insert blank line below` | `editing.lua` |
 | `<CR>` | n | Split at column 0, i.e. push this line down | `Insert blank line` | `editing.lua` |
 | `p` | n | Paste after the cursor, trimmed | `Paste after cursor (leading/trailing blank lines trimmed)` | `editing.lua` |

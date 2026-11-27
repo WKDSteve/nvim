@@ -208,8 +208,9 @@ function M.setup()
 
   install_paste_trim()
 
-  -- Branch-aware redo/undo that survives auto-changes by plugins
-  map("n", "<C-r>", "g+", { desc = "Redo (branch-aware)" })
+  -- `u` and `<C-r>` (branch-aware redo via `g+`, survives auto-changes by
+  -- plugins) that also restore the Visual selection; see the module.
+  require("bindings.mappings.undo_select").setup()
 
   -- Insert blank lines
   map("n", "<leader><CR>", "o<Esc>k", { desc = "Insert blank line below" })
