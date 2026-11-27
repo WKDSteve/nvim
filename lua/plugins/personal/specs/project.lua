@@ -709,10 +709,10 @@ return {
         -- without a GitHub remote and any failure fall back to a normal fetch.
         -- Values: false (fetch every repository) | "github". NOT `true`: that is rejected
         -- and the value stays false. Default: false.
-        -- Measured on 2026-11-27 (83 repositories): see task
+        -- Measured on 2026-11-27 (83 repositories, fetch on open): about 26 s with false,
+        -- about 7 s with "github" (77 of 83 fetches saved). See task
         -- gitsuite.nvim/abnahme-github-vorabcheck-an-den-80-repos-messen-vorher-nach.
-        -- fetch_precheck = "github",
-          fetch_precheck = "false",
+        fetch_precheck = "github",
         -- `gP` (pull the whole page) asks "Only behind" or "All"; this picks the
         -- focused default. "behind" = only repositories behind their upstream
         -- (as of the last fetch); "all" = every repository on the page.
