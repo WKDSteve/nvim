@@ -52,10 +52,15 @@ return function(H)
 
     -- a terminal buffer: its scrollback is copied
     local term = vim.api.nvim_create_buf(false, true)
-    vim.api.nvim_open_term(term, {})
+    local chan = vim.api.nvim_open_term(term, {})
+    vim.api.nvim_chan_send(chan, "hello")
+    vim.wait(1000, function()
+      return (vim.api.nvim_buf_get_lines(term, 0, 1, false)[1] or ""):find("hello") ~= nil
+    end)
     vim.api.nvim_win_set_buf(0, term)
     eq(vim.bo[term].buftype, "terminal", "a terminal buffer")
-    ok(general.copy_file(0, "a") >= 1, "a terminal buffer is copied")
+    eq(general.copy_file(0, "a"), 1, "a terminal buffer is copied without its blank rows")
+    eq(vim.fn.getreg("a", 1, 1), { "hello" }, "only what the terminal shows")
   end)
   vim.notify = orig_notify
   if not cok then

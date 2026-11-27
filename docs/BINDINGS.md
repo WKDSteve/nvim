@@ -181,7 +181,7 @@ nothing, rather than binding keys that would complain when pressed);
 
 ### Terminal mode (moved to terminal.nvim)
 
-The terminal keys (`<A-h>` toggle in n/t, `<Esc>`/`<C-c>` leave terminal mode, `<C-h/j/k/l>`
+The terminal keys (`<A-h>` toggle in n/t, `<Esc>` leaves terminal mode (`<C-c>` stays the shell's interrupt; `<C-S-c>` copies the buffer, see terminal.nvim), `<C-h/j/k/l>`
 window navigation, `<A-l>` clear) used to live in `bindings/mappings/terminal.lua` and toggled
 snacks.nvim's floating terminal. Since 2026-10-07 they are registered by
 [terminal.nvim](https://github.com/WKDSteve/terminal.nvim) (its own

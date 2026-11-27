@@ -23,6 +23,12 @@ function M.copy_file(win, reg)
   win = win == 0 and vim.api.nvim_get_current_win() or win
   local buf = vim.api.nvim_win_get_buf(win)
   local lines = vim.api.nvim_buf_get_lines(buf, 0, -1, false)
+  if vim.bo[buf].buftype == "terminal" then
+    -- a terminal buffer keeps the screen's blank rows below the last output
+    while #lines > 1 and lines[#lines]:match("^%s*$") do
+      lines[#lines] = nil
+    end
+  end
   vim.fn.setreg(reg, lines, "V")
   local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(buf), ":t")
   vim.notify(
