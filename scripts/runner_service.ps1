@@ -39,6 +39,10 @@ param(
   [string] $Root = (Join-Path $env:USERPROFILE 'actions-runners'),
   # For a test: the names of the user's environment variables (default: HKCU\Environment and the machine's).
   [string[]] $EnvNames = $null,
+  # For a test: where the account comes from (Local, MicrosoftAccount, ...) and whether Windows Hello is required for
+  # Microsoft accounts on this device (DevicePasswordLessBuildVersion 2). Default: read from this machine.
+  [string] $AccountSource = '',
+  [string] $PasswordLess = '',
   # For a test: only define the functions.
   [switch] $LibraryOnly
 )
@@ -112,6 +116,24 @@ function Grant-ServiceLogonRight([string] $Account) {
   }
 }
 
+# Why a service logon of this account will fail before anybody types a password, or $null. A Microsoft account on a
+# device that requires Windows Hello for it (passwordless sign-in) is checked against a cached password that is often
+# not there: the service fails with event 7038 "user name or password is incorrect" (2026-11-27, tasks-vault).
+function Get-LogonProblem([string] $Source, [string] $Passwordless) {
+  if (-not $Source) {
+    $Source = try { [string] (Get-LocalUser -Name $env:USERNAME -ErrorAction Stop).PrincipalSource } catch { '' }
+  }
+  if (-not $Passwordless) {
+    $Passwordless = try { [string] (Get-ItemProperty 'HKLM:\SOFTWARE\Microsoft\Windows NT\CurrentVersion\PasswordLess\Device' -ErrorAction Stop).DevicePasswordLessBuildVersion } catch { '' }
+  }
+  if ($Source -eq 'MicrosoftAccount' -and $Passwordless -eq '2') {
+    return 'a Microsoft account with "require Windows Hello sign-in" on: a service cannot log on with it (event 7038). ' +
+      'Turn that setting off (Settings > Accounts > Sign-in options), sign in once with the account password, then install; ' +
+      'or run the runner under a local account'
+  }
+  return $null
+}
+
 function Get-Plan([string] $Dir) {
   [pscustomobject]@{
     Runner      = Split-Path $Dir -Leaf
@@ -147,6 +169,8 @@ if ($Action -eq 'plan') {
   Write-Output "account:  $($plan.Account)  (its password is asked in the elevated window at install)"
   Write-Output "emptied:  $(if ($plan.EmptiedVars.Count) { ($plan.EmptiedVars | ForEach-Object { $_.TrimEnd('=') }) -join ', ' } else { '(none)' })"
   Write-Output "state:    $(if (Test-RunnerService $dir) { 'runs as a service already' } else { 'started by runners.ps1' })"
+  $problem = Get-LogonProblem $AccountSource $PasswordLess
+  if ($problem) { Write-Output "warning: $problem"; exit 1 }
   if (-not (Test-Path $plan.Program)) { Write-Output "warning: $($plan.Program) is missing (an old runner version?)"; exit 1 }
   exit 0
 }
@@ -158,7 +182,14 @@ if (-not (Test-Elevated)) {
 }
 
 if ($Action -eq 'install') {
-  if (Test-RunnerService $dir) { Write-Output "$Repo runs as a service already ($($plan.Service))"; exit 0 }
+  if (Test-RunnerService $dir) {
+    $existing = Get-Service -Name $plan.Service -ErrorAction SilentlyContinue
+    if ($existing -and $existing.Status -eq 'Running') { Write-Output "$Repo runs as a service already ($($plan.Service))"; exit 0 }
+    Write-Output "$Repo has a .service but its service is $(if ($existing) { $existing.Status } else { 'missing' }): run `"runner_service.ps1 remove $Repo`" first"
+    exit 1
+  }
+  $problem = Get-LogonProblem $AccountSource $PasswordLess
+  if ($problem) { Write-Output "not installed: $problem"; exit 1 }
   if (-not (Test-Path $plan.Program)) { Write-Output "missing $($plan.Program)"; exit 1 }
   & (Join-Path $PSScriptRoot 'runners.ps1') stop $Repo
   $cred = Get-Credential -UserName $plan.Account -Message "Password of $($plan.Account) for the runner service $($plan.Service) (goes to the service manager only)"
@@ -172,7 +203,19 @@ if ($Action -eq 'install') {
   & sc.exe failure $plan.Service reset= 86400 actions= restart/60000/restart/60000/restart/300000 | Out-Null
   Set-Content -Path (Join-Path $dir '.service') -Value $plan.Service -NoNewline -Encoding ascii
   try { Start-Service -Name $plan.Service }
-  catch { Write-Output "the service did not start: $($_.Exception.Message) (wrong password? check, then: runner_service.ps1 remove $Repo)"; exit 1 }
+  catch {
+    # Never leave the runner without a listener: take the service out again and start the runner the usual way.
+    $why = $_.Exception.Message
+    $logon = Get-WinEvent -FilterHashtable @{ LogName = 'System'; Id = 7038; StartTime = (Get-Date).AddMinutes(-5) } -MaxEvents 5 -ErrorAction SilentlyContinue |
+      Where-Object { $_.Message -match [regex]::Escape($plan.Service) } | Select-Object -First 1
+    & sc.exe delete $plan.Service | Out-Null
+    Remove-Item (Join-Path $dir '.service') -ErrorAction SilentlyContinue
+    Write-Output "the service did not start: $why"
+    if ($logon) { Write-Output '  the logon failed (event 7038: user name or password is incorrect)' }
+    Write-Output '  rolled back: the service is deleted, the runner starts the usual way again'
+    & (Join-Path $PSScriptRoot 'runners.ps1') start $Repo
+    exit 1
+  }
   Write-Output "$Repo runs as the service $($plan.Service); check: pwsh scripts/runners.ps1 status $Repo"
   exit 0
 }

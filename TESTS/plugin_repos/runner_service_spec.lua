@@ -54,13 +54,30 @@ return function(H)
   write(dir .. "/bin/RunnerService.exe", "")
   local win_root = tmp:gsub("/", "\\")
 
-  local function plan()
+  ---@param source? string the account's PrincipalSource (default: a local account)
+  ---@param passwordless? string DevicePasswordLessBuildVersion (default: 0, Windows Hello not required)
+  local function plan(source, passwordless)
     return pwsh(
-      ("& '%s' plan tasks-vault -Root '%s' -EnvNames @('ANTHROPIC_API_KEY','LIB_NVIM_DIR','CLAUDE_X','CLAUDECODE','GITHUB_TOKEN','KEEP_ME','MYCLAUDE')"):format(
+      ("& '%s' plan tasks-vault -Root '%s' -AccountSource %s -PasswordLess %s -EnvNames @('ANTHROPIC_API_KEY','LIB_NVIM_DIR','CLAUDE_X','CLAUDECODE','GITHUB_TOKEN','KEEP_ME','MYCLAUDE')"):format(
         script,
-        win_root
+        win_root,
+        source or "Local",
+        passwordless or "0"
       )
     )
+  end
+
+  -- A Microsoft account that must sign in with Windows Hello cannot log a service on (event 7038, 2026-11-27):
+  -- the plan says so before anybody types a password; a Microsoft account with a password, or a local one, is fine.
+  do
+    local c, o = plan("MicrosoftAccount", "2")
+    eq(c, 1, "plan: a Microsoft account with Windows Hello required is refused: " .. o)
+    ok(
+      o:find("warning: a Microsoft account", 1, true) ~= nil,
+      "plan: and says why and what to do: " .. o
+    )
+    c = plan("MicrosoftAccount", "0")
+    eq(c, 0, "plan: a Microsoft account that may use its password is fine")
   end
 
   local code, out = plan()
