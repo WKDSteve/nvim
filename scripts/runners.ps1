@@ -70,6 +70,12 @@ foreach ($n in $names) {
   if (-not (Test-Path (Join-Path $Root "$n\run.cmd"))) { Write-Output "unknown runner: $n (no $Root\$n\run.cmd)"; exit 2 }
 }
 
+# A runner with a .service runs as a Windows service (scripts/runner_service.ps1): the service manager starts and stops
+# its listener; start/ensure/stop leave it alone.
+function Test-ServiceRunner([string] $name) {
+  Test-Path (Join-Path $Root "$name\.service")
+}
+
 function Get-Listener([string] $name) {
   Get-CimInstance Win32_Process -Filter "Name = 'Runner.Listener.exe'" |
     Where-Object { Test-RunnerOwnsPath $Root $name $_.ExecutablePath }
@@ -119,6 +125,7 @@ function Show([string] $name, $remote) {
   if ($null -eq $remote) { $remote = (Get-RemoteMany @($name))[$name] }
   $line = '{0,-14} local={1,-8} github={2}' -f $name, $local, $remote.status
   if ($remote.busy) { $line += ' busy' }
+  if (Test-ServiceRunner $name) { $line += ' service' }
   [Console]::WriteLine($line)
   return ($local -eq 'running' -and $remote.status -eq 'online')
 }
@@ -137,6 +144,10 @@ switch ($Action) {
   }
   'stop' {
     foreach ($n in $names) {
+      if (Test-ServiceRunner $n) {
+        Write-Output "$n runs as a service: left alone (stop it with the service manager, or scripts/runner_service.ps1 remove $n)"
+        continue
+      }
       Get-Listener $n | ForEach-Object { Stop-Process -Id $_.ProcessId -Force }
       # run.cmd / Runner.Worker of this runner go with it; the wrapper cmd exits when the listener does
       Write-Output "$n stopped"
@@ -146,7 +157,9 @@ switch ($Action) {
     # A runner keeps the PATH of the process that starts it, so this is the moment to look: a tool that is
     # missing now would turn a job red later (exit 127). Only a warning; the runners start in any case.
     # Skipped when every runner runs already (nothing is started) and with -SkipCheck.
-    $toStart = @($names | Where-Object { -not (Get-Listener $_) })
+    # A service runner is started by the service manager; a second listener next to it would take the same jobs.
+    foreach ($n in @($names | Where-Object { Test-ServiceRunner $_ })) { Write-Output "$n runs as a service: not started here" }
+    $toStart = @($names | Where-Object { -not (Test-ServiceRunner $_) -and -not (Get-Listener $_) })
     if ($toStart.Count -gt 0 -and -not $SkipCheck) {
       $report = @(& (Join-Path $PSScriptRoot 'runner_tools_check.ps1') -Owner $Owner 2>&1 | ForEach-Object { "$_" })
       $problems = @($report | Where-Object { $_ -match '^(MISSING|WARN)\s' })

@@ -63,6 +63,7 @@ local specs = {
   "plugin_repos/runner_names_spec.lua",
   "plugin_repos/runner_window_guard_spec.lua",
   "plugin_repos/runner_detached_spec.lua",
+  "plugin_repos/runner_service_spec.lua",
   "plugin_repos/list_vaults_spec.lua",
   "plugin_repos/sync_status_reuse_spec.lua",
   "learn_plan_viewer/statusline_spec.lua",
