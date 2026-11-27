@@ -19,11 +19,12 @@
     3.7 times slower, browser tests of other repositories red at their 30 s limit). Four per job keep a
     lone build reasonably fast and a crowd of them near the core count.
 
-  ACTIONS_RUNNER_HOOK_JOB_COMPLETED=<this folder>\runner_job_completed.ps1
-    After each job the window guard (scripts/runner_window_guard.ps1) lists the windows the job opened, as warnings
-    in its log: a test step that starts a console program with a console of its own opens a Windows Terminal window
-    that takes the focus at the machine (2026-11-26: 104 of them during one round of CI runs). The job-started hook
-    belongs to the guard of testing.nvim; this one is free.
+  ACTIONS_RUNNER_HOOK_JOB_COMPLETED=<this folder>\runner_job_completed.ps1 (retired 2026-11-27, taken out again)
+    It listed the windows each job opened, but the runner starts it as a pwsh with a console of its own, so the hook
+    itself opened a window in every job (the black pwsh.EXE window of 2026-11-27; 11 of 75 terminal windows that
+    day were next to it). The window logger (runner_window_guard.ps1 -Ensure) still records every window;
+    tasks-vault TOOLS/scripts/app-proc-watch/console-origins.py reads its log. Only our own line is taken out: a
+    hook of the same name set by hand stays.
 
   -Started records the .env a runner is started with (a copy, .env.started); `runners.ps1 start|ensure` calls it
   right before it starts the runner. The time of the .env says nothing: `testing ci runner-guard install`
@@ -52,8 +53,12 @@ $ErrorActionPreference = 'Stop'
 # Name, value and what the runner gains, in the order they join a .env.
 $settings = @(
   @{ Name = 'GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT'; Value = '300'; Says = 'waits 300 s for its worker' },
-  @{ Name = 'CARGO_BUILD_JOBS'; Value = '4'; Says = 'builds with 4 cargo jobs' },
-  @{ Name = 'ACTIONS_RUNNER_HOOK_JOB_COMPLETED'; Value = (Join-Path $PSScriptRoot 'runner_job_completed.ps1'); Says = 'reports the windows of each job' }
+  @{ Name = 'CARGO_BUILD_JOBS'; Value = '4'; Says = 'builds with 4 cargo jobs' }
+)
+# Lines this script wrote once and takes out again, only when their value is ours (Ours matches it); a line of the
+# same name set by hand stays.
+$retired = @(
+  @{ Name = 'ACTIONS_RUNNER_HOOK_JOB_COMPLETED'; Ours = 'runner_job_completed\.ps1$'; Says = 'no longer reports the windows of each job' }
 )
 # `pwsh -File` hands a list over as one string with commas.
 $names = @($Name | ForEach-Object { $_ -split ',' })
@@ -136,12 +141,14 @@ foreach ($n in $names) {
   # One .env that cannot be written costs that runner its settings, not the start of the others.
   try {
     $lines = if (Test-Path $path) { @(Get-Content $path) } else { @() }
+    $dropped = @($retired | Where-Object { $r = $_; @($lines | Where-Object { $_ -like "$($r.Name)=*" -and $_.Substring($r.Name.Length + 1) -match $r.Ours }).Count -gt 0 })
+    $lines = @($lines | Where-Object { $line = $_; -not ($retired | Where-Object { $line -like "$($_.Name)=*" -and $line.Substring($_.Name.Length + 1) -match $_.Ours }) })
     $added = @($settings | Where-Object { $s = $_; @($lines | Where-Object { $_ -like "$($s.Name)=*" }).Count -eq 0 })
-    if ($added.Count -eq 0) { continue }
+    if ($added.Count -eq 0 -and $dropped.Count -eq 0) { continue }
     # No byte order mark: the runner splits each line at '=', and a mark would become part of the first name.
     $text = ((@($lines) + @($added | ForEach-Object { "$($_.Name)=$($_.Value)" })) -join "`n") + "`n"
     [System.IO.File]::WriteAllText($path, $text, [System.Text.UTF8Encoding]::new($false))
-    Write-Output "$n now $(($added | ForEach-Object { $_.Says }) -join ' and ') (a running runner reads .env after stop and start)"
+    Write-Output "$n now $((@($added + $dropped) | ForEach-Object { $_.Says }) -join ' and ') (a running runner reads .env after stop and start)"
   }
   catch {
     Write-Output "warning: $n keeps its .env as it is (no longer worker wait, no cargo job limit): $($_.Exception.Message)"

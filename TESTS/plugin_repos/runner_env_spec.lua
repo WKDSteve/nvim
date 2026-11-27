@@ -28,7 +28,7 @@ return function(H)
   ok(vim.uv.fs_stat(script) ~= nil, "the spec runs from the root of the config")
 
   local root = vim.fn.tempname()
-  for _, name in ipairs({ "broken", "hooked", "empty", "own", "set" }) do
+  for _, name in ipairs({ "broken", "hooked", "empty", "own", "set", "retired" }) do
     vim.fn.mkdir(vim.fs.joinpath(root, name), "p")
   end
   local hook = "ACTIONS_RUNNER_HOOK_JOB_STARTED=C:\\guard\\job-started.ps1"
@@ -40,6 +40,15 @@ return function(H)
   write(hooked, hook)
   write(own, "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\n")
   write(set, set_by_hand)
+  -- our job-completed hook of before 2026-11-27: its line goes, the rest stays
+  local retired = vim.fs.joinpath(root, "retired", ".env")
+  local retired_keep = "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\nCARGO_BUILD_JOBS=4\n"
+  write(
+    retired,
+    "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\n"
+      .. "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=C:\\cfg\\scripts\\runner_job_completed.ps1\n"
+      .. "CARGO_BUILD_JOBS=4\n"
+  )
   -- A folder where the file belongs: neither readable nor writable as a file, and it comes first.
   vim.fn.mkdir(vim.fs.joinpath(root, "broken", ".env"), "p")
 
@@ -54,7 +63,7 @@ return function(H)
         "-Root",
         root,
         "-Name",
-        "broken,hooked,empty,own,set",
+        "broken,hooked,empty,own,set,retired",
       }, { text = true })
       :wait(60000)
     eq(done.code, 0, tostring(done.stderr))
@@ -94,51 +103,46 @@ return function(H)
   eq(code, 1, "-Check fails while a .env lacks a setting")
   ok(
     said:find(
-      "missing  hooked lacks GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT, CARGO_BUILD_JOBS, ACTIONS_RUNNER_HOOK_JOB_COMPLETED",
+      "missing  hooked lacks GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT, CARGO_BUILD_JOBS in",
       1,
       true
     ),
     said
   )
   ok(said:find("missing  empty lacks", 1, true), "a runner without .env lacks everything")
-  ok(
-    said:find("missing  own lacks CARGO_BUILD_JOBS, ACTIONS_RUNNER_HOOK_JOB_COMPLETED in", 1, true),
-    "names only what is missing"
-  )
+  ok(said:find("missing  own lacks CARGO_BUILD_JOBS in", 1, true), "names only what is missing")
   ok(said:find("ok       set", 1, true), "a .env set by hand is ok")
   eq(read(hooked), hook, "-Check writes nothing")
 
   local first = run()
-  -- The job-completed hook of the window guard: the script next to runner_env.ps1, a path of this machine.
-  local completed =
-    read(vim.fs.joinpath(root, "empty", ".env")):match("ACTIONS_RUNNER_HOOK_JOB_COMPLETED=([^\n]+)")
-  ok(completed and completed:match("runner_job_completed%.ps1$"), tostring(completed))
+  -- The job-completed hook of the window guard is retired (it opened a pwsh window in every job): nobody gets it.
   ok(
-    vim.uv.fs_stat(completed) ~= nil,
-    "the hook names a file that is there: " .. tostring(completed)
+    not read(vim.fs.joinpath(root, "empty", ".env")):find(
+      "ACTIONS_RUNNER_HOOK_JOB_COMPLETED",
+      1,
+      true
+    ),
+    "a new .env gets no job-completed hook"
   )
-  local hook_line = "ACTIONS_RUNNER_HOOK_JOB_COMPLETED=" .. completed .. "\n"
-  local lines = "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\nCARGO_BUILD_JOBS=4\n" .. hook_line
+  local lines = "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=300\nCARGO_BUILD_JOBS=4\n"
   eq(read(hooked), hook .. "\n" .. lines, "the hook stays and the settings join it")
   eq(read(vim.fs.joinpath(root, "empty", ".env")), lines, "a runner without .env gets one")
   eq(
     read(own),
-    "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\nCARGO_BUILD_JOBS=4\n" .. hook_line,
+    "GITHUB_ACTIONS_RUNNER_CHANNEL_TIMEOUT=120\nCARGO_BUILD_JOBS=4\n",
     "a value set by hand stays, the missing settings join it"
   )
-  eq(read(set), set_by_hand, "a .env with every setting set by hand stays as it is")
+  eq(read(set), set_by_hand, "a .env set by hand stays as it is, its own job-completed hook too")
+  eq(read(retired), retired_keep, "our old job-completed hook line is taken out, the rest stays")
   ok(
-    first:find(
-      "hooked now waits 300 s for its worker and builds with 4 cargo jobs and reports the windows of each job",
-      1,
-      true
-    ),
+    first:find("retired now no longer reports the windows of each job", 1, true),
+    "says that the hook went: " .. first
+  )
+  ok(
+    first:find("hooked now waits 300 s for its worker and builds with 4 cargo jobs", 1, true),
     "says what changed"
   )
-  ok(
-    first:find("own now builds with 4 cargo jobs and reports the windows of each job", 1, true),
-    "and only what was missing"
-  )
+  ok(first:find("own now builds with 4 cargo jobs", 1, true), "and only what was missing")
   ok(not first:find("set now", 1, true), "and nothing for a runner that had it all")
   ok(
     first:find("warning: broken", 1, true),

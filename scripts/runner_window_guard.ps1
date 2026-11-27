@@ -17,6 +17,9 @@
   -Report is the job-completed hook (ACTIONS_RUNNER_HOOK_JOB_COMPLETED, scripts/runner_job_completed.ps1): it finds
   the Runner.Worker of its job among its own parents and lists every window whose process chain passes through that
   worker, as a ::warning:: in the job's log. It always exits 0: a window is a finding, not a failed job.
+  Not wired since 2026-11-27: the runner starts the hook as a pwsh with a console of its own, so the report opened a
+  window in every job (scripts/runner_env.ps1 takes the line out). Read the log with tasks-vault
+  TOOLS/scripts/app-proc-watch/console-origins.py instead; -Report still works when called by hand.
 
   Not on the workstation (NVIM_MACHINE_ROLE=workstation): a global window hook and process snapshots there can read
   as an attack to the endpoint protection, and no runner runs there.
