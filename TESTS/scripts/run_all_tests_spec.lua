@@ -147,6 +147,46 @@ return function(H)
     eq(pool.drop_all(), {}, "the end of the run removes them all")
     ok(vim.uv.fs_stat(w.path) == nil, "nothing is left of them")
 
+    -- Each run has a folder of its own, below $REPOS_DIR (the trusted root), else the temp folder.
+    local repos = H.tmpdir()
+    local tmp = H.tmpdir()
+    local run1 = lib.origin_base(repos, tmp, "1-100")
+    local run2 = lib.origin_base(repos, tmp, "2-100")
+    eq(run1, vim.fs.joinpath(repos, ".run_all_tests-origin", "1-100"), "below $REPOS_DIR")
+    ok(run1 ~= run2, "two runs: two folders")
+    eq(
+      lib.origin_base(nil, tmp, "1-100"),
+      vim.fs.joinpath(tmp, ".run_all_tests-origin", "1-100"),
+      "without $REPOS_DIR: the temp folder"
+    )
+    eq(
+      lib.origin_base(repos .. "/missing", tmp, "1-100"),
+      vim.fs.joinpath(tmp, ".run_all_tests-origin", "1-100"),
+      "a $REPOS_DIR that is not there: the temp folder"
+    )
+
+    -- A run that left its worktree dirty, and one whose folder was deleted behind git's back: the next run is not
+    -- held up by either (before, both sat at the one fixed path and every later run was INFRA).
+    local first = lib.worktree_pool({ ["demo.nvim"] = b }, run1)
+    local left = first.get("demo.nvim")
+    ok(left.path ~= nil, "the first run's worktree: " .. tostring(left.err))
+    H.write(left.path .. "/left-by-a-spec", "x")
+    ok(first.drop_all()[1] ~= nil, "the first run leaves it, dirty")
+    local second = lib.worktree_pool({ ["demo.nvim"] = b }, run2)
+    local w2 = second.get("demo.nvim")
+    ok(w2.path ~= nil, "the next run gets its own worktree: " .. tostring(w2.err))
+    vim.fn.delete(w2.path or "", "rf")
+    local third = lib.worktree_pool({ ["demo.nvim"] = b }, lib.origin_base(repos, tmp, "3-100"))
+    local w3 = third.get("demo.nvim")
+    ok(
+      w3.path ~= nil,
+      "a folder deleted behind git's back holds up no later run: " .. tostring(w3.err)
+    )
+    eq(third.drop_all(), {}, "the third run cleans up after itself")
+    os.remove(left.path .. "/left-by-a-spec")
+    eq(lib.remove_worktree(b, left.path), nil, "the first run's leftover goes once it is clean")
+    git(b, { "worktree", "prune" })
+
     local no_origin = H.tmpdir()
     git(no_origin, { "init", "-q", "-b", "main" })
     local none, why = lib.origin_worktree(no_origin, "x.nvim", base)

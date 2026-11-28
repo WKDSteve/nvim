@@ -22,12 +22,13 @@
 -- a red may be fixed on main already. `--fetch` updates the remote refs first (`git fetch`, nothing else is touched).
 --
 -- `--at=origin` tests what is on `origin/main` instead: each repo is fetched and checked out as a detached worktree
--- at `$REPOS_DIR/.run_all_tests-origin/<name>` (below the trusted root of testing.nvim: a worktree in the temp folder
+-- at `$REPOS_DIR/.run_all_tests-origin/<run>/<name>` (below the trusted root of testing.nvim: a worktree in the temp folder
 -- would be refused as untrusted, and widening `$TESTING_TRUST_ROOTS` is not this script's call; without `$REPOS_DIR`
 -- the temp folder), and so is every dependency its `scripts/test.sh` lists
 -- (`DEPS=(...)`), handed over as `$<NAME>_DIR` (which test.sh looks at first). The shared checkouts are not touched
 -- (other sessions work in them); a worktree is removed after use with `git worktree remove` (never `--force`: one the
--- suite left dirty stays and is named). A worktree left by an aborted run sits at the same path and is removed first.
+-- suite left dirty stays and is named). Each run has a folder `<run>` of its own (`origin_base`): what an earlier run
+-- left behind is never in its way.
 --
 -- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch] [--at=origin]
 --
@@ -166,6 +167,19 @@ local function origin_worktree(dir, name, base)
     return nil, "git worktree add failed: " .. first_line(added)
   end
   return path, sha:sub(1, 9)
+end
+
+--- The folder the worktrees of one `--at=origin` run go to: below `$REPOS_DIR` (the trusted root of testing.nvim),
+--- else the temp folder, and one of its own per run (`<pid>-<time>`). A worktree an earlier run left behind (dirty,
+--- or its folder deleted while git still lists it) is then never in the way of this run, and two runs never remove
+--- each other's.
+---@param repos string|nil `$REPOS_DIR`
+---@param tmp string the temp folder
+---@param stamp string unique for the run
+---@return string base
+local function origin_base(repos, tmp, stamp)
+  local parent = (repos and repos ~= "" and uv.fs_stat(repos)) and repos or tmp
+  return vim.fs.joinpath(parent, ".run_all_tests-origin", stamp)
 end
 
 --- Remove a worktree made by `origin_worktree`, never with `--force`: one the suite left dirty stays, and the
@@ -503,8 +517,9 @@ local function worktree_pool(checkouts, base)
   function pool.get(name)
     if not made[name] then
       local src = checkouts[name]
-      if not src then
-        local candidate = (vim.env.REPOS_DIR or "") .. "/" .. name
+      local repos = vim.env.REPOS_DIR
+      if not src and repos and repos ~= "" then
+        local candidate = repos .. "/" .. name
         src = uv.fs_stat(candidate .. "/.git") and candidate or nil
       end
       if not src then
@@ -561,13 +576,16 @@ local function main()
     for _, p in ipairs(list) do
       checkouts[p.name] = p.dir
     end
-    local repos = vim.env.REPOS_DIR
-    local parent = (repos and repos ~= "" and uv.fs_stat(repos)) and repos or uv.os_tmpdir()
-    pool = worktree_pool(checkouts, vim.fs.joinpath(parent, ".run_all_tests-origin"))
+    local base =
+      origin_base(vim.env.REPOS_DIR, uv.os_tmpdir(), ("%d-%d"):format(uv.os_getpid(), os.time()))
+    pool = worktree_pool(checkouts, base)
     cleanup_worktrees = function()
       for _, problem in ipairs(pool.drop_all()) do
         io.stdout:write("run_all_tests: " .. problem .. "\n")
       end
+      -- the folder of this run, and the common one when no other run is in it; a worktree left dirty keeps both
+      uv.fs_rmdir(base)
+      uv.fs_rmdir(vim.fs.dirname(base))
     end
   end
   local is_dep = {} ---@type table<string, boolean> worktrees kept for later repos
@@ -766,6 +784,7 @@ if rawget(_G, "RUN_ALL_TESTS_AS_LIBRARY") then
     env_name_of = env_name_of,
     test_deps = test_deps,
     origin_worktree = origin_worktree,
+    origin_base = origin_base,
     remove_worktree = remove_worktree,
     worktree_pool = worktree_pool,
   }
