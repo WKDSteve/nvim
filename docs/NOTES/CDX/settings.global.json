@@ -33,7 +33,8 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"__NVIM_CONFIG__/docs/NOTES/CDX/check-stop.js\""
+            "command": "node \"__NVIM_CONFIG__/docs/NOTES/CDX/check-stop.js\"",
+            "timeout": 330
           }
         ]
       }

@@ -6,8 +6,9 @@
 // Usage: node merge-claude-settings.js <templatePath> <settingsPath> <nvimConfigPath>
 //
 // - Merges permissions.allow as a deduplicated union.
-// - Appends hooks.PostToolUse entries from the template that aren't
-//   already present (matched by matcher + hooks[0].command).
+// - Appends hooks.PostToolUse and hooks.Stop entries from the template that
+//   aren't already present (matched by matcher + hooks[0].command); an entry
+//   that is present gets the template's `timeout`.
 // - Leaves every other existing top-level key untouched.
 // - Backs up an existing settings.json before overwriting it.
 
@@ -47,11 +48,19 @@ existing.hooks.PostToolUse = existing.hooks.PostToolUse.filter((e) => {
 for (const event of ['PostToolUse', 'Stop']) {
   for (const entry of template.hooks?.[event] ?? []) {
     const entryCommand = entry.hooks?.[0]?.command;
-    const alreadyPresent = existing.hooks[event].some(
+    const present = existing.hooks[event].find(
       (e) => e.matcher === entry.matcher && e.hooks?.[0]?.command === entryCommand
     );
-    if (alreadyPresent) {
-      console.log(`  Hook ${event} '${entry.matcher ?? '*'}' bereits vorhanden - uebersprungen.`);
+    if (present) {
+      // The timeout belongs to the template: an entry merged before it had one must get it, or Claude Code's
+      // default may end the hook before the hook's own time limit does.
+      const want = entry.hooks[0].timeout;
+      if (want !== undefined && present.hooks[0].timeout !== want) {
+        present.hooks[0].timeout = want;
+        console.log(`  Hook ${event} '${entry.matcher ?? '*'}': timeout auf ${want} s gesetzt.`);
+      } else {
+        console.log(`  Hook ${event} '${entry.matcher ?? '*'}' bereits vorhanden - uebersprungen.`);
+      }
     } else {
       existing.hooks[event].push(entry);
       console.log(`  Hook ${event} '${entry.matcher ?? '*'}' ergaenzt.`);
