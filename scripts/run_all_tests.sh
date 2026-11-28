@@ -10,7 +10,8 @@
 #   scripts/run_all_tests.sh --timeout=1200        seconds per repo (default 900)
 #   scripts/run_all_tests.sh --fetch               fetch first: a checkout behind its upstream is named as such
 #   scripts/run_all_tests.sh --at=origin           test origin/main of every repo and of its dependencies, each in a
-#                                                  detached worktree under the temp folder; the checkouts stay as they are
+#                                                  detached worktree at $REPOS_DIR/.run_all_tests-origin; the checkouts
+#                                                  stay as they are
 #
 # The whole run holds one slot of testing.nvim's queue of heavy runs; red repos list their red cases.
 #

@@ -22,7 +22,9 @@
 -- a red may be fixed on main already. `--fetch` updates the remote refs first (`git fetch`, nothing else is touched).
 --
 -- `--at=origin` tests what is on `origin/main` instead: each repo is fetched and checked out as a detached worktree
--- under the temp folder (`run_all_tests-origin/<name>`), and so is every dependency its `scripts/test.sh` lists
+-- at `$REPOS_DIR/.run_all_tests-origin/<name>` (below the trusted root of testing.nvim: a worktree in the temp folder
+-- would be refused as untrusted, and widening `$TESTING_TRUST_ROOTS` is not this script's call; without `$REPOS_DIR`
+-- the temp folder), and so is every dependency its `scripts/test.sh` lists
 -- (`DEPS=(...)`), handed over as `$<NAME>_DIR` (which test.sh looks at first). The shared checkouts are not touched
 -- (other sessions work in them); a worktree is removed after use with `git worktree remove` (never `--force`: one the
 -- suite left dirty stays and is named). A worktree left by an aborted run sits at the same path and is removed first.
@@ -533,7 +535,9 @@ local function main()
     for _, p in ipairs(list) do
       checkouts[p.name] = p.dir
     end
-    pool = worktree_pool(checkouts, vim.fs.joinpath(uv.os_tmpdir(), "run_all_tests-origin"))
+    local repos = vim.env.REPOS_DIR
+    local parent = (repos and repos ~= "" and uv.fs_stat(repos)) and repos or uv.os_tmpdir()
+    pool = worktree_pool(checkouts, vim.fs.joinpath(parent, ".run_all_tests-origin"))
     cleanup_worktrees = function()
       for _, problem in ipairs(pool.drop_all()) do
         io.stdout:write("run_all_tests: " .. problem .. "\n")

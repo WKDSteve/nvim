@@ -121,7 +121,7 @@ return function(H)
     eq(pool.get("demo.nvim").path, w.path, "and hands the same one to every repo that needs it")
     H.has(pool.get("no-such.nvim").err or "", "no checkout", "a dependency without a checkout")
     eq(pool.drop_all(), {}, "the end of the run removes them all")
-    ok(vim.uv.fs_stat(w.path) == nil, "nothing is left in the temp folder")
+    ok(vim.uv.fs_stat(w.path) == nil, "nothing is left of them")
 
     local no_origin = H.tmpdir()
     git(no_origin, { "init", "-q", "-b", "main" })
