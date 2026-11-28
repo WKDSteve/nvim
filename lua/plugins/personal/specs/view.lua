@@ -168,7 +168,6 @@ return {
     --     -- Also bind this key to the same menu at the cursor. Default false: no global key is taken unasked.
     --     key = "<A-b>",
     --     -- prewarm = true, -- load the sister plugins' menu modules in idle slices after startup
-    --     -- renderer = "kit", -- needs no third-party menu plugin
     --     -- native_popup = false, -- keep Neovim's own right-click popup
     --     -- sections = { code = true, clipboard = true, file = true, delete = true, tools = true },
     --     entries = {
@@ -473,8 +472,8 @@ return {
       --   max_delay = 1000, -- ms
       -- },
 
-      -- Right-click menu entries (nvzone/menu is a soft dependency; `false`
-      -- only stops M.items()/M.submenu() from returning entries).
+      -- Right-click menu entries (`false` only stops
+      -- M.items()/M.submenu() from returning entries).
       -- menu = { enable = true },
       -- Which hosts may drive the plugin: `ui_menu = false` keeps ui.nvim's
       -- right-click menu from composing the ASCII fly-out.
@@ -728,8 +727,8 @@ return {
       --   dpi = 120, -- rasterization resolution
       -- },
 
-      -- Right-click menu entries (nvzone/menu is a soft dependency; `false`
-      -- only stops M.items()/M.submenu() from returning entries).
+      -- Right-click menu entries (`false` only stops
+      -- M.items()/M.submenu() from returning entries).
       -- menu = { enable = true },
       -- Which hosts may drive the plugin: `ui_menu = false` keeps ui.nvim's
       -- right-click menu from composing the Images fly-out.

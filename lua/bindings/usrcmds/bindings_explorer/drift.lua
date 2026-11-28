@@ -81,7 +81,7 @@ local M = {}
 ---
 --- Four German-corpus headers are deliberately NOT added -- their cells are
 --- not keys, and admitting them would let unrelated text "document" a
---- binding: `Eintrag` (`Menu.md`, nvzone/menu labels), `Tab` (the former
+--- binding: `Eintrag` (`Menu.md`, context-menu labels), `Tab` (the former
 --- `Search.md`, search.nvim tab names), `Modul` (`Snacks.md`, module names), `Vorschlag
 --- (README)` (`Gitsigns.md`, keys upstream merely suggests). Same reason
 --- `` `lhs` key `` (fileops.nvim.md) and `` `keymaps.<name>` `` (diff.nvim.md)

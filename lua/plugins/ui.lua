@@ -54,7 +54,7 @@ return {
   -- `MunifTanjim/nui.nvim` has no entry of its own: noice and neo-tree both
   -- declare it as a dependency, which keeps it installed and lazy-loaded.
 
-  -- `nvzone/minty` (and its `nvzone/volt` dependency) left on 2026-09-19:
+  -- The former third-party colour picker left on 2026-09-19:
   -- the right-click menu's "Color Picker" entry opens ui.nvim's
   -- `ui.colorpicker` now (`:UI color [#hex]`), a hue row + saturation x
   -- lightness grid + shades in a ui.kit float.

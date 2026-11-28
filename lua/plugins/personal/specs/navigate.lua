@@ -586,7 +586,7 @@ return {
       -- Show a handler picker for ambiguous no-target `:Open` instead of guessing.
       -- picker = { enabled = false },
 
-      -- Whether nvzone/menu entries are provided at all.
+      -- Whether context-menu entries are provided at all.
       -- menu = {
       --   enable = true,
       -- },
@@ -1194,7 +1194,7 @@ return {
           -- undo_depth = 10, -- rewrites that stay undoable
         },
 
-        -- nvzone/menu / right-click menu entries. `enable = false` yields no entries;
+        -- Right-click menu entries. `enable = false` yields no entries;
         -- entries of a disabled feature are omitted automatically.
         -- menu = {
         --   enable = true,

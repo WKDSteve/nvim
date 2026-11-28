@@ -123,7 +123,7 @@ return {
         -- Default autocommands (cursorline toggle while the DAP UI is open).
         -- autocmds = { enable = true },
 
-        -- nvzone/menu context-menu entries for a host to compose (dap.nvim ships
+        -- Context-menu entries for a host to compose (dap.nvim ships
         -- no trigger of its own).
         -- menu = { enable = true },
 
@@ -770,7 +770,7 @@ return {
     --   -- Label the bound key prefixes as which-key groups.
     --   which_key = { enable = true },
     --
-    --   -- nvzone/menu entries (soft dependency; off automatically when missing).
+    --   -- Context-menu entries for a host to compose.
     --   menu = { enable = true },
     --
     --   -- Which hosts may drive this plugin; `ui_menu = false` keeps ui.nvim's
@@ -1359,7 +1359,7 @@ return {
       --   prev = "[k",
       -- },
 
-      -- nvzone/menu context-menu entries (soft dependency).
+      -- Context-menu entries for a host to compose.
       -- menu = { enable = true },
 
       -- Which hosts may drive this plugin; `ui_menu = false` keeps ui.nvim's

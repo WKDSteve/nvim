@@ -789,7 +789,7 @@ return {
       --   char = "=",
       -- },
 
-      -- nvzone/menu entries; `enable = false` provides none at all.
+      -- Context-menu entries; `enable = false` provides none at all.
       -- menu = {
       --   enable = true,
       --   fold = true, -- fold/unfold entries (shown on a heading)

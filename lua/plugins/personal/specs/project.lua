@@ -94,8 +94,7 @@ return {
       -- keymaps = nil, -- table|false
 
       -- menu = {
-      --   -- Right-click context menu on list-view buffers (nvzone/menu, soft
-      --   -- dependency; off automatically when it is not installed).
+      --   -- Right-click context menu on list-view buffers (ui.contextmenu).
       --   enable = true,
       -- },
     },
@@ -228,7 +227,7 @@ return {
         --   render_debounce_ms = 50,
         --   -- "default" | "minimal" | "compact" (reserved for future use).
         --   theme = "default",
-        --   -- Right-click context menu (nvzone/menu, soft dependency).
+        --   -- Right-click context menu (ui.contextmenu).
         --   menu = {
         --     enable = true,
         --   },
@@ -494,7 +493,7 @@ return {
       -- keys = {},
       -- Register :DocBrowse's bindings with which-key when it is installed.
       -- which_key = true,
-      -- Right-click context menu on :DocBrowse's list (nvzone/menu, soft dependency).
+      -- Right-click context menu on :DocBrowse's list (ui.contextmenu).
       -- menu = true,
       -- Collect per-stage scan timings and report them after a `:DocMap`.
       -- debug = false,
