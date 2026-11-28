@@ -9,7 +9,8 @@
 //                                                       pnpm, yarn, else npm; only once node_modules is installed)
 //         node_modules/.bin/tsc --noEmit               (otherwise)
 //
-// Lockfiles and node_modules are looked for up to the root of the git repository, not above it.
+// The tsconfig.json of a changed .ts/.tsx file is the nearest one above that file, up to the root of the git
+// repository; each such project is checked once. Lockfiles and node_modules are looked for up to that root, not above.
 // Missing tools are skipped. `stop_hook_active` guards against endless loops. A check that runs out of time
 // (CHECK_STOP_TIMEOUT_MS, default 5 min) blocks the stop and is ended with its whole process tree.
 
@@ -131,12 +132,20 @@ process.stdin.on('end', async () => {
   if (data.stop_hook_active) process.exit(0);
 
   const cwd = data.cwd || process.cwd();
-  let changed;
+  // Paths relative to the root of the repository (porcelain ignores status.relativePaths); -z keeps names with
+  // spaces unquoted, and a rename or copy brings its old name as an extra entry, which is skipped.
+  const changed = [];
   try {
-    changed = execFileSync('git', ['status', '--porcelain', '--untracked-files=all'], { cwd, encoding: 'utf8' })
-      .split('\n')
-      .map((l) => l.slice(3).trim())
-      .filter(Boolean);
+    const entries = execFileSync('git', ['status', '--porcelain', '-z', '--untracked-files=all'], {
+      cwd,
+      encoding: 'utf8',
+    }).split('\0');
+    for (let i = 0; i < entries.length; i++) {
+      const entry = entries[i];
+      if (entry.length < 4) continue;
+      changed.push(entry.slice(3));
+      if (entry[0] === 'R' || entry[0] === 'C') i++;
+    }
   } catch {
     process.exit(0); // not a git repo
   }
@@ -157,16 +166,23 @@ process.stdin.on('end', async () => {
     }
   }
 
-  if (changed.some((f) => /\.(ts|tsx)$/.test(f))) {
-    const tsconfig = findUp(cwd, 'tsconfig.json');
-    const projectCheck = tsconfig && checkScript(path.dirname(tsconfig), root);
+  // Each changed .ts/.tsx file belongs to the nearest tsconfig.json above it, up to the root of the repository (a
+  // session in the root of tasks-desktop changes ui/src/x.ts, whose tsconfig is ui/tsconfig.json). Each project is
+  // checked once.
+  const tsconfigs = new Map();
+  for (const f of changed.filter((name) => /\.(ts|tsx)$/.test(name))) {
+    const start = path.dirname(root ? path.resolve(root, f) : path.resolve(cwd, f));
+    const tsconfig = findUp(start, 'tsconfig.json', root);
+    if (tsconfig) tsconfigs.set(IS_WIN ? tsconfig.toLowerCase() : tsconfig, tsconfig);
+  }
+  for (const tsconfig of tsconfigs.values()) {
+    const projectCheck = checkScript(path.dirname(tsconfig), root);
     if (projectCheck) {
       // The project's own type check (e.g. svelte-check + tsc -p ...): a bare tsc cannot read every file it can.
       const err = await run(projectCheck.bin, ['run', 'check'], projectCheck.dir, IS_WIN);
       if (err) errors.push(err);
     } else {
-      const tsc =
-        tsconfig && findUp(path.dirname(tsconfig), path.join('node_modules', '.bin', IS_WIN ? 'tsc.cmd' : 'tsc'), root);
+      const tsc = findUp(path.dirname(tsconfig), path.join('node_modules', '.bin', IS_WIN ? 'tsc.cmd' : 'tsc'), root);
       if (tsc) {
         const err = await run(IS_WIN ? `"${tsc}"` : tsc, ['--noEmit'], path.dirname(tsconfig), IS_WIN);
         if (err) errors.push(err);

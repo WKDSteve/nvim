@@ -168,6 +168,23 @@ try {
     'RAN-pnpm',
     onlyPath([bin('none', [])]),
   );
+  // tasks-desktop: the session stands in the root of the repository, the tsconfig.json is in ui/.
+  const nested = path.join(base, 'nested');
+  for (const sub of ['ui', 'web']) {
+    write(nested, `${sub}/tsconfig.json`, '{}\n');
+    write(nested, `${sub}/src/a.ts`, 'export const a = 1;\n');
+    write(nested, `${sub}/package.json`, JSON.stringify({ name: sub, private: true, scripts: { check: 'node fail.js' } }));
+    write(nested, `${sub}/fail.js`, `console.log("CHECK-${sub.toUpperCase()}-FAILED"); process.exit(1);\n`);
+    fs.mkdirSync(path.join(nested, sub, 'node_modules'), { recursive: true });
+  }
+  write(nested, 'web/src/b.ts', 'export const b = 1;\n');
+  spawnSync('git', ['init', '-q'], { cwd: nested });
+  const n = expect('the tsconfig of a changed file in a subfolder is found from the root', nested, 2, 'CHECK-UI-FAILED');
+  const webRuns = n.out.split('CHECK-WEB-FAILED').length - 1;
+  if (webRuns !== 1) {
+    failed++;
+    console.log(`FAIL ... and each project is checked once (web ran ${webRuns} times)\n${n.out}`);
+  } else console.log('ok   ... and each project is checked once');
   const hang = project('hang', { check: 'node hang.js' });
   const r = expect('a check that runs out of time blocks the stop', hang, 2, 'timed out', null, {
     ...process.env,
