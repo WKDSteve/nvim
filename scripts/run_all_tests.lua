@@ -14,6 +14,10 @@
 -- the exit code, a run that timed out, a name in --only that is no repo, any error of this script).
 -- An infrastructure error is never reported as success and wins over red: the verdict cannot be trusted.
 --
+-- The whole run holds one slot of the queue of heavy runs of testing.nvim (one at a time per machine), so another
+-- session's suite cannot run between two repos; the repo runs it starts inherit the slot and never wait. Under the
+-- table every red repo lists its red cases (id and status) from its IR, at most 10.
+--
 -- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS]
 --
 -- Exceptions, on purpose:
@@ -127,6 +131,65 @@ end
 ---@field counts table<string, integer|string>
 ---@field secs number
 ---@field note string
+---@field failed? string[] The red cases of the repo (`file::case (status)`), from its IR.
+---@field failed_total? integer How many red cases there are (`failed` holds at most `MAX_FAILED_SHOWN`).
+
+--- The red cases listed per repo under the table.
+local MAX_FAILED_SHOWN = 10
+--- Statuses that make a case red.
+local RED = { fail = true, error = true, timeout = true, crash = true }
+
+--- The red cases of an IR, as `id (status)`, sorted; at most `limit` of them and how many there are in all. A red
+--- row of the table only says "RED": a red run under load must say which specs went red, or a timeout and a real
+--- failure look the same.
+---@param ir table
+---@param limit integer
+---@return string[] cases
+---@return integer total
+local function failed_cases(ir, limit)
+  local out = {}
+  for _, c in ipairs(type(ir.cases) == "table" and ir.cases or {}) do
+    if type(c) == "table" and RED[c.status] then
+      local id = type(c.id) == "string" and c.id or tostring(c.file or "?")
+      out[#out + 1] = ("%s (%s)"):format(id, c.status)
+    end
+  end
+  table.sort(out)
+  local total = #out
+  for i = total, limit + 1, -1 do
+    out[i] = nil
+  end
+  return out, total
+end
+
+--- Take the queue of heavy runs of testing.nvim (one at a time per machine) for the WHOLE run, not per repo. Each
+--- repo's `scripts/test.sh` queues on its own; without this the Gesamtlauf left the slot between two repos, another
+--- session's suite ran in between, and the wait for it counted into the next repo's timeout (an INFRA row), or two
+--- suites ran at once (the specs that time out under load went red, other repos each run). The holder's token in
+--- `$TESTING_HEAVY_RUN` reaches every repo run this script starts: they belong to this run and never wait. nil when
+--- testing.nvim is not found (said once; the repos then queue one by one, as before).
+---@param testing_dir string|nil
+---@param say fun(s: string)
+---@return table|nil queue the module, to release the handle
+---@return table|nil handle
+local function take_queue(testing_dir, say)
+  if not testing_dir or not uv.fs_stat(testing_dir .. "/lua/testing/queue.lua") then
+    say("run_all_tests: testing.nvim not found, every repo queues on its own\n")
+    return nil, nil
+  end
+  vim.opt.rtp:append(testing_dir)
+  local ok, queue = pcall(require, "testing.queue")
+  if not ok then
+    say("run_all_tests: cannot load testing.queue: " .. tostring(queue) .. "\n")
+    return nil, nil
+  end
+  local handle, problem =
+    queue.acquire(queue.from_env(), "run_all_tests (every personal plugin)", say)
+  if not handle then
+    die("queue: " .. tostring(problem), 3)
+  end
+  return queue, handle
+end
 
 --- Run `argv` and wait at most `timeout_ms`. On a timeout the whole process tree is stopped (the editor that
 --- `test.sh` started is a grandchild and would otherwise run on into the next repo) and nil comes back.
@@ -201,6 +264,9 @@ local function run_testing(p, bash, timeout_ms)
     row.counts[s] = v or 0
   end
   local bad = row.counts.fail + row.counts.error + row.counts.timeout + row.counts.crash
+  if bad > 0 then
+    row.failed, row.failed_total = failed_cases(ir, MAX_FAILED_SHOWN)
+  end
   if res.code == 0 and bad == 0 then
     row.kind = "ok"
   elseif res.code == 0 then
@@ -264,10 +330,20 @@ local function main()
   if bash == "" then
     die("no bash found", 3)
   end
+  -- first: it puts lib.nvim on the runtimepath, which testing.queue needs
+  local list = projects()
+  local testing_dir = vim.env.TESTING_NVIM_DIR
+  if not testing_dir or testing_dir == "" then
+    testing_dir = (vim.env.REPOS_DIR or "") .. "/testing.nvim"
+  end
+  local queue, handle = take_queue(testing_dir, function(s)
+    io.stdout:write(s)
+    io.stdout:flush()
+  end)
 
   local known = {}
   local rows = {} ---@type RunRow[]
-  for _, p in ipairs(projects()) do
+  for _, p in ipairs(list) do
     known[p.name] = true
     if next(only) == nil or only[p.name] then
       local row
@@ -360,6 +436,21 @@ local function main()
     tcells[#tcells + 1] = ("%5d"):format(totals[s])
   end
   io.stdout:write(("%-24s %-6s %s\n"):format("TOTAL", "", table.concat(tcells, " ")))
+  if queue then
+    queue.release(handle)
+  end
+
+  for _, row in ipairs(rows) do
+    if row.failed and #row.failed > 0 then
+      io.stdout:write(("\n%s: %d red case(s)\n"):format(row.repo, row.failed_total or #row.failed))
+      for _, case in ipairs(row.failed) do
+        io.stdout:write("  " .. case .. "\n")
+      end
+      if (row.failed_total or 0) > #row.failed then
+        io.stdout:write(("  ... and %d more\n"):format(row.failed_total - #row.failed))
+      end
+    end
+  end
 
   if any_infra then
     io.stdout:write("\nINFRASTRUCTURE ERROR: at least one repo could not be judged (exit 3).\n")
@@ -370,6 +461,11 @@ local function main()
   end
   io.stdout:write("\nALL GREEN\n")
   os.exit(0)
+end
+
+-- TESTS/scripts/run_all_tests_spec.lua loads the file for its pieces and runs nothing.
+if rawget(_G, "RUN_ALL_TESTS_AS_LIBRARY") then
+  return { failed_cases = failed_cases, take_queue = take_queue }
 end
 
 -- Any error of this script is an infrastructure error, never the "red" exit code 1 that nvim uses for it.

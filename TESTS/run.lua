@@ -129,6 +129,7 @@ local specs = {
   "multicursor/multicursor_spec.lua",
   "config_telemetry/export_dir_spec.lua",
   "ascii_look/ascii_look_spec.lua",
+  "scripts/run_all_tests_spec.lua",
 }
 
 -- Optional filter: only the specs whose path contains one of the arguments.
