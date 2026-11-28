@@ -59,20 +59,57 @@ local function spec(H)
   for _, action in ipairs({ "on", "status" }) do
     local argv = assert(runner.autostart_argv(action))
     ok(argv[1] == "pwsh" or argv[1] == "powershell", action .. " goes through PowerShell")
-    eq(argv[4], "-EncodedCommand", action .. " hands the script over encoded (no quoting)")
-    local decoded = vim.iconv(vim.base64.decode(argv[5]), "utf-16le", "utf-8")
-    H.has(decoded, runner.AUTOSTART_TASK, action .. " names the fixed task")
+    eq(argv[4], "-Command", action .. " hands the script over as plain text")
+    eq(#argv, 5, action .. ": the script is one argument")
+    -- an encoded command line is what Falcon reads as obfuscation; `status` runs on the workstation
+    for _, word in ipairs(argv) do
+      ok(
+        not word:lower():match("^%-enc"),
+        action .. " has no -EncodedCommand (or its -enc abbreviations)"
+      )
+    end
+    H.has(argv[5], runner.AUTOSTART_TASK, action .. " names the fixed task")
     H.has(
-      decoded,
+      argv[5],
       "$ProgressPreference = 'SilentlyContinue'",
       action .. " keeps the progress records (`#< CLIXML`) out of the notification"
     )
   end
   H.has(
-    vim.iconv(vim.base64.decode(runner.autostart_argv("on")[5]), "utf-16le", "utf-8"),
+    runner.autostart_argv("on")[5],
     "scripts\\runners.ps1",
     "the script path has backslashes (a Windows path)"
   )
+
+  -- the script reaches PowerShell as it was written: quotes, backslashes and lines, and a failure is an exit code
+  -- (autostart tells "no such task" by it). Run for real, with a script that changes nothing.
+  local probe = runner.pwsh_argv(table.concat({
+    "$ErrorActionPreference = 'Stop'",
+    [[$run = '--headless pwsh -File "C:\a b\runners.ps1" ensure all']],
+    "$run",
+    [["two: " + (1 + 1)]],
+  }, "\n"))
+  if vim.fn.executable(probe[1]) ~= 1 then
+    print("n/a  no PowerShell on this machine: the round trip of the script is not run")
+  else
+    local res = vim.system(probe, { text = true }):wait(60000)
+    eq(res.code, 0, "the probe script runs: " .. (res.stderr or ""))
+    eq(
+      vim.split(vim.trim((res.stdout or ""):gsub("\r", "")), "\n"),
+      { [[--headless pwsh -File "C:\a b\runners.ps1" ensure all]], "two: 2" },
+      "quotes, backslashes and lines arrive unchanged"
+    )
+    local fail = vim
+      .system(
+        runner.pwsh_argv(
+          "$ErrorActionPreference = 'Stop'\nGet-Item 'C:\\no\\such\\file-zz'\n'not reached'"
+        ),
+        { text = true }
+      )
+      :wait(60000)
+    ok(fail.code ~= 0, "a terminating error ends PowerShell with a non-zero exit code")
+    ok(not (fail.stdout or ""):find("not reached"), "and the lines after it do not run")
+  end
   eq(
     runner.autostart_argv("off"),
     { "schtasks", "/Delete", "/TN", "GitHub Runners", "/F" },

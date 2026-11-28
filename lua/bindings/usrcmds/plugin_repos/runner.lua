@@ -341,17 +341,20 @@ function M.autostart_status_script(task)
   }, "\n")
 end
 
----argv of `pwsh -EncodedCommand` for a script (no quoting of the script through the command line)
+---argv of `pwsh -Command <script>` for a script: the script is one argument in plain text. Not `-EncodedCommand`:
+---a base64 command line is what an EDR (CrowdStrike Falcon on the workstation) reads as an obfuscated attack, and
+---`autostart status` runs there. The quoting is libuv's (vim.system), which PowerShell's own argument parser undoes;
+---a terminating error (`$ErrorActionPreference = 'Stop'`) ends `-Command` with exit code 1, as it did before.
 ---@param code string
 ---@return string[]
-local function pwsh_argv(code)
+function M.pwsh_argv(code)
   local shell = vim.fn.executable("pwsh") == 1 and "pwsh" or "powershell"
   -- without it the progress records of the ScheduledTasks cmdlets reach stderr as `#< CLIXML` and end up
   -- in the notification next to the real answer
   code = "$ProgressPreference = 'SilentlyContinue'\n" .. code
-  local utf16 = vim.iconv(code, "utf-8", "utf-16le")
-  return { shell, "-NoProfile", "-NonInteractive", "-EncodedCommand", vim.base64.encode(utf16) }
+  return { shell, "-NoProfile", "-NonInteractive", "-Command", code }
 end
+local pwsh_argv = M.pwsh_argv
 
 ---The call for `runner autostart on|off|status`: a scheduled task of the current user that runs
 ---`runners.ps1 ensure all` at logon and every hour (see `autostart_script`). Returns the argv, or nil and why.
