@@ -22,6 +22,10 @@ return function(H)
     return text
   end
 
+  -- No hooks of this machine in the throwaway repository: a global commit-msg hook (core.hooksPath) that strips the
+  -- Claude trailer would leave nothing to find, and the plan would be "no rewrite needed".
+  local no_hooks = H.tmpdir()
+
   ---@param dir string
   ---@param file string
   ---@param subject string
@@ -29,8 +33,18 @@ return function(H)
   local function commit(dir, file, subject, trailer)
     H.write(dir .. "/" .. file, file)
     git(dir, { "add", file })
-    local args =
-      { "-c", "user.name=T", "-c", "user.email=t@example.com", "commit", "-q", "-m", subject }
+    local args = {
+      "-c",
+      "core.hooksPath=" .. no_hooks,
+      "-c",
+      "user.name=T",
+      "-c",
+      "user.email=t@example.com",
+      "commit",
+      "-q",
+      "-m",
+      subject,
+    }
     if trailer then
       vim.list_extend(args, { "-m", trailer })
     end
@@ -147,8 +161,7 @@ return function(H)
   local work = H.tmpdir()
   git(work, { "init", "-q", "-b", "main" })
   -- The machine's global pre-push guard would refuse the rewrite (that is its job); this throwaway
-  -- repository gets a hooks folder of its own, so the spec does not depend on the machine.
-  local no_hooks = H.tmpdir()
+  -- repository gets the empty hooks folder too, so the spec does not depend on the machine.
   git(work, { "config", "core.hooksPath", no_hooks })
   git(work, { "remote", "add", "origin", bare })
   commit(work, "a", "root", "Co-Authored-By: Claude Sonnet 5.5 <noreply@anthropic.com>")
