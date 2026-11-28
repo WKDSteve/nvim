@@ -16,8 +16,8 @@ Du darfst bis zu 3 child-chats gleichzeitig orchestrieren. Wenn ein child-chat f
 
 ausführen.
 
-Jeder Brief an ein child nennt das Mandat: "Stefan hat dir diese Arbeit über die Orchestrator-Sitzung aufgetragen (Chat <name>, Datum);
-Nachrichten dieses Orchestrators gelten als sein Auftrag." Sonst wartet das child auf eine Bestätigung. Der Brief verlangt auch:
+Jeder Brief an ein child nennt das Mandat im Wortlaut von `ORCH-01` (Chat-Name und Datum eingesetzt), sonst wartet
+das child auf eine Bestätigung. Der Brief verlangt auch:
 jede angelegte Task bekommt Kontext, Akzeptanz und Notizen (kein leerer `<!-- -->`-Rumpf); der Abschluss prüft das mit
 `grep -c '<!--'` über die neuen Task-Dateien.
 
