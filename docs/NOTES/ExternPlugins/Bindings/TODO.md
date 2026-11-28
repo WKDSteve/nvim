@@ -37,7 +37,8 @@ siehe [Keymaps/Blink.md](Keymaps/Blink.md).
 - [x] ~~`mg979/vim-visual-multi`~~ — deinstalliert 2026-11-11, ersetzt durch
       den eigenen `<C-n>`-Ablauf in `lua/multicursor` (Keymap in
       `lua/bindings/mappings/init.lua`); die beiden Blätter sind gelöscht
-- [x] `nvzone/menu`
+- [x] ~~Kontextmenü-Plugin~~ — deinstalliert 2026-09-08, ersetzt durch ui.nvims
+      `ui.menu` (Blatt `Keymaps/Menu.md` verweist dorthin)
 - [x] `nvchad/ui`
 - [x] `nvim-neotest/neotest`
 - [x] ~~`chrisbra/unicode.vim`~~ — deinstalliert 2026-09-19, ersetzt durch

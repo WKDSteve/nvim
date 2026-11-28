@@ -1,10 +1,11 @@
 # Kontextmenü — Keymaps
 
-> **Nicht mehr nvzone/menu, und nicht mehr aus dieser Config.** Seit
-> 2026-09-25 kommt das Menü aus ui.nvim (`ui.menu`, gezeichnet von
-> `ui.contextmenu`); `lua/config/menu/` ist gelöscht. `nvzone/menu` ist seit
-> 2026-09-08 deinstalliert (`lua/plugins/nvchad.lua` schaltet NvChads Spec dafür
-> ab). Die Datei liegt nur noch aus Link-Stabilität unter `ExternPlugins/`.
+> **Kein Fremd-Plugin mehr, und nicht mehr aus dieser Config.** Seit
+> 2026-09-25 kommt das Menü aus ui.nvim (`ui.menu`, gezeichnet vom Kit über
+> `ui.contextmenu`); `lua/config/menu/` ist gelöscht. Das frühere Menü-Plugin
+> ist seit 2026-09-08 deinstalliert, und seit 2026-11-28 kennt
+> `lib.nvim.contextmenu` nur noch den Kit-Renderer. Die Datei liegt nur noch aus
+> Link-Stabilität unter `ExternPlugins/`.
 > Die vollständige Beschreibung steht in ui.nvims
 > `lua/ui/menu/README.md`.
 
