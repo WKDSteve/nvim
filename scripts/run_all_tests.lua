@@ -294,6 +294,29 @@ local function failed_cases(ir, limit)
   return out, total
 end
 
+--- The red spec files of lib.nvim's own runner (`FAIL  <file>` and the error on the next line), at most `limit`
+--- and how many there are: its row said only "1 spec file(s) failed", and which one is the first question.
+---@param out string
+---@param limit integer
+---@return string[] cases
+---@return integer total
+local function own_failures(out, limit)
+  local cases = {}
+  local lines = vim.split(out, "\n", { plain = true })
+  for i, line in ipairs(lines) do
+    local name = line:match("^FAIL%s+(%S+)")
+    if name then
+      local why = vim.trim(lines[i + 1] or "")
+      cases[#cases + 1] = why ~= "" and ("%s (%s)"):format(name, why:sub(1, 100)) or name
+    end
+  end
+  local total = #cases
+  for i = total, limit + 1, -1 do
+    cases[i] = nil
+  end
+  return cases, total
+end
+
 --- Take the queue of heavy runs of testing.nvim (one at a time per machine) for the WHOLE run, not per repo. Each
 --- repo's `scripts/test.sh` queues on its own; without this the Gesamtlauf left the slot between two repos, another
 --- session's suite ran in between, and the wait for it counted into the next repo's timeout (an INFRA row), or two
@@ -452,6 +475,7 @@ local function run_own(p, sentinel, timeout_ms, bash)
     row.kind = "ok"
   elseif out:find("spec(s) failed", 1, true) then
     row.kind = "red"
+    row.failed, row.failed_total = own_failures(out, MAX_FAILED_SHOWN)
     row.note = "own runner: "
       .. (out:match("(%d+) spec%(s%) failed") or "?")
       .. " spec file(s) failed"
@@ -732,6 +756,7 @@ end
 if rawget(_G, "RUN_ALL_TESTS_AS_LIBRARY") then
   return {
     failed_cases = failed_cases,
+    own_failures = own_failures,
     take_queue = take_queue,
     behind_upstream = behind_upstream,
     env_name_of = env_name_of,

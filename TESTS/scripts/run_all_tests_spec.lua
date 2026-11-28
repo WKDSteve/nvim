@@ -36,6 +36,26 @@ return function(H)
   eq(all, 4, "but the count is of all of them")
   eq({ lib.failed_cases({ summary = {} }, 5) }, { {}, 0 }, "an IR without cases has none")
 
+  -- lib.nvim's own runner: its red spec files come from its output
+  local own_out = table.concat({
+    "ok    a_spec.lua",
+    "FAIL  b_spec.lua",
+    "      TESTS/b_spec.lua:12: expected 1, got 2",
+    "ok    c_spec.lua",
+    "FAIL  d_spec.lua",
+    "",
+    "2 spec(s) failed",
+  }, "\n")
+  eq({ lib.own_failures(own_out, 10) }, {
+    { "b_spec.lua (TESTS/b_spec.lua:12: expected 1, got 2)", "d_spec.lua" },
+    2,
+  }, "each FAIL line by its file and the error under it")
+  eq(
+    { lib.own_failures(own_out, 1) },
+    { { "b_spec.lua (TESTS/b_spec.lua:12: expected 1, got 2)" }, 2 },
+    "at most the limit"
+  )
+
   -- a checkout behind its upstream: a shared checkout that lags main shows reds main has fixed
   if vim.fn.executable("git") ~= 1 then
     print("n/a  git is not on PATH: behind_upstream is not checked")
