@@ -21,7 +21,13 @@
 -- It tests the checkouts as they are. A row whose checkout is behind its upstream says so ("N behind upstream"): such
 -- a red may be fixed on main already. `--fetch` updates the remote refs first (`git fetch`, nothing else is touched).
 --
--- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch]
+-- `--at=origin` tests what is on `origin/main` instead: each repo is fetched and checked out as a detached worktree
+-- under the temp folder (`run_all_tests-origin/<name>`), and so is every dependency its `scripts/test.sh` lists
+-- (`DEPS=(...)`), handed over as `$<NAME>_DIR` (which test.sh looks at first). The shared checkouts are not touched
+-- (other sessions work in them); a worktree is removed after use with `git worktree remove` (never `--force`: one the
+-- suite left dirty stays and is named). A worktree left by an aborted run sits at the same path and is removed first.
+--
+-- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch] [--at=origin]
 --
 -- Exceptions, on purpose:
 --   * lib.nvim keeps its own runner (decision of 2026-10-06, "Bootstrap circle"): `TESTS/run.lua`,
@@ -45,18 +51,27 @@ local function die(message, code)
   os.exit(code)
 end
 
---- The options: `--only=a,b`, `--timeout=SECONDS` and `--fetch`, nothing else. A value that cannot be read is
---- refused: a mistyped `--only` that fell back to "every repo" would start a 20 minute run.
+local USAGE = "[--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch] [--at=origin]"
+
+--- The options: `--only=a,b`, `--timeout=SECONDS`, `--fetch` and `--at=origin`, nothing else. A value that cannot be
+--- read is refused: a mistyped `--only` that fell back to "every repo" would start a 20 minute run.
 ---@return table<string, boolean> only
 ---@return integer timeout_ms
 ---@return boolean fetch
+---@return boolean at_origin
 local function parse_args()
-  local only, timeout_ms, fetch = {}, 900 * 1000, false
+  local only, timeout_ms, fetch, at_origin = {}, 900 * 1000, false, false
   for _, a in ipairs(_G.arg or {}) do
     local names = a:match("^%-%-only=(.*)$")
     local seconds = a:match("^%-%-timeout=(.*)$")
+    local at = a:match("^%-%-at=(.*)$")
     if a == "--fetch" then
       fetch = true
+    elseif at then
+      if at ~= "origin" then
+        die("--at only knows 'origin' (origin/main), got '" .. at .. "'", 2)
+      end
+      at_origin = true
     elseif names then
       for name in names:gmatch("[^,]+") do
         only[name] = true
@@ -71,15 +86,97 @@ local function parse_args()
       end
       timeout_ms = math.floor(n * 1000)
     else
-      die(
-        "unknown argument '"
-          .. a
-          .. "' (usage: [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch])",
-        2
-      )
+      die("unknown argument '" .. a .. "' (usage: " .. USAGE .. ")", 2)
     end
   end
-  return only, timeout_ms, fetch
+  return only, timeout_ms, fetch, at_origin
+end
+
+---@param dir string
+---@param args string[]
+---@return table
+local function git(dir, args)
+  local cmd = { "git", "-C", dir }
+  vim.list_extend(cmd, args)
+  return vim.system(cmd, { text = true }):wait(120000)
+end
+
+---@param res table
+---@return string
+local function first_line(res)
+  local text = (res.stderr or "") ~= "" and res.stderr or (res.stdout or "")
+  return vim.trim(text:match("[^\n]*") or ""):sub(1, 80)
+end
+
+--- The variable `scripts/test.sh` reads a dependency's folder from: `testing.nvim` -> `TESTING_NVIM_DIR`.
+---@param name string
+---@return string
+local function env_name_of(name)
+  return (name:upper():gsub("[^A-Z0-9]", "_")) .. "_DIR"
+end
+
+--- The dependencies a repo's `scripts/test.sh` resolves (its line `DEPS=('testing.nvim' 'lib.nvim')`), in order.
+---@param dir string
+---@return string[]
+local function test_deps(dir)
+  local f = io.open(dir .. "/scripts/test.sh", "rb")
+  if not f then
+    return {}
+  end
+  local text = f:read("*a")
+  f:close()
+  local list = ("\n" .. text):match("\nDEPS=%(([^)]*)%)")
+  local out = {}
+  for name in (list or ""):gmatch("[%w%._%-]+") do
+    out[#out + 1] = name
+  end
+  return out
+end
+
+--- A detached worktree of the checkout `dir` at its `origin/main` (fetched first), at `base`/`name`. The checkout
+--- itself is not touched: no branch, index or working tree of it moves. A worktree already at that path (left by an
+--- aborted run) is removed first, without `--force`.
+---@param dir string
+---@param name string
+---@param base string
+---@return string|nil path
+---@return string sha_or_problem the short commit on success, else why there is none
+local function origin_worktree(dir, name, base)
+  local fetched = git(dir, { "fetch", "-q", "origin" })
+  if fetched.code ~= 0 then
+    return nil, "git fetch failed: " .. first_line(fetched)
+  end
+  local rev = git(dir, { "rev-parse", "--verify", "-q", "origin/main^{commit}" })
+  if rev.code ~= 0 then
+    return nil, "no origin/main"
+  end
+  local sha = vim.trim(rev.stdout or "")
+  local path = vim.fs.joinpath(base, name)
+  if uv.fs_stat(path) then
+    local gone = git(dir, { "worktree", "remove", path })
+    if gone.code ~= 0 then
+      return nil, "a leftover worktree is in the way (" .. path .. "): " .. first_line(gone)
+    end
+  end
+  vim.fn.mkdir(base, "p")
+  local added = git(dir, { "worktree", "add", "-q", "--detach", path, sha })
+  if added.code ~= 0 then
+    return nil, "git worktree add failed: " .. first_line(added)
+  end
+  return path, sha:sub(1, 9)
+end
+
+--- Remove a worktree made by `origin_worktree`, never with `--force`: one the suite left dirty stays, and the
+--- problem comes back (nil when it is gone).
+---@param dir string the checkout it belongs to
+---@param path string
+---@return string|nil problem
+local function remove_worktree(dir, path)
+  local res = git(dir, { "worktree", "remove", path })
+  if res.code == 0 then
+    return nil
+  end
+  return ("worktree left at %s: %s"):format(path, first_line(res))
 end
 
 --- How many commits the checkout in `dir` is behind its upstream, or nil when that cannot be told (no upstream, not
@@ -256,13 +353,18 @@ end
 ---@param p table
 ---@param bash string
 ---@param timeout_ms integer
+---@param env? table<string, string> `$<NAME>_DIR` of the dependencies (`--at=origin`)
 ---@return RunRow
-local function run_testing(p, bash, timeout_ms)
+local function run_testing(p, bash, timeout_ms, env)
   local ir_file = vim.fn.tempname() .. "-" .. p.name .. ".json"
   local started = uv.hrtime()
   -- The editor's RPC socket must not leak into the child: a spec could reach back into this session.
   local script = 'unset NVIM NVIM_LISTEN_ADDRESS; exec bash scripts/test.sh --json "$1"'
-  local res = spawn({ bash, "-c", script, "run_all_tests", ir_file }, { cwd = p.dir }, timeout_ms)
+  local res = spawn(
+    { bash, "-c", script, "run_all_tests", ir_file },
+    { cwd = p.dir, env = env },
+    timeout_ms
+  )
   local secs = (uv.hrtime() - started) / 1e9
 
   ---@type RunRow
@@ -357,8 +459,59 @@ local function run_own(p, sentinel, timeout_ms, bash)
   return row
 end
 
+--- Set by `main` under `--at=origin`: removes the worktrees still standing. Also called when the script fails.
+---@type fun()|nil
+local cleanup_worktrees = nil
+
+--- The worktrees of `--at=origin`: one per repo name, made on first use, shared by every repo that needs it as a
+--- dependency. `checkouts` maps a repo name to its shared checkout.
+---@param checkouts table<string, string>
+---@param base string
+local function worktree_pool(checkouts, base)
+  local made = {} ---@type table<string, {src: string, path?: string, sha?: string, err?: string}>
+  local pool = {}
+  ---@param name string
+  ---@return {src: string, path?: string, sha?: string, err?: string}
+  function pool.get(name)
+    if not made[name] then
+      local src = checkouts[name]
+      if not src then
+        local candidate = (vim.env.REPOS_DIR or "") .. "/" .. name
+        src = uv.fs_stat(candidate .. "/.git") and candidate or nil
+      end
+      if not src then
+        made[name] = { src = "", err = "no checkout of " .. name }
+      else
+        local path, info = origin_worktree(src, name, base)
+        made[name] = path and { src = src, path = path, sha = info } or { src = src, err = info }
+      end
+    end
+    return made[name]
+  end
+  --- Remove one worktree (it is made again when asked for later); the problem when it stays.
+  ---@param name string
+  ---@return string|nil
+  function pool.drop(name)
+    local w = made[name]
+    made[name] = nil
+    if w and w.path then
+      return remove_worktree(w.src, w.path)
+    end
+    return nil
+  end
+  ---@return string[] problems
+  function pool.drop_all()
+    local problems = {}
+    for _, name in ipairs(vim.tbl_keys(made)) do
+      problems[#problems + 1] = pool.drop(name)
+    end
+    return problems
+  end
+  return pool
+end
+
 local function main()
-  local only, timeout_ms, fetch = parse_args()
+  local only, timeout_ms, fetch, at_origin = parse_args()
   local bash = find_bash()
   if bash == "" then
     die("no bash found", 3)
@@ -374,13 +527,60 @@ local function main()
     io.stdout:flush()
   end)
 
+  local pool
+  if at_origin then
+    local checkouts = {}
+    for _, p in ipairs(list) do
+      checkouts[p.name] = p.dir
+    end
+    pool = worktree_pool(checkouts, vim.fs.joinpath(uv.os_tmpdir(), "run_all_tests-origin"))
+    cleanup_worktrees = function()
+      for _, problem in ipairs(pool.drop_all()) do
+        io.stdout:write("run_all_tests: " .. problem .. "\n")
+      end
+    end
+  end
+  local is_dep = {} ---@type table<string, boolean> worktrees kept for later repos
+
+  ---@param row RunRow
+  ---@param text string
+  local function add_note(row, text)
+    row.note = row.note == "" and text or (row.note .. "; " .. text)
+  end
+
   local known = {}
   local rows = {} ---@type RunRow[]
   for _, p in ipairs(list) do
     known[p.name] = true
     if next(only) == nil or only[p.name] then
       local row
-      if NO_SPECS[p.name] then
+      local env, problem, at_sha
+      if pool and not NO_SPECS[p.name] then
+        local w = pool.get(p.name)
+        if w.err then
+          problem = w.err
+        else
+          at_sha = w.sha
+          p = { name = p.name, repo = p.repo, dir = w.path }
+          env = {}
+          for _, dep in ipairs(test_deps(w.path)) do
+            if dep ~= p.name then
+              is_dep[dep] = true
+              local d = pool.get(dep)
+              if d.err then
+                problem = "dependency " .. dep .. ": " .. d.err
+                break
+              end
+              env[env_name_of(dep)] = d.path
+            else
+              env[env_name_of(dep)] = w.path
+            end
+          end
+        end
+      end
+      if problem then
+        row = { repo = p.name, kind = "infra", counts = {}, secs = 0, note = problem }
+      elseif NO_SPECS[p.name] then
         row = { repo = p.name, kind = "none", counts = {}, secs = 0, note = "no specs" }
       elseif OWN_RUNNER[p.name] then
         row = run_own(p, OWN_RUNNER[p.name], timeout_ms, bash)
@@ -394,18 +594,34 @@ local function main()
             or "no runner (no scripts/test.sh)",
         }
       else
-        row = run_testing(p, bash, timeout_ms)
+        row = run_testing(p, bash, timeout_ms, env)
       end
-      row.behind = behind_upstream(p.dir, fetch)
-      if row.behind and row.behind > 0 then
-        local stale = ("%d behind upstream"):format(row.behind)
-        row.note = row.note == "" and stale or (row.note .. "; " .. stale)
+      if pool then
+        if at_sha then
+          add_note(row, "origin/main " .. at_sha)
+        end
+        if not is_dep[p.name] then
+          local left = pool.drop(p.name)
+          if left then
+            add_note(row, left)
+          end
+        end
+      else
+        row.behind = behind_upstream(p.dir, fetch)
+        if row.behind and row.behind > 0 then
+          add_note(row, ("%d behind upstream"):format(row.behind))
+        end
       end
       rows[#rows + 1] = row
       -- shown as they finish: a full run takes a while
       io.stdout:write(("  ... %s: %s\n"):format(row.repo, row.kind))
       io.stdout:flush()
     end
+  end
+  -- the dependencies' worktrees, kept for later repos until now
+  if cleanup_worktrees then
+    cleanup_worktrees()
+    cleanup_worktrees = nil
   end
 
   -- a name that is no repo (a typo) must not turn into "nothing ran, all green"
@@ -510,12 +726,24 @@ end
 
 -- TESTS/scripts/run_all_tests_spec.lua loads the file for its pieces and runs nothing.
 if rawget(_G, "RUN_ALL_TESTS_AS_LIBRARY") then
-  return { failed_cases = failed_cases, take_queue = take_queue, behind_upstream = behind_upstream }
+  return {
+    failed_cases = failed_cases,
+    take_queue = take_queue,
+    behind_upstream = behind_upstream,
+    env_name_of = env_name_of,
+    test_deps = test_deps,
+    origin_worktree = origin_worktree,
+    remove_worktree = remove_worktree,
+    worktree_pool = worktree_pool,
+  }
 end
 
 -- Any error of this script is an infrastructure error, never the "red" exit code 1 that nvim uses for it.
 local ok, err = xpcall(main, debug.traceback)
 if not ok then
   io.stderr:write("run_all_tests: internal error: " .. tostring(err) .. "\n")
+  if cleanup_worktrees then
+    pcall(cleanup_worktrees)
+  end
   os.exit(3)
 end

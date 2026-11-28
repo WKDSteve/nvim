@@ -41,11 +41,11 @@ return function(H)
     print("n/a  git is not on PATH: behind_upstream is not checked")
   else
     local no_hooks = H.tmpdir() -- this machine's global hooks (pre-push guard, trailer strip) stay out
-    local function git(dir, args)
+    local function git(dir, args, may_fail)
       local cmd = { "git", "-c", "core.hooksPath=" .. no_hooks, "-C", dir }
       vim.list_extend(cmd, args)
       local res = vim.system(cmd, { text = true }):wait(60000)
-      assert(res.code == 0, table.concat(cmd, " ") .. ": " .. (res.stderr or ""))
+      assert(may_fail or res.code == 0, table.concat(cmd, " ") .. ": " .. (res.stderr or ""))
       return vim.trim(res.stdout or "")
     end
     local function commit(dir, name)
@@ -79,7 +79,71 @@ return function(H)
     )
     eq(lib.behind_upstream(a, false), 0, "a checkout at its upstream is 0 behind")
     eq(lib.behind_upstream(H.tmpdir(), false), nil, "a folder that is no repository: unknown")
+
+    -- --at=origin: the run sees origin/main, never the (stale) shared checkout, and leaves that checkout alone
+    commit(a, "three")
+    git(a, { "push", "-q" })
+    local origin_sha = git(a, { "rev-parse", "HEAD" })
+    local b_head, b_status = git(b, { "rev-parse", "HEAD" }), git(b, { "status", "--porcelain" })
+    local base = H.tmpdir() .. "/wt"
+    local path, sha = lib.origin_worktree(b, "demo.nvim", base)
+    ok(path ~= nil, "a worktree at origin/main: " .. tostring(sha))
+    path = path or ""
+    eq(sha, origin_sha:sub(1, 9), "at the commit of origin/main (fetched first)")
+    eq(git(path, { "rev-parse", "HEAD" }), origin_sha, "its HEAD is origin/main")
+    ok(vim.uv.fs_stat(path .. "/three") ~= nil, "it holds what only origin/main has")
+    ok(vim.uv.fs_stat(b .. "/two") == nil, "the checkout itself did not move")
+    eq(git(b, { "rev-parse", "HEAD" }), b_head, "the checkout's HEAD is where it was")
+    eq(git(b, { "status", "--porcelain" }), b_status, "and its working tree is untouched")
+    eq(
+      git(path, { "symbolic-ref", "-q", "--short", "HEAD" }, true),
+      "",
+      "detached: no branch is made or taken"
+    )
+
+    local again = lib.origin_worktree(b, "demo.nvim", base)
+    eq(again, path, "a worktree left at the same path (an aborted run) is replaced")
+    eq(lib.remove_worktree(b, path), nil, "a clean worktree is removed")
+    ok(vim.uv.fs_stat(path) == nil, "and its folder is gone")
+    ok(not git(b, { "worktree", "list" }):find("demo.nvim", 1, true), "and git forgot it")
+
+    path = lib.origin_worktree(b, "demo.nvim", base) or ""
+    H.write(path .. "/left-by-a-spec", "x")
+    local problem = lib.remove_worktree(b, path)
+    H.has(problem or "", path, "a worktree the suite left dirty is not forced away, it is named")
+    ok(vim.uv.fs_stat(path .. "/left-by-a-spec") ~= nil, "and what is in it stays")
+    os.remove(path .. "/left-by-a-spec")
+    eq(lib.remove_worktree(b, path), nil, "clean again, it goes")
+
+    local pool = lib.worktree_pool({ ["demo.nvim"] = b }, base)
+    local w = pool.get("demo.nvim")
+    eq(w.sha, origin_sha:sub(1, 9), "the pool makes the worktree on first use")
+    eq(pool.get("demo.nvim").path, w.path, "and hands the same one to every repo that needs it")
+    H.has(pool.get("no-such.nvim").err or "", "no checkout", "a dependency without a checkout")
+    eq(pool.drop_all(), {}, "the end of the run removes them all")
+    ok(vim.uv.fs_stat(w.path) == nil, "nothing is left in the temp folder")
+
+    local no_origin = H.tmpdir()
+    git(no_origin, { "init", "-q", "-b", "main" })
+    local none, why = lib.origin_worktree(no_origin, "x.nvim", base)
+    ok(none == nil, "a checkout without a remote gets no worktree")
+    ok(why ~= "", "and says why: " .. why)
   end
+
+  -- the dependencies a repo's scripts/test.sh resolves, and the variable that hands one over
+  eq(lib.env_name_of("testing.nvim"), "TESTING_NVIM_DIR", "testing.nvim -> $TESTING_NVIM_DIR")
+  eq(lib.env_name_of("ui.nvim"), "UI_NVIM_DIR", "ui.nvim -> $UI_NVIM_DIR")
+  local repo = H.tmpdir()
+  H.write(
+    repo .. "/scripts/test.sh",
+    "#!/usr/bin/env bash\n# DEPS=('old.nvim')\nDEPS=('testing.nvim' 'lib.nvim' 'ui.nvim')\n"
+  )
+  eq(
+    lib.test_deps(repo),
+    { "testing.nvim", "lib.nvim", "ui.nvim" },
+    "the DEPS line, in order (a comment does not count)"
+  )
+  eq(lib.test_deps(H.tmpdir()), {}, "no scripts/test.sh: no dependencies")
 
   -- the queue: one slot for the whole run
   local found = vim.api.nvim_get_runtime_file("lua/testing/queue.lua", false)[1]
