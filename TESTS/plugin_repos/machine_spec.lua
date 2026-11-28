@@ -176,6 +176,13 @@ local function spec(H)
     "no Command field at all: nothing to run, whatever the Hint says"
   )
 
+  -- Every B below names its PowerShell: without `shell`, build_argv looks for pwsh on this machine, and where there
+  -- is none (WSL, the Linux CI) it builds no argv, so every call returned false before reaching what it checks.
+  local function build(it, deps)
+    deps = deps or {}
+    deps.shell = deps.shell or "pwsh"
+    return machine.build_in_terminal(it, deps)
+  end
   local repo = H.tmpdir()
   local runs, done = {}, {}
   local fake_terminal = {
@@ -203,7 +210,7 @@ local function spec(H)
   eq(o.name, "build:mdview.nvim", "a named terminal, listed by :Terminal list")
   eq(runs[1].argv[4], wrapped("node scripts/build-go.mjs"))
   eq(
-    machine.build_in_terminal(with(mdview, { Path = repo }), { terminal = fake_terminal }),
+    build(with(mdview, { Path = repo }), { terminal = fake_terminal }),
     false,
     "a second B on the same folder while the first build runs starts nothing"
   )
@@ -223,18 +230,15 @@ local function spec(H)
   vim.api.nvim_buf_delete(term_buf, { force = true })
 
   eq(
-    machine.build_in_terminal(
-      with(mdview, { Path = repo .. "/gone" }),
-      { terminal = fake_terminal }
-    ),
+    build(with(mdview, { Path = repo .. "/gone" }), { terminal = fake_terminal }),
     false,
     "a folder that is not there starts nothing"
   )
-  eq(machine.build_in_terminal(with(desktop, { Path = repo }), { terminal = fake_terminal }), false)
-  eq(machine.build_in_terminal(nil, { terminal = fake_terminal }), false, "a line without a repo")
+  eq(build(with(desktop, { Path = repo }), { terminal = fake_terminal }), false)
+  eq(build(nil, { terminal = fake_terminal }), false, "a line without a repo")
   eq(#runs, 1, "terminal.run was asked for none of these, nor for the guarded second B")
   eq(
-    machine.build_in_terminal(with(mdview, { Path = repo }), {
+    build(with(mdview, { Path = repo }), {
       terminal = {
         run = function()
           return false, "E36"
@@ -245,7 +249,7 @@ local function spec(H)
     "a terminal that could not start is reported as not started"
   )
   ok(
-    machine.build_in_terminal(with(mdview, { Path = repo }), { terminal = fake_terminal }),
+    build(with(mdview, { Path = repo }), { terminal = fake_terminal }),
     "and that failure did not leave the folder marked as building"
   )
   -- end that build, so no folder stays locked for the cases below
@@ -265,7 +269,7 @@ local function spec(H)
     { relative = "editor", row = 1, col = 1, width = 10, height = 3 }
   )
   local captured
-  machine.build_in_terminal(with(mdview, { Path = H.tmpdir() }), {
+  build(with(mdview, { Path = H.tmpdir() }), {
     terminal = {
       run = function(_, opts)
         captured = opts
@@ -293,7 +297,7 @@ local function spec(H)
     { relative = "editor", row = 1, col = 1, width = 10, height = 3 }
   )
   local first
-  machine.build_in_terminal(with(mdview, { Path = again }), {
+  build(with(mdview, { Path = again }), {
     terminal = {
       run = function(_, opts)
         first = opts
@@ -304,7 +308,7 @@ local function spec(H)
   first.on_open({ bufnr = float2_buf })
   first.on_exit(0)
   local second
-  machine.build_in_terminal(with(mdview, { Path = again }), {
+  build(with(mdview, { Path = again }), {
     terminal = {
       run = function(_, run_opts)
         -- what terminal.nvim does for a name it already has: close the old one first
@@ -328,9 +332,9 @@ local function spec(H)
       return true, nil, { backend = "tmux" }
     end,
   }
-  ok(machine.build_in_terminal(with(mdview, { Path = pane_dir }), { terminal = pane_terminal }))
+  ok(build(with(mdview, { Path = pane_dir }), { terminal = pane_terminal }))
   ok(
-    machine.build_in_terminal(with(mdview, { Path = pane_dir }), { terminal = pane_terminal }),
+    build(with(mdview, { Path = pane_dir }), { terminal = pane_terminal }),
     "a second B is possible: the pane's end is unknown, so the folder is not kept locked"
   )
 
@@ -370,7 +374,7 @@ local function spec(H)
   end
   local function start(path, bufnr)
     local opts_of
-    machine.build_in_terminal(with(mdview, { Path = path }), {
+    build(with(mdview, { Path = path }), {
       terminal = {
         run = function(_, run_opts)
           opts_of = run_opts
@@ -432,7 +436,7 @@ local function spec(H)
   -- a terminal.nvim that throws does not leave the folder locked
   local thrown = H.tmpdir()
   eq(
-    machine.build_in_terminal(with(mdview, { Path = thrown }), {
+    build(with(mdview, { Path = thrown }), {
       terminal = {
         run = function()
           error("lazy load failed")
@@ -442,7 +446,7 @@ local function spec(H)
     false
   )
   ok(
-    machine.build_in_terminal(with(mdview, { Path = thrown }), { terminal = fake_terminal }),
+    build(with(mdview, { Path = thrown }), { terminal = fake_terminal }),
     "the next B on that folder starts"
   )
   runs[#runs].opts.on_exit(1)
