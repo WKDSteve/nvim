@@ -83,32 +83,38 @@ local function spec(H)
 
   -- the script reaches PowerShell as it was written: quotes, backslashes and lines, and a failure is an exit code
   -- (autostart tells "no such task" by it). Run for real, with a script that changes nothing.
+  -- pwsh 7 and, its fallback without pwsh, Windows PowerShell 5.1: both get the same argv.
   local probe = runner.pwsh_argv(table.concat({
     "$ErrorActionPreference = 'Stop'",
     [[$run = '--headless pwsh -File "C:\a b\runners.ps1" ensure all']],
     "$run",
     [["two: " + (1 + 1)]],
   }, "\n"))
-  if vim.fn.executable(probe[1]) ~= 1 then
-    print("n/a  no PowerShell on this machine: the round trip of the script is not run")
-  else
-    local res = vim.system(probe, { text = true }):wait(60000)
-    eq(res.code, 0, "the probe script runs: " .. (res.stderr or ""))
-    eq(
-      vim.split(vim.trim((res.stdout or ""):gsub("\r", "")), "\n"),
-      { [[--headless pwsh -File "C:\a b\runners.ps1" ensure all]], "two: 2" },
-      "quotes, backslashes and lines arrive unchanged"
-    )
-    local fail = vim
-      .system(
-        runner.pwsh_argv(
-          "$ErrorActionPreference = 'Stop'\nGet-Item 'C:\\no\\such\\file-zz'\n'not reached'"
-        ),
-        { text = true }
+  local failing = runner.pwsh_argv(
+    "$ErrorActionPreference = 'Stop'\nGet-Item 'C:\\no\\such\\file-zz'\n'not reached'"
+  )
+  local shells = 0
+  for _, shell in ipairs({ "pwsh", "powershell" }) do
+    if vim.fn.executable(shell) == 1 then
+      shells = shells + 1
+      probe[1], failing[1] = shell, shell
+      local res = vim.system(probe, { text = true }):wait(60000)
+      eq(res.code, 0, shell .. ": the probe script runs: " .. (res.stderr or ""))
+      eq(
+        vim.split(vim.trim((res.stdout or ""):gsub("\r", "")), "\n"),
+        { [[--headless pwsh -File "C:\a b\runners.ps1" ensure all]], "two: 2" },
+        shell .. ": quotes, backslashes and lines arrive unchanged"
       )
-      :wait(60000)
-    ok(fail.code ~= 0, "a terminating error ends PowerShell with a non-zero exit code")
-    ok(not (fail.stdout or ""):find("not reached"), "and the lines after it do not run")
+      local fail = vim.system(failing, { text = true }):wait(60000)
+      ok(fail.code ~= 0, shell .. ": a terminating error ends it with a non-zero exit code")
+      ok(
+        not (fail.stdout or ""):find("not reached"),
+        shell .. ": and the lines after it do not run"
+      )
+    end
+  end
+  if shells == 0 then
+    print("n/a  no PowerShell on this machine: the round trip of the script is not run")
   end
   eq(
     runner.autostart_argv("off"),
