@@ -139,7 +139,11 @@ return function(H)
     local w = pool.get("demo.nvim")
     eq(w.sha, origin_sha:sub(1, 9), "the pool makes the worktree on first use")
     eq(pool.get("demo.nvim").path, w.path, "and hands the same one to every repo that needs it")
-    H.has(pool.get("no-such.nvim").err or "", "no checkout", "a dependency without a checkout")
+    local foreign = pool.get("no-such.nvim")
+    ok(
+      foreign.external and not foreign.err and not foreign.path,
+      "a dependency without a checkout (telescope.nvim) is not ours: test.sh resolves it, no INFRA row"
+    )
     eq(pool.drop_all(), {}, "the end of the run removes them all")
     ok(vim.uv.fs_stat(w.path) == nil, "nothing is left of them")
 

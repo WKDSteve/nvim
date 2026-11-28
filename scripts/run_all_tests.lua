@@ -490,14 +490,16 @@ end
 local cleanup_worktrees = nil
 
 --- The worktrees of `--at=origin`: one per repo name, made on first use, shared by every repo that needs it as a
---- dependency. `checkouts` maps a repo name to its shared checkout.
+--- dependency. `checkouts` maps a repo name to its shared checkout. A name with no checkout under `$REPOS_DIR` is
+--- not one of ours (telescope.nvim for cmdlog.nvim): `external`, and test.sh resolves it as always.
 ---@param checkouts table<string, string>
 ---@param base string
 local function worktree_pool(checkouts, base)
-  local made = {} ---@type table<string, {src: string, path?: string, sha?: string, err?: string}>
+  ---@alias RatWorktree {src: string, path?: string, sha?: string, err?: string, external?: boolean}
+  local made = {} ---@type table<string, RatWorktree>
   local pool = {}
   ---@param name string
-  ---@return {src: string, path?: string, sha?: string, err?: string}
+  ---@return RatWorktree
   function pool.get(name)
     if not made[name] then
       local src = checkouts[name]
@@ -506,7 +508,7 @@ local function worktree_pool(checkouts, base)
         src = uv.fs_stat(candidate .. "/.git") and candidate or nil
       end
       if not src then
-        made[name] = { src = "", err = "no checkout of " .. name }
+        made[name] = { src = "", external = true }
       else
         local path, info = origin_worktree(src, name, base)
         made[name] = path and { src = src, path = path, sha = info } or { src = src, err = info }
@@ -599,7 +601,9 @@ local function main()
                 problem = "dependency " .. dep .. ": " .. d.err
                 break
               end
-              env[env_name_of(dep)] = d.path
+              if not d.external then
+                env[env_name_of(dep)] = d.path
+              end
             else
               env[env_name_of(dep)] = w.path
             end
