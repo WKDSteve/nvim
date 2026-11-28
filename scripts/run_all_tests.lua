@@ -18,7 +18,10 @@
 -- session's suite cannot run between two repos; the repo runs it starts inherit the slot and never wait. Under the
 -- table every red repo lists its red cases (id and status) from its IR, at most 10.
 --
--- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS]
+-- It tests the checkouts as they are. A row whose checkout is behind its upstream says so ("N behind upstream"): such
+-- a red may be fixed on main already. `--fetch` updates the remote refs first (`git fetch`, nothing else is touched).
+--
+-- Usage:  nvim -l scripts/run_all_tests.lua [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch]
 --
 -- Exceptions, on purpose:
 --   * lib.nvim keeps its own runner (decision of 2026-10-06, "Bootstrap circle"): `TESTS/run.lua`,
@@ -42,16 +45,19 @@ local function die(message, code)
   os.exit(code)
 end
 
---- The options: `--only=a,b` and `--timeout=SECONDS`, nothing else. A value that cannot be read is
+--- The options: `--only=a,b`, `--timeout=SECONDS` and `--fetch`, nothing else. A value that cannot be read is
 --- refused: a mistyped `--only` that fell back to "every repo" would start a 20 minute run.
 ---@return table<string, boolean> only
 ---@return integer timeout_ms
+---@return boolean fetch
 local function parse_args()
-  local only, timeout_ms = {}, 900 * 1000
+  local only, timeout_ms, fetch = {}, 900 * 1000, false
   for _, a in ipairs(_G.arg or {}) do
     local names = a:match("^%-%-only=(.*)$")
     local seconds = a:match("^%-%-timeout=(.*)$")
-    if names then
+    if a == "--fetch" then
+      fetch = true
+    elseif names then
       for name in names:gmatch("[^,]+") do
         only[name] = true
       end
@@ -65,10 +71,36 @@ local function parse_args()
       end
       timeout_ms = math.floor(n * 1000)
     else
-      die("unknown argument '" .. a .. "' (usage: [--only=a.nvim,b.nvim] [--timeout=SECONDS])", 2)
+      die(
+        "unknown argument '"
+          .. a
+          .. "' (usage: [--only=a.nvim,b.nvim] [--timeout=SECONDS] [--fetch])",
+        2
+      )
     end
   end
-  return only, timeout_ms
+  return only, timeout_ms, fetch
+end
+
+--- How many commits the checkout in `dir` is behind its upstream, or nil when that cannot be told (no upstream, not
+--- a repository). The run tests the shared checkouts as they are, and the sessions push from worktrees of their own:
+--- a checkout that lags `origin/main` shows reds that `main` fixed long ago (2026-11-28: casedesk.nvim 1 behind,
+--- filetree.nvim 6 behind, both red for exactly that). `fetch` first updates the remote refs (`git fetch`: no
+--- working tree, branch or index is touched).
+---@param dir string
+---@param fetch boolean
+---@return integer|nil behind
+local function behind_upstream(dir, fetch)
+  if fetch then
+    vim.system({ "git", "-C", dir, "fetch", "-q" }, { text = true }):wait(60000)
+  end
+  local res = vim
+    .system({ "git", "-C", dir, "rev-list", "--count", "HEAD..@{upstream}" }, { text = true })
+    :wait(30000)
+  if res.code ~= 0 then
+    return nil
+  end
+  return tonumber(vim.trim(res.stdout or ""))
 end
 
 ---@return string
@@ -133,6 +165,7 @@ end
 ---@field note string
 ---@field failed? string[] The red cases of the repo (`file::case (status)`), from its IR.
 ---@field failed_total? integer How many red cases there are (`failed` holds at most `MAX_FAILED_SHOWN`).
+---@field behind? integer Commits the checkout is behind its upstream (nil: unknown).
 
 --- The red cases listed per repo under the table.
 local MAX_FAILED_SHOWN = 10
@@ -325,7 +358,7 @@ local function run_own(p, sentinel, timeout_ms, bash)
 end
 
 local function main()
-  local only, timeout_ms = parse_args()
+  local only, timeout_ms, fetch = parse_args()
   local bash = find_bash()
   if bash == "" then
     die("no bash found", 3)
@@ -362,6 +395,11 @@ local function main()
         }
       else
         row = run_testing(p, bash, timeout_ms)
+      end
+      row.behind = behind_upstream(p.dir, fetch)
+      if row.behind and row.behind > 0 then
+        local stale = ("%d behind upstream"):format(row.behind)
+        row.note = row.note == "" and stale or (row.note .. "; " .. stale)
       end
       rows[#rows + 1] = row
       -- shown as they finish: a full run takes a while
@@ -443,6 +481,13 @@ local function main()
   for _, row in ipairs(rows) do
     if row.failed and #row.failed > 0 then
       io.stdout:write(("\n%s: %d red case(s)\n"):format(row.repo, row.failed_total or #row.failed))
+      if row.behind and row.behind > 0 then
+        io.stdout:write(
+          ("  (the checkout is %d commit(s) behind its upstream: main may have fixed this)\n"):format(
+            row.behind
+          )
+        )
+      end
       for _, case in ipairs(row.failed) do
         io.stdout:write("  " .. case .. "\n")
       end
@@ -465,7 +510,7 @@ end
 
 -- TESTS/scripts/run_all_tests_spec.lua loads the file for its pieces and runs nothing.
 if rawget(_G, "RUN_ALL_TESTS_AS_LIBRARY") then
-  return { failed_cases = failed_cases, take_queue = take_queue }
+  return { failed_cases = failed_cases, take_queue = take_queue, behind_upstream = behind_upstream }
 end
 
 -- Any error of this script is an infrastructure error, never the "red" exit code 1 that nvim uses for it.

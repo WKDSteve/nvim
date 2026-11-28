@@ -36,6 +36,51 @@ return function(H)
   eq(all, 4, "but the count is of all of them")
   eq({ lib.failed_cases({ summary = {} }, 5) }, { {}, 0 }, "an IR without cases has none")
 
+  -- a checkout behind its upstream: a shared checkout that lags main shows reds main has fixed
+  if vim.fn.executable("git") ~= 1 then
+    print("n/a  git is not on PATH: behind_upstream is not checked")
+  else
+    local no_hooks = H.tmpdir() -- this machine's global hooks (pre-push guard, trailer strip) stay out
+    local function git(dir, args)
+      local cmd = { "git", "-c", "core.hooksPath=" .. no_hooks, "-C", dir }
+      vim.list_extend(cmd, args)
+      local res = vim.system(cmd, { text = true }):wait(60000)
+      assert(res.code == 0, table.concat(cmd, " ") .. ": " .. (res.stderr or ""))
+      return vim.trim(res.stdout or "")
+    end
+    local function commit(dir, name)
+      H.write(dir .. "/" .. name, name)
+      git(dir, { "add", name })
+      git(
+        dir,
+        { "-c", "user.name=T", "-c", "user.email=t@example.com", "commit", "-q", "-m", name }
+      )
+    end
+    local bare, a, b = H.tmpdir(), H.tmpdir(), H.tmpdir()
+    git(bare, { "init", "-q", "--bare", "-b", "main" })
+    git(a, { "init", "-q", "-b", "main" })
+    git(a, { "remote", "add", "origin", bare })
+    commit(a, "one")
+    git(a, { "push", "-q", "-u", "origin", "main" })
+    git(b, { "clone", "-q", bare, "." })
+    commit(a, "two")
+    git(a, { "push", "-q" })
+    local head_before = git(b, { "rev-parse", "HEAD" })
+    eq(
+      lib.behind_upstream(b, false),
+      0,
+      "without --fetch: what the checkout last fetched (nothing new yet)"
+    )
+    eq(lib.behind_upstream(b, true), 1, "with --fetch: one commit behind its upstream")
+    eq(
+      git(b, { "rev-parse", "HEAD" }),
+      head_before,
+      "fetching moved neither the branch nor the working tree"
+    )
+    eq(lib.behind_upstream(a, false), 0, "a checkout at its upstream is 0 behind")
+    eq(lib.behind_upstream(H.tmpdir(), false), nil, "a folder that is no repository: unknown")
+  end
+
   -- the queue: one slot for the whole run
   local found = vim.api.nvim_get_runtime_file("lua/testing/queue.lua", false)[1]
   local testing_dir = found and vim.fs.dirname(vim.fs.dirname(vim.fs.dirname(found)))

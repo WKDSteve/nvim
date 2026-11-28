@@ -8,6 +8,9 @@
 #   scripts/run_all_tests.sh                       all repos
 #   scripts/run_all_tests.sh --only=media.nvim,lsp.nvim
 #   scripts/run_all_tests.sh --timeout=1200        seconds per repo (default 900)
+#   scripts/run_all_tests.sh --fetch               fetch first: a checkout behind its upstream is named as such
+#
+# The whole run holds one slot of testing.nvim's queue of heavy runs; red repos list their red cases.
 #
 # Exit code: 0 all green, 1 at least one repo red, 3 infrastructure error (a repo without a runner or
 # without testing.nvim, a missing IR, a timeout): the verdict cannot be trusted and is never "green".
