@@ -7,6 +7,16 @@ return function(H)
   local bwt = require("bindings.mappings.buf_win_tab")
   local kit = require("lib.nvim.ui.kit")
 
+  -- A modified buffer that an earlier spec of the same run left behind would make the "clean editor" case ask (and
+  -- not quit): under `testing ci` it was red once in a while and green on its own. They count as saved while this spec
+  -- runs and get their flag back at the end. One is planted here, so this guard is always exercised.
+  local planted = vim.api.nvim_create_buf(true, false)
+  vim.api.nvim_buf_set_lines(planted, 0, -1, false, { "left behind by an earlier spec" })
+  local leftovers = bwt.unsaved_buffers()
+  for _, b in ipairs(leftovers) do
+    vim.bo[b].modified = false
+  end
+
   local function dirty_buf(name)
     local b = vim.api.nvim_create_buf(true, false)
     vim.api.nvim_win_set_buf(0, b)
@@ -75,4 +85,11 @@ return function(H)
   vim.api.nvim_buf_delete(nb, { force = true })
   vim.fn.delete(path)
   vim.api.nvim_buf_delete(b, { force = true })
+  for _, lb in ipairs(leftovers) do
+    if vim.api.nvim_buf_is_valid(lb) then
+      vim.bo[lb].modified = true
+    end
+  end
+  ok(vim.bo[planted].modified, "a buffer left behind gets its unsaved flag back")
+  vim.api.nvim_buf_delete(planted, { force = true })
 end
