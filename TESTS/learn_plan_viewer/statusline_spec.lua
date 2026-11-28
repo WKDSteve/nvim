@@ -2,7 +2,7 @@
 -- the ticked boxes of that week's page, read once and again only after a write.
 
 ---@param H table
-local function spec(H)
+return function(H)
   local eq = H.eq
   local config = require("bindings.usrcmds.learn_plan_viewer.config")
   local statusline = require("bindings.usrcmds.learn_plan_viewer.statusline")
@@ -38,5 +38,3 @@ local function spec(H)
     error(err, 0)
   end
 end
-
-return spec

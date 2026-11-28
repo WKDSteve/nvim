@@ -3,7 +3,7 @@
 -- for mdview.nvim: no network, no checkout needed.
 
 ---@param H table
-local function spec(H)
+return function(H)
   local eq, ok = H.eq, H.ok
   local binaries = require("bindings.usrcmds.plugin_repos.binaries")
   local lib = require("lib.nvim.binaries")
@@ -79,5 +79,3 @@ local function spec(H)
   package.preload["spec_fake_binaries_mod"] = nil
   vim.g.lib_binaries = saved_mode
 end
-
-return spec

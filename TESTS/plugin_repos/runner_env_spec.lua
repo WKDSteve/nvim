@@ -22,6 +22,7 @@ end
 return function(H)
   local eq, ok = H.eq, H.ok
   if vim.fn.executable("pwsh") ~= 1 then
+    print("n/a  pwsh is not on PATH")
     return
   end
   local script = vim.fs.joinpath(vim.fn.getcwd(), "scripts", "runner_env.ps1")

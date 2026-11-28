@@ -1,7 +1,7 @@
 -- TESTS/git_hooks/git_hooks_spec.lua -- :MyGit hooks: hook state, install plan and a real install.sh run.
 
 ---@param H table
-local function spec(H)
+return function(H)
   local eq, ok = H.eq, H.ok
   local hooks = require("bindings.usrcmds.git_hooks")
 
@@ -139,5 +139,3 @@ local function spec(H)
   eq(vim.fn.glob(shared .. "/*", false, true), {}, "the shared hooksPath folder is left alone")
   vim.env.GIT_CONFIG_GLOBAL = nil
 end
-
-return spec

@@ -1,7 +1,7 @@
 -- TESTS/wkdbook_picker/wkdbook_picker_spec.lua -- :WKDBook: which book, and which picker.
 
 ---@param H table
-local function spec(H)
+return function(H)
   local eq, ok = H.eq, H.ok
   local picker = require("bindings.usrcmds.wkdbook_picker")
 
@@ -53,5 +53,3 @@ local function spec(H)
     error(run_err, 0)
   end
 end
-
-return spec

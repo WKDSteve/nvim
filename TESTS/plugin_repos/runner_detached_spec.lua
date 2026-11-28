@@ -5,6 +5,7 @@
 return function(H)
   local eq, ok = H.eq, H.ok
   if vim.fn.has("win32") ~= 1 or vim.fn.executable("pwsh") ~= 1 then
+    print("n/a  a detached runner start exists on Windows only (needs pwsh on Windows)")
     return
   end
   local script = vim.fs.joinpath(vim.fn.getcwd(), "scripts", "runner_detached.ps1")
