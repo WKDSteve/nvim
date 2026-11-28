@@ -10,6 +10,7 @@ return function(H)
 
   if vim.fn.has("win32") ~= 1 then
     -- setup() is a no-op off Windows; nothing is exported there.
+    print("n/a  config/ui_open.lua only acts on Windows")
     return
   end
 
